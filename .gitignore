@@ -1,0 +1,9 @@
+build/
+bin/
+out/
+cmake-build-*/
+
+.sln
+.vs/
+.idea/
+ext/project_path.hpp
