@@ -4,6 +4,7 @@
 #include <array>
 #include <fstream>
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
 
 // This creates circular header inclusion, that is quite bad.
@@ -58,7 +59,6 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	initScreenTexture();
     initializeGlTextures();
 	initializeGlEffects();
-	initializeGlGeometryBuffers();
 
 	return true;
 }
@@ -95,142 +95,18 @@ void RenderSystem::initializeGlEffects()
 {
 	for(uint i = 0; i < effect_paths.size(); i++)
 	{
-		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
-		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
+		const std::string vertex_shader_name = effect_paths[i] + ".vert";
+		const std::string fragment_shader_name = effect_paths[i] + ".frag";
 
 		bool is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
 		assert(is_valid && (GLuint)effects[i] != 0);
 	}
 }
 
-// One could merge the following two functions as a template function...
-template <class T>
-void RenderSystem::bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(uint)gid]);
-	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-	gl_has_errors();
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffers[(uint)gid]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-		sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
-	gl_has_errors();
-}
-
-void RenderSystem::initializeGlMeshes()
-{
-	for (uint i = 0; i < mesh_paths.size(); i++)
-	{
-		// Initialize meshes
-		GEOMETRY_BUFFER_ID geom_index = mesh_paths[i].first;
-		std::string name = mesh_paths[i].second;
-		Mesh::loadFromOBJFile(name, 
-			meshes[(int)geom_index].vertices,
-			meshes[(int)geom_index].vertex_indices,
-			meshes[(int)geom_index].original_size);
-
-		bindVBOandIBO(geom_index,
-			meshes[(int)geom_index].vertices, 
-			meshes[(int)geom_index].vertex_indices);
-	}
-}
-
-void RenderSystem::initializeGlGeometryBuffers()
-{
-	// Vertex Buffer creation.
-	glGenBuffers((GLsizei)vertex_buffers.size(), vertex_buffers.data());
-	// Index Buffer creation.
-	glGenBuffers((GLsizei)index_buffers.size(), index_buffers.data());
-
-	// Index and Vertex buffer data initialization.
-	initializeGlMeshes();
-
-	//////////////////////////
-	// Initialize sprite
-	// The position corresponds to the center of the texture.
-	std::vector<TexturedVertex> textured_vertices(4);
-	textured_vertices[0].position = { -1.f/2, +1.f/2, 0.f };
-	textured_vertices[1].position = { +1.f/2, +1.f/2, 0.f };
-	textured_vertices[2].position = { +1.f/2, -1.f/2, 0.f };
-	textured_vertices[3].position = { -1.f/2, -1.f/2, 0.f };
-	textured_vertices[0].texcoord = { 0.f, 1.f };
-	textured_vertices[1].texcoord = { 1.f, 1.f };
-	textured_vertices[2].texcoord = { 1.f, 0.f };
-	textured_vertices[3].texcoord = { 0.f, 0.f };
-
-	// Counterclockwise as it's the default opengl front winding direction.
-	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
-	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
-
-	////////////////////////
-	// Initialize egg
-	std::vector<ColoredVertex> egg_vertices;
-	std::vector<uint16_t> egg_indices;
-	constexpr float z = -0.1f;
-	constexpr int NUM_TRIANGLES = 62;
-
-	for (int i = 0; i < NUM_TRIANGLES; i++) {
-		const float t = float(i) * M_PI * 2.f / float(NUM_TRIANGLES - 1);
-		egg_vertices.push_back({});
-		egg_vertices.back().position = { 0.5 * cos(t), 0.5 * sin(t), z };
-		egg_vertices.back().color = { 0.8, 0.8, 0.8 };
-	}
-	egg_vertices.push_back({});
-	egg_vertices.back().position = { 0, 0, 0 };
-	egg_vertices.back().color = { 1, 1, 1 };
-	for (int i = 0; i < NUM_TRIANGLES; i++) {
-		egg_indices.push_back((uint16_t)i);
-		egg_indices.push_back((uint16_t)((i + 1) % NUM_TRIANGLES));
-		egg_indices.push_back((uint16_t)NUM_TRIANGLES);
-	}
-	int geom_index = (int)GEOMETRY_BUFFER_ID::EGG;
-	meshes[geom_index].vertices = egg_vertices;
-	meshes[geom_index].vertex_indices = egg_indices;
-	bindVBOandIBO(GEOMETRY_BUFFER_ID::EGG, meshes[geom_index].vertices, meshes[geom_index].vertex_indices);
-
-	//////////////////////////////////
-	// Initialize debug line
-	std::vector<ColoredVertex> line_vertices;
-	std::vector<uint16_t> line_indices;
-
-	constexpr float depth = 0.5f;
-	constexpr vec3 red = { 0.8,0.1,0.1 };
-
-	// Corner points
-	line_vertices = {
-		{{-0.5,-0.5, depth}, red},
-		{{-0.5, 0.5, depth}, red},
-		{{ 0.5, 0.5, depth}, red},
-		{{ 0.5,-0.5, depth}, red},
-	};
-
-	// Two triangles
-	line_indices = {0, 1, 3, 1, 2, 3};
-	
-	geom_index = (int)GEOMETRY_BUFFER_ID::DEBUG_LINE;
-	meshes[geom_index].vertices = line_vertices;
-	meshes[geom_index].vertex_indices = line_indices;
-	bindVBOandIBO(GEOMETRY_BUFFER_ID::DEBUG_LINE, line_vertices, line_indices);
-
-	///////////////////////////////////////////////////////
-	// Initialize screen triangle (yes, triangle, not quad; its more efficient).
-	std::vector<vec3> screen_vertices(3);
-	screen_vertices[0] = { -1, -6, 0.f };
-	screen_vertices[1] = { 6, -1, 0.f };
-	screen_vertices[2] = { -1, 6, 0.f };
-
-	// Counterclockwise as it's the default opengl front winding direction.
-	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
-	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
-}
-
 RenderSystem::~RenderSystem()
 {
 	// Don't need to free gl resources since they last for as long as the program,
 	// but it's polite to clean after yourself.
-	glDeleteBuffers((GLsizei)vertex_buffers.size(), vertex_buffers.data());
-	glDeleteBuffers((GLsizei)index_buffers.size(), index_buffers.data());
 	glDeleteTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 	glDeleteTextures(1, &off_screen_render_buffer_color);
 	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);

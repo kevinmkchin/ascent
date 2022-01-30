@@ -141,7 +141,7 @@ elseif (IS_OS_WINDOWS)
 
     target_compile_options(${PROJECT_NAME} PUBLIC
         # increase warning level
-        "/W4"
+        "/W3"
 
         # Turn warning "not all control paths return a value" into an error
         "/we4715"
