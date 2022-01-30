@@ -4,6 +4,52 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+
+/**
+ * The following enumerators represent global identifiers refering to graphic
+ * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
+ * currently supported by the system.
+ *
+ * So, instead of referring to a game asset directly, the game logic just
+ * uses these enumerators and the RenderRequest struct to inform the renderer
+ * how to structure the next draw command.
+ *
+ * There are 2 reasons for this:
+ *
+ * First, game assets such as textures and meshes are large and should not be
+ * copied around as this wastes memory and runtime. Thus separating the data
+ * from its representation makes the system faster.
+ *
+ * Second, it is good practice to decouple the game logic from the render logic.
+ * Imagine, for example, changing from OpenGL to Vulkan, if the game logic
+ * depends on OpenGL semantics it will be much harder to do the switch than if
+ * the renderer encapsulates all asset data and the game logic is agnostic to it.
+ *
+ * The final value in each enumeration is both a way to keep track of how many
+ * enums there are, and as a default value to represent uninitialized fields.
+ */
+
+enum class TEXTURE_ASSET_ID {
+    BUG = 0,
+    EAGLE = BUG + 1,
+    TEXTURE_COUNT = EAGLE + 1
+};
+const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
+
+enum class EFFECT_ASSET_ID {
+    FINAL_PASS = 0,
+    SPRITE = 1,
+    EFFECT_COUNT = SPRITE + 1
+};
+const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
+
+
+/**
+ *
+ * Components
+ *
+ * */
+
 // Player component
 struct Player
 {
@@ -26,9 +72,9 @@ struct Eatable
 struct Motion
 {
 	vec2 position = { 0, 0 };
-	float angle = 0;
+	float rotation = 0;
 	vec2 velocity = { 0, 0 };
-	vec2 scale = { 10, 10 };
+	vec2 scale = { 1, 1 };
 };
 
 struct SpriteComponent
@@ -36,6 +82,7 @@ struct SpriteComponent
     // TODO(Kevin)
 
     ivec2 dimensions; // in pixels
+    TEXTURE_ASSET_ID texId;
     // some ID for the texture we want to use
 
     // Texture we want to use
@@ -75,48 +122,3 @@ struct DeathTimer
 {
 	float counter_ms = 3000;
 };
-
-/**
- * The following enumerators represent global identifiers refering to graphic
- * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
- * currently supported by the system.
- *
- * So, instead of referring to a game asset directly, the game logic just
- * uses these enumerators and the RenderRequest struct to inform the renderer
- * how to structure the next draw command.
- *
- * There are 2 reasons for this:
- *
- * First, game assets such as textures and meshes are large and should not be
- * copied around as this wastes memory and runtime. Thus separating the data
- * from its representation makes the system faster.
- *
- * Second, it is good practice to decouple the game logic from the render logic.
- * Imagine, for example, changing from OpenGL to Vulkan, if the game logic
- * depends on OpenGL semantics it will be much harder to do the switch than if
- * the renderer encapsulates all asset data and the game logic is agnostic to it.
- *
- * The final value in each enumeration is both a way to keep track of how many
- * enums there are, and as a default value to represent uninitialized fields.
- */
-
-enum class TEXTURE_ASSET_ID {
-	BUG = 0,
-	EAGLE = BUG + 1,
-	TEXTURE_COUNT = EAGLE + 1
-};
-const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
-
-enum class EFFECT_ASSET_ID {
-    FINAL_PASS = 0,
-	TEXTURED = 1,
-	EFFECT_COUNT = TEXTURED + 1
-};
-const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
-
-struct RenderRequest {
-	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
-	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
-    // TODO(Kevin): Sprite data here instead of this bullshit ^
-};
-

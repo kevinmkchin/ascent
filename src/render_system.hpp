@@ -29,7 +29,7 @@ class RenderSystem {
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
         shader_path("finalpass"),
-		shader_path("textured"),
+		shader_path("sprite"),
     };
 
 public:
@@ -57,7 +57,7 @@ private:
 	// Internal drawing functions for each entity type
 	void drawSprite(Entity entity, const mat3& projection);
 
-	void drawToScreen();
+	void finalDrawToScreen();
 
 	// Window handle
 	GLFWwindow* window;
