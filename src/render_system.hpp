@@ -21,14 +21,6 @@ class RenderSystem {
 	std::array<ivec2, texture_count> texture_dimensions;
 
 	// Make sure these paths remain in sync with the associated enumerators.
-	// Associated id with .obj path
-	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
-	{
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN, mesh_path("chicken.obj"))
-		  // specify meshes of other assets here
-	};
-
-	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
 			textures_path("bug.png"),
 			textures_path("eagle.png") };
@@ -36,31 +28,18 @@ class RenderSystem {
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
-		shader_path("coloured"),
-		shader_path("egg"),
-		shader_path("chicken"),
+        shader_path("finalpass"),
 		shader_path("textured"),
-		shader_path("wind") };
-
-	std::array<GLuint, geometry_count> vertex_buffers;
-	std::array<GLuint, geometry_count> index_buffers;
-	std::array<Mesh, geometry_count> meshes;
+    };
 
 public:
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
-	template <class T>
-	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
-
 	void initializeGlTextures();
 
 	void initializeGlEffects();
 
-	void initializeGlMeshes();
-	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
-
-	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
@@ -76,7 +55,8 @@ public:
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat3& projection);
+	void drawSprite(Entity entity, const mat3& projection);
+
 	void drawToScreen();
 
 	// Window handle

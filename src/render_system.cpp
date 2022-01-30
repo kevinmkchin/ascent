@@ -4,15 +4,17 @@
 
 #include "tiny_ecs_registry.hpp"
 
-void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
+void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 {
+    // TODO(Kevin): Draw sprite stuff
+
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
+    transform.rotate(motion.angle * DEG2RAD);
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
@@ -28,91 +30,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	glUseProgram(program);
 	gl_has_errors();
 
-	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
-	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
-	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
-
-	// Setting vertex and index buffers
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	gl_has_errors();
-
-	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-		gl_has_errors();
-		assert(in_texcoord_loc >= 0);
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(TexturedVertex), (void *)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_texcoord_loc);
-		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-			(void *)sizeof(
-				vec3)); // note the stride to skip the preceeding vertex position
-
-		// Enabling and binding texture to slot 0
-		glActiveTexture(GL_TEXTURE0);
-		gl_has_errors();
-
-		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
-
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::CHICKEN || render_request.used_effect == EFFECT_ASSET_ID::EGG)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
-		gl_has_errors();
-
-		if (render_request.used_effect == EFFECT_ASSET_ID::CHICKEN)
-		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
-
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
-			gl_has_errors();
-		}
-	}
-	else
-	{
-		assert(false && "Type of render request not supported");
-	}
-
-	// Getting uniform locations for glUniform* calls
-	GLint color_uloc = glGetUniformLocation(program, "fcolor");
-	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-	glUniform3fv(color_uloc, 1, (float *)&color);
-	gl_has_errors();
-
-	// Get number of indices from index buffer, which has elements uint16_t
-	GLint size = 0;
-	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-	gl_has_errors();
-
-	GLsizei num_indices = size / sizeof(uint16_t);
-	// GLsizei num_triangles = num_indices / 3;
-
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Setting uniform values to the currently bound program
@@ -122,17 +39,16 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
 	gl_has_errors();
 	// Drawing of num_indices/3 triangles specified in the index buffer
-	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	//glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
 }
 
-// draw the intermediate texture to the screen, with some distortion to simulate
-// wind
+// draw the intermediate texture to the screen
 void RenderSystem::drawToScreen()
 {
 	// Setting shaders
 	// get the wind texture, sprite mesh, and program
-	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WIND]);
+	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::FINAL_PASS]);
 	gl_has_errors();
 	// Clearing backbuffer
 	int w, h;
@@ -149,20 +65,15 @@ void RenderSystem::drawToScreen()
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
-	// Draw the screen texture on the quad geometry
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]);
-	glBindBuffer(
-		GL_ELEMENT_ARRAY_BUFFER,
-		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
-																	 // indices to the bound GL_ARRAY_BUFFER
+//	// Draw the screen texture on the quad geometry
+//	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]);
+//	glBindBuffer(
+//		GL_ELEMENT_ARRAY_BUFFER,
+//		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
+//																	 // indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
-	const GLuint wind_program = effects[(GLuint)EFFECT_ASSET_ID::WIND];
-	// Set clock
-	GLuint time_uloc = glGetUniformLocation(wind_program, "time");
-	GLuint dead_timer_uloc = glGetUniformLocation(wind_program, "darken_screen_factor");
-	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	const GLuint wind_program = effects[(GLuint)EFFECT_ASSET_ID::FINAL_PASS];
 	ScreenState &screen = registry.screenStates.get(screen_state_entity);
-	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
@@ -197,8 +108,8 @@ void RenderSystem::draw()
 	gl_has_errors();
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
-	glDepthRange(0.00001, 10);
-	glClearColor(0.674, 0.847, 1.0 , 1.0);
+	glDepthRange(0.00001f, 10.f);
+	glClearColor(0.674f, 0.847f, 1.0f, 1.0f);
 	glClearDepth(10.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -209,17 +120,20 @@ void RenderSystem::draw()
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
 	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		if (!registry.motions.has(entity))
-			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_2D);
-	}
+
+    // TODO(Kevin): iterate SpriteComponent
+
+//	for (Entity entity : registry.renderRequests.entities)
+//	{
+//		if (!registry.motions.has(entity))
+//			continue;
+//		// Note, its not very efficient to access elements indirectly via the entity
+//		// albeit iterating through all Sprites in sequence. A good point to optimize
+//		drawTexturedMesh(entity, projection_2D);
+//	}
 
 	// Truely render to the screen
-	drawToScreen();
+	//drawToScreen();
 
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);

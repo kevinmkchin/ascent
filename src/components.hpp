@@ -70,20 +70,11 @@ struct ColoredVertex
 	vec3 color;
 };
 
-// Single Vertex Buffer element for textured sprites (textured.vs.glsl)
+// Single Vertex Buffer element for textured sprites (textured.vert)
 struct TexturedVertex
 {
 	vec3 position;
 	vec2 texcoord;
-};
-
-// Mesh datastructure for storing vertex and index buffers
-struct Mesh
-{
-	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = {1,1};
-	std::vector<ColoredVertex> vertices;
-	std::vector<uint16_t> vertex_indices;
 };
 
 /**
@@ -118,28 +109,15 @@ enum class TEXTURE_ASSET_ID {
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
-	COLOURED = 0,
-	EGG = COLOURED + 1,
-	CHICKEN = EGG + 1,
-	TEXTURED = CHICKEN + 1,
-	WIND = TEXTURED + 1,
-	EFFECT_COUNT = WIND + 1
+    FINAL_PASS = 0,
+	TEXTURED = 1,
+	EFFECT_COUNT = TEXTURED + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
-
-enum class GEOMETRY_BUFFER_ID {
-	CHICKEN = 0,
-	SPRITE = CHICKEN + 1,
-	EGG = SPRITE + 1,
-	DEBUG_LINE = EGG + 1,
-	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
-};
-const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
-	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+    // TODO(Kevin): Sprite data here instead of this bullshit ^
 };
 
