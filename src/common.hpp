@@ -39,6 +39,26 @@ const int window_height_px = 720;
 #define DEG2RAD 0.0174532925f  // degrees * DEG2RAD = radians
 #define RAD2DEG 57.2958f       // radians * RAD2DEG = degrees
 
+#define INTERNAL static
+#define LOCAL_PERSIST static
+
+typedef uint8_t       u8;
+typedef uint16_t      u16;
+typedef uint32_t      u32;
+typedef uint64_t      u64;
+typedef int8_t        i8;
+typedef int16_t       i16;
+typedef int32_t       i32;
+typedef int64_t       i64;
+typedef uint_fast8_t  u8f;
+typedef uint_fast16_t u16f;
+typedef uint_fast32_t u32f;
+typedef int_fast8_t   i8f;
+typedef int_fast16_t  i16f;
+typedef int_fast32_t  i32f;
+typedef i16           bool16;
+typedef i32           bool32;
+
 // The 'Transform' component handles transformations passed to the Vertex shader
 // (similar to the gl Immediate mode equivalent, e.g., glTranslate()...)
 // We recomment making all components non-copyable by derving from ComponentNonCopyable
