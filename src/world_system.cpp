@@ -191,6 +191,8 @@ void WorldSystem::restart_game() {
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
+
+    createBug(vec2(0.f,0.f)); // TODO(Kevin): remove this later - just for testing
 }
 
 // Compute collisions between entities
