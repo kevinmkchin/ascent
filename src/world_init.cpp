@@ -2,7 +2,7 @@
 #include "tiny_ecs_registry.hpp"
 
 
-// TODO(Kevin): for all the entities we want to create, we prob but their initialization code/functions here
+// TODO(Kevin): for all the entities we want to create, we prob put their initialization code/functions here
 
 Entity createBug(RenderSystem* renderer, vec2 position)
 {

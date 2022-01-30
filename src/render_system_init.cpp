@@ -43,7 +43,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 		printf("window width_height = %d,%d\n", window_width_px, window_height_px);
 	}
 
-	// Hint: Ask your TA for how to setup pretty OpenGL error callbacks. 
+	// Hint: Ask your TA for how to setup pretty OpenGL error callbacks.
 	// This can not be done in mac os, so do not enable
 	// it unless you are on Linux or Windows. You will need to change the window creation
 	// code to use OpenGL 4.3 (not suported on mac) and add additional .h and .cpp
@@ -130,7 +130,8 @@ bool RenderSystem::initScreenTexture()
 	registry.screenStates.emplace(screen_state_entity);
 
 	int framebuffer_width, framebuffer_height;
-	glfwGetFramebufferSize(const_cast<GLFWwindow*>(window), &framebuffer_width, &framebuffer_height);  // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+	// TODO(Kevin): Don't use this framebuffer size? Diff internal resolution? not sure how it works
+    glfwGetFramebufferSize(const_cast<GLFWwindow*>(window), &framebuffer_width, &framebuffer_height);  // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
 	glGenTextures(1, &off_screen_render_buffer_color);
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
@@ -174,8 +175,7 @@ bool gl_compile_shader(GLuint shader)
 	return true;
 }
 
-bool loadEffectFromFile(
-	const std::string& vs_path, const std::string& fs_path, GLuint& out_program)
+bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program)
 {
 	// Opening files
 	std::ifstream vs_is(vs_path);
