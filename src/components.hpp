@@ -23,11 +23,24 @@ struct Eatable
 };
 
 // All data relevant to the shape and motion of entities
-struct Motion {
+struct Motion
+{
 	vec2 position = { 0, 0 };
 	float angle = 0;
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
+};
+
+struct SpriteComponent
+{
+    // TODO(Kevin)
+
+    ivec2 dimensions; // in pixels
+    // some ID for the texture we want to use
+
+    // Texture we want to use
+    // Dimensions of that texture
+    // Info about which region of the texture to use as sprite
 };
 
 // Stucture to store collision information
@@ -61,20 +74,6 @@ struct DebugComponent
 struct DeathTimer
 {
 	float counter_ms = 3000;
-};
-
-// Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
-struct ColoredVertex
-{
-	vec3 position;
-	vec3 color;
-};
-
-// Single Vertex Buffer element for textured sprites (textured.vert)
-struct TexturedVertex
-{
-	vec3 position;
-	vec2 texcoord;
 };
 
 /**

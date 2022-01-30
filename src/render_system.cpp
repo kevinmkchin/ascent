@@ -49,7 +49,6 @@ void RenderSystem::drawToScreen()
 	// Setting shaders
 	// get the wind texture, sprite mesh, and program
 	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::FINAL_PASS]);
-	gl_has_errors();
 	// Clearing backbuffer
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
@@ -59,7 +58,6 @@ void RenderSystem::drawToScreen()
 	glClearColor(1.f, 0, 0, 1.0);
 	glClearDepth(1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	gl_has_errors();
 	// Enabling alpha channel for textures
 	glDisable(GL_BLEND);
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -98,18 +96,11 @@ void RenderSystem::drawToScreen()
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 /*bytes cuz uint32*/ * 6, refQuadIndices, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0); // Unbind the VAO;
-        gl_has_errors();
     }
-
-	const GLuint wind_program = effects[(GLuint)EFFECT_ASSET_ID::FINAL_PASS];
-	ScreenState &screen = registry.screenStates.get(screen_state_entity);
-	gl_has_errors();
 
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
-
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
-	gl_has_errors();
 
 	// Draw
     glBindVertexArray(finalQuadVAO);
@@ -117,7 +108,6 @@ void RenderSystem::drawToScreen()
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
 	gl_has_errors();
 }
 
