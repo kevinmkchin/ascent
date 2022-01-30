@@ -65,21 +65,44 @@ void RenderSystem::drawToScreen()
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
-//	// Draw the screen texture on the quad geometry
-//	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]);
-//	glBindBuffer(
-//		GL_ELEMENT_ARRAY_BUFFER,
-//		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
-//																	 // indices to the bound GL_ARRAY_BUFFER
-	gl_has_errors();
+    LOCAL_PERSIST u32 finalQuadVAO;
+    LOCAL_PERSIST u32 finalQuadVBO;
+    LOCAL_PERSIST u32 finalQuadIBO;
+
+    if(!finalQuadVAO)
+    {
+        u32 refQuadIndices[6] = {
+                0, 1, 3,
+                0, 3, 2
+        };
+        float refQuadVertices[16] = {
+                //  x   y    u    v
+                -1.f, -1.f, 0.f, 0.f,
+                1.f, -1.f, 1.f, 0.f,
+                -1.f, 1.f, 0.f, 1.f,
+                1.f, 1.f, 1.f, 1.f
+        };
+
+        glGenVertexArrays(1, &finalQuadVAO);
+        glBindVertexArray(finalQuadVAO);
+        glGenBuffers(1, &finalQuadVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, finalQuadVBO);
+        glBufferData(GL_ARRAY_BUFFER, 4 /*bytes cuz float*/ * 16, refQuadVertices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
+        glEnableVertexAttribArray(1);
+
+        glGenBuffers(1, &finalQuadIBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalQuadIBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 /*bytes cuz uint32*/ * 6, refQuadIndices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0); // Unbind the VAO;
+        gl_has_errors();
+    }
+
 	const GLuint wind_program = effects[(GLuint)EFFECT_ASSET_ID::FINAL_PASS];
 	ScreenState &screen = registry.screenStates.get(screen_state_entity);
-	gl_has_errors();
-	// Set the vertex position and vertex texture coordinates (both stored in the
-	// same VBO)
-	GLint in_position_loc = glGetAttribLocation(wind_program, "in_position");
-	glEnableVertexAttribArray(in_position_loc);
-	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
 	gl_has_errors();
 
 	// Bind our texture in Texture Unit 0
@@ -87,11 +110,14 @@ void RenderSystem::drawToScreen()
 
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
+
 	// Draw
-	glDrawElements(
-		GL_TRIANGLES, 3, GL_UNSIGNED_SHORT,
-		nullptr); // one triangle = 3 vertices; nullptr indicates that there is
-				  // no offset from the bound index buffer
+    glBindVertexArray(finalQuadVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalQuadIBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
 	gl_has_errors();
 }
 
@@ -133,7 +159,7 @@ void RenderSystem::draw()
 //	}
 
 	// Truely render to the screen
-	//drawToScreen();
+	drawToScreen();
 
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
