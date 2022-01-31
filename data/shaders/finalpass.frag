@@ -4,7 +4,7 @@ uniform sampler2D screen_texture;
 
 in vec2 texcoord;
 
-layout(location = 0) out vec4 color;
+out vec4 color;
 
 void main()
 {
