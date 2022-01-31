@@ -193,6 +193,7 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
     createBug(vec2(0.f,0.f)); // TODO(Kevin): remove this later - just for testing
+    createSpelunkyDude(vec2(128.f, 128.f));
 }
 
 // Compute collisions between entities
