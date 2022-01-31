@@ -26,3 +26,25 @@ Entity createBug(vec2 position)
 
 	return entity;
 }
+
+Entity createSpelunkyDude(vec2 position) {
+    // Reserve an entity
+    auto entity = Entity();
+
+    // Initialize the position, scale, and physics components
+    auto& motion = registry.motions.emplace(entity);
+    motion.rotation = 0.f;
+    motion.velocity = { 0, 0 };
+    motion.position = position;
+
+    registry.eatables.emplace(entity);
+    registry.sprites.insert(
+            entity,
+            {
+                    ivec2(64, 64),
+                    TEXTURE_ASSET_ID::SPELUNKY
+            }
+    );
+
+    return entity;
+}

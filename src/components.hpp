@@ -32,7 +32,8 @@
 enum class TEXTURE_ASSET_ID {
     BUG = 0,
     EAGLE = BUG + 1,
-    TEXTURE_COUNT = EAGLE + 1
+    SPELUNKY = EAGLE + 1,
+    TEXTURE_COUNT = SPELUNKY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

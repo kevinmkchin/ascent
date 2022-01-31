@@ -5,3 +5,5 @@
 #include "render_system.hpp"
 
 Entity createBug(vec2 position);
+
+Entity createSpelunkyDude(vec2 position);
