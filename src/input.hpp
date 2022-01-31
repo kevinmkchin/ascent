@@ -104,5 +104,6 @@ namespace Input {
     void ResetControllerStates(); // CALL THIS AT THE END OF AN UPDATE STEP
     void SDLControllerConnected(i32 deviceIndex);
     void SDLControllerRemoved(i32 joystickInstanceID);
+    void SetInvertYAxis(bool invert);
 }
 

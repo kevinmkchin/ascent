@@ -8,6 +8,10 @@ INTERNAL u8 gJustReleasedKeyState[256];
 // Gamepad State - Look inside GamepadStatesWrapper and GamepadStates
 INTERNAL Input::GamepadStatesWrapper gGamepadStates;
 
+INTERNAL bool invertYAxis = false;
+INTERNAL i16 SDL_JOYSTICK_DEAD_ZONE = 8000;
+INTERNAL i16 SDL_JOYSTICK_MAX = 32767;
+
 namespace Input {
 
 /** Keyboard **/
@@ -235,9 +239,6 @@ namespace Input {
         }
     }
 
-    i16 SDL_JOYSTICK_DEAD_ZONE = 8000;
-    i16 SDL_JOYSTICK_MAX = 32767;
-
     void ProcessSDLControllerAxisEvent(SDL_ControllerAxisEvent gamepadAxisEvent) {
         i32 joystickInstanceID = gamepadAxisEvent.which;
         i32 gamepadIndex = gGamepadStates.GamepadIndexFromInstanceID(joystickInstanceID);
@@ -259,7 +260,7 @@ namespace Input {
             case SDL_CONTROLLER_AXIS_LEFTY: {
                 if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
                     vec2 leftAxisDir = gGamepadStates[gamepadIndex].leftThumbStickDir * (float) SDL_JOYSTICK_MAX;
-                    leftAxisDir.y = -(float) axisValue;
+                    leftAxisDir.y = (float) (invertYAxis ? -axisValue : axisValue);
                     leftAxisDir /= (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].leftThumbStickDir = leftAxisDir;
                 } else {
@@ -281,7 +282,7 @@ namespace Input {
             case SDL_CONTROLLER_AXIS_RIGHTY: {
                 if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
                     vec2 rightAxisDir = gGamepadStates[gamepadIndex].rightThumbStickDir * (float) SDL_JOYSTICK_MAX;
-                    rightAxisDir.y = -(float) axisValue;
+                    rightAxisDir.y = (float) (invertYAxis ? -axisValue : axisValue);
                     rightAxisDir /= (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].rightThumbStickDir = rightAxisDir;
                 } else {
@@ -332,6 +333,10 @@ namespace Input {
         printf("Gamepad disconnected. Instance ID: %d\n", joystickInstanceID);
     }
 
+    void SetInvertYAxis(bool invert)
+    {
+        invertYAxis = invert;
+    }
 
 /** GamepadState Implementation **/
 
