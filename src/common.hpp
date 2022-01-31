@@ -20,6 +20,12 @@ using namespace glm;
 
 #include "tiny_ecs.hpp"
 
+// Note(Kevin): This is the internal resolution of the game. I'm not expecting this
+// to change during runtime, so I've made these as #define instead of variables.
+// (e.g. Celeste has an internal resolution of 320x180 regardless of the window size)
+#define GAME_RESOLUTION_WIDTH 320
+#define GAME_RESOLUTION_HEIGHT 180
+
 // Simple utility functions to avoid mistyping directory name
 // audio_path("audio.ogg") -> data/audio/audio.ogg
 // Get defintion of PROJECT_SOURCE_DIR from:
