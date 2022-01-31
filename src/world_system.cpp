@@ -94,6 +94,30 @@ bool WorldSystem::step(float deltaTime) {
 		}
 	}
 
+
+    Motion& playerMotion = registry.motions.get(player);
+    if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP))
+    {
+        playerMotion.position.y -= 128.f * deltaTime;
+    }
+    if(Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN))
+    {
+        playerMotion.position.y += 128.f * deltaTime;
+    }
+    if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
+    {
+        playerMotion.position.x -= 128.f * deltaTime;
+    }
+    if(Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT))
+    {
+        playerMotion.position.x += 128.f * deltaTime;
+    }
+    if(Input::GetGamepad(0).isConnected)
+    {
+        playerMotion.position += Input::GetGamepad(0).leftThumbStickDir * 128.f * deltaTime;
+    }
+
+
     float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
 //		// progress timer
