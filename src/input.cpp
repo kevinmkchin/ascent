@@ -1,0 +1,398 @@
+#include "input.hpp"
+
+/** Input States **/
+// Keyboard State - Access via SDL_Scancode https://wiki.libsdl.org/SDL_Scancode
+INTERNAL u8 gCurrentKeyState[256];
+INTERNAL u8 gJustPressedKeyState[256];
+INTERNAL u8 gJustReleasedKeyState[256];
+// Gamepad State - Look inside GamepadStatesWrapper and GamepadStates
+INTERNAL Input::GamepadStatesWrapper gGamepadStates;
+
+namespace Input {
+
+/** Keyboard **/
+    bool IsKeyPressed(SDL_Scancode scancode)
+    {
+        return gCurrentKeyState[scancode];
+    }
+
+    bool IsKeyReleased(SDL_Scancode scancode)
+    {
+        return !IsKeyPressed(scancode);
+    }
+
+    bool HasKeyBeenPressed(SDL_Scancode scancode)
+    {
+        return gJustPressedKeyState[scancode];
+    }
+
+    bool HasKeyBeenReleased(SDL_Scancode scancode)
+    {
+        return gJustReleasedKeyState[scancode];
+    }
+
+    void ProcessSDLKeyDownEvent(SDL_KeyboardEvent keyEvent) {
+        SDL_Scancode key = keyEvent.keysym.scancode;
+        gCurrentKeyState[key] = 1;
+        if (!keyEvent.repeat) {
+            gJustPressedKeyState[key] = 1;
+        }
+    }
+
+    void ProcessSDLKeyUpEvent(SDL_KeyboardEvent keyEvent) {
+        // Never set JustPressed or JustReleased to 0 here.
+        SDL_Scancode key = keyEvent.keysym.scancode;
+        gCurrentKeyState[key] = 0;
+        gJustReleasedKeyState[key] = 1;
+    }
+
+    void ResetKeyboardStates() {
+        memset(gJustPressedKeyState, 0, 256);
+        memset(gJustReleasedKeyState, 0, 256);
+    }
+
+
+/** Gamepad **/
+
+    GamepadState& GetGamepad(i32 playerNumber)
+    {
+        return gGamepadStates[playerNumber];
+    }
+
+    void ProcessSDLControllerButtonDownEvent(SDL_ControllerButtonEvent gamepadButtonEvent) {
+        /* SDL_GameControllerButton reference:
+        SDL_CONTROLLER_BUTTON_A 0
+        SDL_CONTROLLER_BUTTON_B 1
+        SDL_CONTROLLER_BUTTON_X 2
+        SDL_CONTROLLER_BUTTON_Y 3
+        SDL_CONTROLLER_BUTTON_BACK 4
+        SDL_CONTROLLER_BUTTON_GUIDE 5
+        SDL_CONTROLLER_BUTTON_START 6
+        SDL_CONTROLLER_BUTTON_LEFTSTICK 7
+        SDL_CONTROLLER_BUTTON_RIGHTSTICK 8
+        SDL_CONTROLLER_BUTTON_LEFTSHOULDER 9
+        SDL_CONTROLLER_BUTTON_RIGHTSHOULDER 10
+        SDL_CONTROLLER_BUTTON_DPAD_UP 11
+        SDL_CONTROLLER_BUTTON_DPAD_DOWN 12
+        SDL_CONTROLLER_BUTTON_DPAD_LEFT 13
+        SDL_CONTROLLER_BUTTON_DPAD_RIGHT 14
+        */
+
+        i32 joystickInstanceID = gamepadButtonEvent.which;
+        i32 gamepadIndex = gGamepadStates.GamepadIndexFromInstanceID(joystickInstanceID);
+        u8 buttonIndex = gamepadButtonEvent.button;
+
+        switch (buttonIndex) {
+            case 0: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_A;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_A;
+            }
+                break;
+            case 1: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_B;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_B;
+            }
+                break;
+            case 2: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_X;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_X;
+            }
+                break;
+            case 3: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_Y;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_Y;
+            }
+                break;
+            case 4: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_BACK;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_BACK;
+            }
+                break;
+            case 6: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_START;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_START;
+            }
+                break;
+            case 7: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_LTHUMB;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_LTHUMB;
+            }
+                break;
+            case 8: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_RTHUMB;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_RTHUMB;
+            }
+                break;
+            case 9: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_LB;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_LB;
+            }
+                break;
+            case 10: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_RB;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_RB;
+            }
+                break;
+            case 11: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_DPAD_UP;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_DPAD_UP;
+            }
+                break;
+            case 12: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_DPAD_DOWN;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_DPAD_DOWN;
+            }
+                break;
+            case 13: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_DPAD_LEFT;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_DPAD_LEFT;
+            }
+                break;
+            case 14: {
+                gGamepadStates[gamepadIndex].currentButtonState |= GAMEPAD_DPAD_RIGHT;
+                gGamepadStates[gamepadIndex].justPressedButtonState |= GAMEPAD_DPAD_RIGHT;
+            }
+                break;
+        }
+    }
+
+    void ProcessSDLControllerButtonUpEvent(SDL_ControllerButtonEvent gamepadButtonEvent) {
+        i32 joystickInstanceID = gamepadButtonEvent.which;
+        i32 gamepadIndex = gGamepadStates.GamepadIndexFromInstanceID(joystickInstanceID);
+        u8 buttonIndex = gamepadButtonEvent.button;
+
+        switch (buttonIndex) {
+            case 0: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_A;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_A;
+            }
+                break;
+            case 1: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_B;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_B;
+            }
+                break;
+            case 2: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_X;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_X;
+            }
+                break;
+            case 3: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_Y;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_Y;
+            }
+                break;
+            case 4: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_BACK;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_BACK;
+            }
+                break;
+            case 6: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_START;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_START;
+            }
+                break;
+            case 7: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_LTHUMB;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_LTHUMB;
+            }
+                break;
+            case 8: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_RTHUMB;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_RTHUMB;
+            }
+                break;
+            case 9: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_LB;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_LB;
+            }
+                break;
+            case 10: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_RB;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_RB;
+            }
+                break;
+            case 11: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_DPAD_UP;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_DPAD_UP;
+            }
+                break;
+            case 12: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_DPAD_DOWN;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_DPAD_DOWN;
+            }
+                break;
+            case 13: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_DPAD_LEFT;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_DPAD_LEFT;
+            }
+                break;
+            case 14: {
+                gGamepadStates[gamepadIndex].currentButtonState ^= GAMEPAD_DPAD_RIGHT;
+                gGamepadStates[gamepadIndex].justReleasedButtonState |= GAMEPAD_DPAD_RIGHT;
+            }
+                break;
+        }
+    }
+
+    i16 SDL_JOYSTICK_DEAD_ZONE = 8000;
+    i16 SDL_JOYSTICK_MAX = 32767;
+
+    void ProcessSDLControllerAxisEvent(SDL_ControllerAxisEvent gamepadAxisEvent) {
+        i32 joystickInstanceID = gamepadAxisEvent.which;
+        i32 gamepadIndex = gGamepadStates.GamepadIndexFromInstanceID(joystickInstanceID);
+        u8 axisIndex = gamepadAxisEvent.axis;
+        i16 axisValue = gamepadAxisEvent.value;
+
+        switch (axisIndex) {
+            case SDL_CONTROLLER_AXIS_LEFTX: {
+                if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
+                    vec2 leftAxisDir = gGamepadStates[gamepadIndex].leftThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    leftAxisDir.x = (float) axisValue;
+                    leftAxisDir /= (float) SDL_JOYSTICK_MAX;
+                    gGamepadStates[gamepadIndex].leftThumbStickDir = leftAxisDir;
+                } else {
+                    gGamepadStates[gamepadIndex].leftThumbStickDir.x = 0.f;
+                }
+            }
+                break;
+            case SDL_CONTROLLER_AXIS_LEFTY: {
+                if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
+                    vec2 leftAxisDir = gGamepadStates[gamepadIndex].leftThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    leftAxisDir.y = -(float) axisValue;
+                    leftAxisDir /= (float) SDL_JOYSTICK_MAX;
+                    gGamepadStates[gamepadIndex].leftThumbStickDir = leftAxisDir;
+                } else {
+                    gGamepadStates[gamepadIndex].leftThumbStickDir.y = 0.f;
+                }
+            }
+                break;
+            case SDL_CONTROLLER_AXIS_RIGHTX: {
+                if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
+                    vec2 rightAxisDir = gGamepadStates[gamepadIndex].rightThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    rightAxisDir.x = (float) axisValue;
+                    rightAxisDir /= (float) SDL_JOYSTICK_MAX;
+                    gGamepadStates[gamepadIndex].rightThumbStickDir = rightAxisDir;
+                } else {
+                    gGamepadStates[gamepadIndex].rightThumbStickDir.x = 0.f;
+                }
+            }
+                break;
+            case SDL_CONTROLLER_AXIS_RIGHTY: {
+                if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
+                    vec2 rightAxisDir = gGamepadStates[gamepadIndex].rightThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    rightAxisDir.y = -(float) axisValue;
+                    rightAxisDir /= (float) SDL_JOYSTICK_MAX;
+                    gGamepadStates[gamepadIndex].rightThumbStickDir = rightAxisDir;
+                } else {
+                    gGamepadStates[gamepadIndex].rightThumbStickDir.y = 0.f;
+                }
+            }
+                break;
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT: {
+                if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
+                    gGamepadStates[gamepadIndex].leftTrigger =
+                            (axisValue + ((float) SDL_JOYSTICK_MAX)) / (2 * ((float) SDL_JOYSTICK_MAX));
+                } else {
+                    gGamepadStates[gamepadIndex].leftTrigger = 0.f;
+                }
+            }
+                break;
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: {
+                if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
+                    gGamepadStates[gamepadIndex].rightTrigger =
+                            (axisValue + ((float) SDL_JOYSTICK_MAX)) / (2 * ((float) SDL_JOYSTICK_MAX));
+                } else {
+                    gGamepadStates[gamepadIndex].rightTrigger = 0.f;
+                }
+            }
+                break;
+        }
+    }
+
+    void ResetControllerStates() {
+        for (int i = 0; i < MAX_GAMEPAD_COUNT; ++i) {
+            gGamepadStates[i].justPressedButtonState = 0;
+            gGamepadStates[i].justReleasedButtonState = 0;
+        }
+    }
+
+    void SDLControllerConnected(i32 deviceIndex) {
+        SDL_GameController *deviceHandle = SDL_GameControllerOpen(deviceIndex);
+        i32 joystickInstanceID = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(deviceHandle));
+        gGamepadStates.OnConnect(joystickInstanceID);
+
+        printf("Gamepad connected. Instance ID: %d\n", joystickInstanceID);
+    }
+
+    void SDLControllerRemoved(i32 joystickInstanceID) {
+        gGamepadStates.OnDisconnect(joystickInstanceID);
+        SDL_GameControllerClose(SDL_GameControllerFromInstanceID(joystickInstanceID));
+
+        printf("Gamepad disconnected. Instance ID: %d\n", joystickInstanceID);
+    }
+
+
+/** GamepadState Implementation **/
+
+    bool GamepadState::IsPressed(u16 button /* bitwise-OR-able */) const {
+        return currentButtonState & button;
+    }
+
+    bool GamepadState::IsReleased(u16 button /* bitwise-OR-able */) const {
+        return !IsPressed(button);
+    }
+
+    bool GamepadState::HasBeenPressed(u16 button) const {
+        return justPressedButtonState & button;
+    }
+
+    bool GamepadState::HasBeenReleased(u16 button) const {
+        return justReleasedButtonState & button;
+    }
+
+
+/** GamepadStatesWrapper Implementation **/
+
+    GamepadState &GamepadStatesWrapper::AtInstanceID(const i32 instanceID) {
+        return states[mapInstanceIDtoGamepadIndex[instanceID]];
+    }
+
+    u8 GamepadStatesWrapper::GamepadIndexFromInstanceID(const i32 instanceID) {
+        return mapInstanceIDtoGamepadIndex[instanceID];
+    }
+
+    void GamepadStatesWrapper::OnConnect(i32 instanceID) {
+        mapInstanceIDtoGamepadIndex[instanceID] = gamepadCount;
+        states[gamepadCount].isConnected = true;
+        ++gamepadCount;
+    }
+
+    void GamepadStatesWrapper::OnDisconnect(i32 instanceID) {
+        i32 gamepadIndex = mapInstanceIDtoGamepadIndex[instanceID];
+
+        // shift game states left
+        for (i32 i = gamepadIndex; i < gamepadCount - 1; ++i) {
+            states[i] = states[i + 1];
+        }
+
+        // reset last game state. we shift these over so just resetting the last is enough.
+        states[gamepadCount - 1].isConnected = false;
+        states[gamepadCount - 1].currentButtonState = 0;
+        states[gamepadCount - 1].justPressedButtonState = 0;
+        states[gamepadCount - 1].justReleasedButtonState = 0;
+        states[gamepadCount - 1].leftTrigger = 0.f;
+        states[gamepadCount - 1].rightTrigger = 0.f;
+        states[gamepadCount - 1].leftThumbStickDir = {0.f, 0.f};
+        states[gamepadCount - 1].leftThumbStickDir = {0.f, 0.f};
+
+        // shift indices left
+        for (int i = 0; i < 128; ++i) {
+            if (gamepadIndex < mapInstanceIDtoGamepadIndex[i]) {
+                --mapInstanceIDtoGamepadIndex[i];
+            }
+        }
+
+        --gamepadCount;
+    }
+}

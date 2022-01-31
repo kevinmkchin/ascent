@@ -10,6 +10,7 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "input.hpp"
 
 #include <SDL.h>
 
@@ -113,14 +114,16 @@ int main(int argc, char* argv[])
 
 		// Calculating elapsed times in milliseconds from the previous iteration
 		auto now = Clock::now();
-		float elapsed_ms =
-			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
+		float elapsed_ms = (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
 
 		world.step(elapsed_ms);
 		ai.step(elapsed_ms);
 		physics.step(elapsed_ms);
 		world.handle_collisions();
+
+        Input::ResetControllerStates();
+        Input::ResetKeyboardStates();
 
 		renderer.draw();
         SDL_GL_SwapWindow(window);
