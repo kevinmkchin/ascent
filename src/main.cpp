@@ -116,10 +116,11 @@ int main(int argc, char* argv[])
 		auto now = Clock::now();
 		float elapsed_ms = (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
+        float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
 
-		world.step(elapsed_ms);
-		ai.step(elapsed_ms);
-		physics.step(elapsed_ms);
+		world.step(deltaTime);
+		ai.step(deltaTime);
+		physics.step(deltaTime);
 		world.handle_collisions();
 
         Input::ResetControllerStates();
