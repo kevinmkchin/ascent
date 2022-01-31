@@ -157,9 +157,10 @@ void RenderSystem::draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
 	// Clearing backbuffer
-	glViewport(0, 0, backbufferWidth, backbufferHeight);
+	glViewport(0, 0, 320, 180);
 	glDepthRange(0.00001f, 10.f);
-	glClearColor(0.674f, 0.847f, 1.0f, 1.0f);
+	//glClearColor(0.674f, 0.847f, 1.0f, 1.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glClearDepth(10.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -187,8 +188,8 @@ mat3 RenderSystem::createProjectionMatrix()
 	float top = 0.f;
 
 	gl_has_errors();
-	float right = (float) backbufferWidth;
-	float bottom = (float) backbufferHeight;
+	float right = (float) GAME_RESOLUTION_WIDTH;
+	float bottom = (float) GAME_RESOLUTION_HEIGHT;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
