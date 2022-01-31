@@ -8,5 +8,5 @@
 class AISystem
 {
 public:
-	void step(float elapsed_ms);
+	void step(float deltaTime);
 };

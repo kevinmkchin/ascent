@@ -26,8 +26,10 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
-void PhysicsSystem::step(float elapsed_ms)
+void PhysicsSystem::step(float deltaTime)
 {
+    float elapsed_ms = deltaTime * 1000.f;
+
 	auto& motion_registry = registry.motions;
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{

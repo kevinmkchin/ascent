@@ -74,7 +74,7 @@ void WorldSystem::unloadAllContent()
 }
 
 // Update our game world
-bool WorldSystem::step(float elapsed_ms_since_last_update) {
+bool WorldSystem::step(float deltaTime) {
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -96,19 +96,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if(counter.counter_ms < min_counter_ms){
-		    min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.deathTimers.remove(entity);
-            restart_game();
-			return true;
-		}
+//		// progress timer
+//		DeathTimer& counter = registry.deathTimers.get(entity);
+//		counter.counter_ms -= elapsed_ms_since_last_update;
+//		if(counter.counter_ms < min_counter_ms){
+//		    min_counter_ms = counter.counter_ms;
+//		}
+//
+//		// restart the game once the death timer expired
+//		if (counter.counter_ms < 0) {
+//			registry.deathTimers.remove(entity);
+//            restart_game();
+//			return true;
+//		}
 	}
 
 	return true;

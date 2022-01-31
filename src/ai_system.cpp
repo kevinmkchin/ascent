@@ -1,7 +1,7 @@
 // internal
 #include "ai_system.hpp"
 
-void AISystem::step(float elapsed_ms)
+void AISystem::step(float deltaTime)
 {
 
 }

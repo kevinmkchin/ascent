@@ -24,8 +24,8 @@ public:
 
     void cleanUp();
 
-	// Steps the game ahead by ms milliseconds
-	bool step(float elapsed_ms);
+	// Steps the game ahead by deltaTime
+	bool step(float deltaTime);
 
 	// Check for collisions
 	void handle_collisions();
