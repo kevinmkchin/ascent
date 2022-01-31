@@ -1,6 +1,5 @@
 // internal
 #include "render_system.hpp"
-#include <SDL.h>
 
 #include "tiny_ecs_registry.hpp"
 
@@ -91,10 +90,8 @@ void RenderSystem::finalDrawToScreen()
 	// get the wind texture, sprite mesh, and program
 	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::FINAL_PASS]);
 	// Clearing backbuffer
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, backbufferWidth, backbufferHeight);
 	glDepthRange(0, 10);
 	glClearColor(1.f, 0, 0, 1.0);
 	glClearDepth(1.f);
@@ -156,15 +153,11 @@ void RenderSystem::finalDrawToScreen()
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw()
 {
-	// Getting size of window
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
-
 	// First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
 	// Clearing backbuffer
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, backbufferWidth, backbufferHeight);
 	glDepthRange(0.00001f, 10.f);
 	glClearColor(0.674f, 0.847f, 1.0f, 1.0f);
 	glClearDepth(10.f);
@@ -176,9 +169,6 @@ void RenderSystem::draw()
 							  // sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
-	// Draw all textured meshes that have a position and size component
-
-    // TODO(Kevin): iterate SpriteComponent
 
     for (Entity entWithSprite : registry.sprites.entities)
     {
@@ -188,10 +178,6 @@ void RenderSystem::draw()
 
 	// Truely render to the screen
     finalDrawToScreen();
-
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
 }
 
 mat3 RenderSystem::createProjectionMatrix()
@@ -201,8 +187,8 @@ mat3 RenderSystem::createProjectionMatrix()
 	float top = 0.f;
 
 	gl_has_errors();
-	float right = (float) window_width_px;
-	float bottom = (float) window_height_px;
+	float right = (float) backbufferWidth;
+	float bottom = (float) backbufferHeight;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);

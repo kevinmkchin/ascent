@@ -7,7 +7,6 @@
 #include <vector>
 #include <random>
 
-#define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_mixer.h>
 
@@ -20,14 +19,10 @@ class WorldSystem
 public:
 	WorldSystem();
 
-	// Creates a window
-	GLFWwindow* create_window();
-
 	// starts the game
 	void init(RenderSystem* renderer);
 
-	// Releases all associated resources
-	~WorldSystem();
+    void cleanUp();
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
@@ -35,23 +30,29 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+    // Handle input events
+    void SDLProcessEvents();
+
 	// Should the game be over ?
 	bool is_over()const;
+    void set_is_over(bool over) { gameIsRunning = over; }
+
 private:
-	// Input callback functions
-	void on_key(int key, int, int action, int mod);
-	void on_mouse_move(vec2 pos);
+    void loadAllContent();
+
+    void unloadAllContent();
 
 	// restart level
 	void restart_game();
 
 	// OpenGL window handle
-	GLFWwindow* window;
+	SDL_Window* window;
 
 	// Number of bug eaten by the chicken, displayed in the window title
 	unsigned int points;
 
 	// Game state
+    bool gameIsRunning = true;
 	RenderSystem* renderer;
 	float current_speed;
 	float next_eagle_spawn;

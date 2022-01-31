@@ -58,9 +58,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
-	// you may need the following quantities to compute wall positions
-	(float)window_width_px; (float)window_height_px;
-
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
 	{

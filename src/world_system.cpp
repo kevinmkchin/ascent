@@ -14,6 +14,8 @@ const size_t MAX_BUG = 5;
 const size_t EAGLE_DELAY_MS = 2000 * 3;
 const size_t BUG_DELAY_MS = 5000 * 3;
 
+INTERNAL Entity player;
+
 // Create the bug world
 WorldSystem::WorldSystem()
 	: points(0)
@@ -23,97 +25,10 @@ WorldSystem::WorldSystem()
 	rng = std::default_random_engine(std::random_device()());
 }
 
-WorldSystem::~WorldSystem() {
-	// Destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
-	if (chicken_dead_sound != nullptr)
-		Mix_FreeChunk(chicken_dead_sound);
-	if (chicken_eat_sound != nullptr)
-		Mix_FreeChunk(chicken_eat_sound);
-	Mix_CloseAudio();
+void WorldSystem::init(RenderSystem* renderer_arg)
+{
+    loadAllContent();
 
-	// Destroy all created components
-	registry.clear_all_components();
-
-	// Close the window
-	glfwDestroyWindow(window);
-}
-
-// Debugging
-namespace {
-	void glfw_err_cb(int error, const char *desc) {
-		fprintf(stderr, "%d: %s", error, desc);
-	}
-}
-
-// World initialization
-// Note, this has a lot of OpenGL specific things, could be moved to the renderer
-GLFWwindow* WorldSystem::create_window() {
-	///////////////////////////////////////
-	// Initialize GLFW
-	glfwSetErrorCallback(glfw_err_cb);
-	if (!glfwInit()) {
-		fprintf(stderr, "Failed to initialize GLFW");
-		return nullptr;
-	}
-
-	//-------------------------------------------------------------------------
-	// If you are on Linux or Windows, you can change these 2 numbers to 4 and 3 and
-	// enable the glDebugMessageCallback to have OpenGL catch your mistakes for you.
-	// GLFW / OGL Initialization
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#if __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-	glfwWindowHint(GLFW_RESIZABLE, 0);
-
-	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Chicken Game Assignment", nullptr, nullptr);
-	if (window == nullptr) {
-		fprintf(stderr, "Failed to glfwCreateWindow");
-		return nullptr;
-	}
-
-	// Setting callbacks to member functions (that's why the redirect is needed)
-	// Input is handled using GLFW, for more info see
-	// http://www.glfw.org/docs/latest/input_guide.html
-	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	glfwSetKeyCallback(window, key_redirect);
-	glfwSetCursorPosCallback(window, cursor_pos_redirect);
-
-	//////////////////////////////////////
-	// Loading music and sounds with SDL
-	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-		fprintf(stderr, "Failed to initialize SDL Audio");
-		return nullptr;
-	}
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
-		fprintf(stderr, "Failed to open audio device");
-		return nullptr;
-	}
-
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
-	chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
-	chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
-
-	if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("music.wav").c_str(),
-			audio_path("chicken_dead.wav").c_str(),
-			audio_path("chicken_eat.wav").c_str());
-		return nullptr;
-	}
-
-	return window;
-}
-
-void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
@@ -123,12 +38,42 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
     restart_game();
 }
 
+void WorldSystem::cleanUp()
+{
+    unloadAllContent();
+}
+
+void WorldSystem::loadAllContent()
+{
+    background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+    chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
+    chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
+
+    if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr) {
+        fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
+                audio_path("music.wav").c_str(),
+                audio_path("chicken_dead.wav").c_str(),
+                audio_path("chicken_eat.wav").c_str());
+    }
+}
+
+void WorldSystem::unloadAllContent()
+{
+    // Destroy music components
+    if (background_music != nullptr)
+        Mix_FreeMusic(background_music);
+    if (chicken_dead_sound != nullptr)
+        Mix_FreeChunk(chicken_dead_sound);
+    if (chicken_eat_sound != nullptr)
+        Mix_FreeChunk(chicken_eat_sound);
+    Mix_CloseAudio();
+
+    // Destroy all created components
+    registry.clear_all_components();
+}
+
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-	// Updating window title with points
-	std::stringstream title_ss;
-	title_ss << "Points: " << points;
-	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -148,10 +93,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	// Processing the chicken state
-	assert(registry.screenStates.components.size() <= 1);
-    ScreenState &screen = registry.screenStates.components[0];
-
     float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
 		// progress timer
@@ -164,13 +105,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		// restart the game once the death timer expired
 		if (counter.counter_ms < 0) {
 			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
             restart_game();
 			return true;
 		}
 	}
-	// reduce window brightness if any of the present chickens is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	return true;
 }
@@ -193,7 +131,7 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
     createBug(vec2(0.f,0.f)); // TODO(Kevin): remove this later - just for testing
-    createSpelunkyDude(vec2(128.f, 128.f));
+    player = createSpelunkyDude(vec2(128.f, 128.f));
 }
 
 // Compute collisions between entities
@@ -236,48 +174,52 @@ void WorldSystem::handle_collisions() {
 
 // Should the game be over ?
 bool WorldSystem::is_over() const {
-	return bool(glfwWindowShouldClose(window));
+	return !gameIsRunning;
 }
 
-// On key callback
-void WorldSystem::on_key(int key, int, int action, int mod) {
+void WorldSystem::SDLProcessEvents()
+{
+    SDL_Event event;
+    while(SDL_PollEvent(&event))
+    {
+        switch(event.type)
+        {
+//            case SDL_KEYDOWN:{
+//                ProcessSDLKeyDownEvent(event.key);
+//            }break;
+//            case SDL_KEYUP:{
+//                ProcessSDLKeyUpEvent(event.key);
+//            }break;
+//
+//            case SDL_CONTROLLERBUTTONDOWN:{
+//                ProcessSDLControllerButtonDownEvent(event.cbutton);
+//            }break;
+//            case SDL_CONTROLLERBUTTONUP:{
+//                ProcessSDLControllerButtonUpEvent(event.cbutton);
+//            }break;
+//            case SDL_CONTROLLERAXISMOTION:{
+//                ProcessSDLControllerAxisEvent(event.caxis);
+//            }break;
+//            case SDL_CONTROLLERDEVICEADDED:{
+//                SDLControllerConnected(event.cdevice.which);
+//            }break;
+//            case SDL_CONTROLLERDEVICEREMOVED:{
+//                SDLControllerRemoved(event.cdevice.which);
+//            }break;
 
+            case SDL_WINDOWEVENT:{
+                switch(event.window.event)
+                {
+                    case SDL_WINDOWEVENT_RESIZED:
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:{
+                        renderer->updateBackBufferSize();
+                    }break;
+                }
+            }break;
 
-
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-        restart_game();
-	}
-
-	// Debugging
-	if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE)
-			debugging.in_debug_mode = false;
-		else
-			debugging.in_debug_mode = true;
-	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
-}
-
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE CHICKEN ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the chicken's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	(vec2)mouse_position; // dummy to avoid compiler warning
+            case SDL_QUIT:{
+                gameIsRunning = false;
+            }break;
+        }
+    }
 }
