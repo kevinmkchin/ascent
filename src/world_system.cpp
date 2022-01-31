@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "physics_system.hpp"
+#include "input.hpp"
 
 // Game configuration
 const size_t MAX_EAGLES = 15;
@@ -184,28 +185,28 @@ void WorldSystem::SDLProcessEvents()
     {
         switch(event.type)
         {
-//            case SDL_KEYDOWN:{
-//                ProcessSDLKeyDownEvent(event.key);
-//            }break;
-//            case SDL_KEYUP:{
-//                ProcessSDLKeyUpEvent(event.key);
-//            }break;
-//
-//            case SDL_CONTROLLERBUTTONDOWN:{
-//                ProcessSDLControllerButtonDownEvent(event.cbutton);
-//            }break;
-//            case SDL_CONTROLLERBUTTONUP:{
-//                ProcessSDLControllerButtonUpEvent(event.cbutton);
-//            }break;
-//            case SDL_CONTROLLERAXISMOTION:{
-//                ProcessSDLControllerAxisEvent(event.caxis);
-//            }break;
-//            case SDL_CONTROLLERDEVICEADDED:{
-//                SDLControllerConnected(event.cdevice.which);
-//            }break;
-//            case SDL_CONTROLLERDEVICEREMOVED:{
-//                SDLControllerRemoved(event.cdevice.which);
-//            }break;
+            case SDL_KEYDOWN:{
+                Input::ProcessSDLKeyDownEvent(event.key);
+            }break;
+            case SDL_KEYUP:{
+                Input::ProcessSDLKeyUpEvent(event.key);
+            }break;
+
+            case SDL_CONTROLLERBUTTONDOWN:{
+                Input::ProcessSDLControllerButtonDownEvent(event.cbutton);
+            }break;
+            case SDL_CONTROLLERBUTTONUP:{
+                Input::ProcessSDLControllerButtonUpEvent(event.cbutton);
+            }break;
+            case SDL_CONTROLLERAXISMOTION:{
+                Input::ProcessSDLControllerAxisEvent(event.caxis);
+            }break;
+            case SDL_CONTROLLERDEVICEADDED:{
+                Input::SDLControllerConnected(event.cdevice.which);
+            }break;
+            case SDL_CONTROLLERDEVICEREMOVED:{
+                Input::SDLControllerRemoved(event.cdevice.which);
+            }break;
 
             case SDL_WINDOWEVENT:{
                 switch(event.window.event)

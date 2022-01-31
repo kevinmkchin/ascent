@@ -33,8 +33,10 @@ inline std::string mesh_path(const std::string& name) {return data_path() + "/me
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
 #endif
+
 #define DEG2RAD 0.0174532925f  // degrees * DEG2RAD = radians
 #define RAD2DEG 57.2958f       // radians * RAD2DEG = degrees
+#define ASCENT_abs(a) ((a) < 0.f ? (-(a)) : (a))
 
 #define INTERNAL static
 #define LOCAL_PERSIST static
