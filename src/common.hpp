@@ -9,7 +9,7 @@
 // glfw (OpenGL)
 #define NOMINMAX
 #include <gl3w.h>
-#include <GLFW/glfw3.h>
+#include <SDL.h>
 
 // The glm library provides vector and matrix operations as in GLSL
 #include <glm/vec2.hpp>				// vec2
@@ -29,9 +29,6 @@ inline std::string shader_path(const std::string& name) {return std::string(PROJ
 inline std::string textures_path(const std::string& name) {return data_path() + "/textures/" + std::string(name);};
 inline std::string audio_path(const std::string& name) {return data_path() + "/audio/" + std::string(name);};
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
-
-const int window_width_px = 1280;
-const int window_height_px = 720;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

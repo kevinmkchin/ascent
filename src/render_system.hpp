@@ -35,41 +35,43 @@ class RenderSystem {
 
 public:
 	// Initialize the window
-	bool init(GLFWwindow* window);
+	bool init(SDL_Window* window);
 
-	void initializeGlTextures();
-
-	void initializeGlEffects();
-
-	// Initialize the screen texture used as intermediate render target
-	// The draw loop first renders to this texture, then it is used for the wind
-	// shader
-	bool initScreenTexture();
-
-	// Destroy resources associated to one or all entities created by the system
-	~RenderSystem();
+    // Destroy resources associated to one or all entities created by the system
+    void cleanUp();
 
 	// Draw all entities
 	void draw();
 
-	mat3 createProjectionMatrix();
-
+    // Call this when the display resolution (i.e. the window size) changes
+    void updateBackBufferSize();
 private:
+    void initializeGlTextures();
+
+    void initializeGlEffects();
+
+    // Initialize the screen texture used as intermediate render target
+    // The draw loop first renders to this texture
+    bool initScreenTexture();
+
+    void updateScreenTextureSize(i32 newWidth, i32 newHeight);
+
 	// Internal drawing functions for each entity type
 	void drawSprite(Entity entity, const mat3& projection);
 
 	void finalDrawToScreen();
 
+    mat3 createProjectionMatrix();
+
 	// Window handle
-	GLFWwindow* window;
+    SDL_Window* window;
+    i32 backbufferWidth = 0;
+    i32 backbufferHeight = 0;
 
 	// Screen texture handles
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
-
-	Entity screen_state_entity;
 };
 
-bool loadEffectFromFile(
-	const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
+bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program);

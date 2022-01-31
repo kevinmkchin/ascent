@@ -16,7 +16,6 @@ public:
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
 	ComponentContainer<SpriteComponent> sprites;
-	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<Eatable> eatables;
 	ComponentContainer<Deadly> deadlys;
 	ComponentContainer<DebugComponent> debugComponents;
@@ -31,7 +30,6 @@ public:
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
 		registry_list.push_back(&sprites);
-		registry_list.push_back(&screenStates);
 		registry_list.push_back(&eatables);
 		registry_list.push_back(&deadlys);
 		registry_list.push_back(&debugComponents);

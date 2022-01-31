@@ -15,33 +15,17 @@
 #include <sstream>
 
 // World initialization
-bool RenderSystem::init(GLFWwindow* window_arg)
+bool RenderSystem::init(SDL_Window* window_arg)
 {
 	this->window = window_arg;
 
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); // vsync
-
-	// Load OpenGL function pointers
-	const int is_fine = gl3w_init();
-	assert(is_fine == 0);
+    SDL_GL_GetDrawableSize(window, &backbufferWidth, &backbufferHeight);
 
 	// Create a frame buffer
 	frame_buffer = 0;
 	glGenFramebuffers(1, &frame_buffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
-
-	// For some high DPI displays (ex. Retina Display on Macbooks)
-	// https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value
-	int frame_buffer_width_px, frame_buffer_height_px;
-	glfwGetFramebufferSize(window, &frame_buffer_width_px, &frame_buffer_height_px);  // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
-	if (frame_buffer_width_px != window_width_px)
-	{
-		printf("WARNING: retina display! https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value\n");
-		printf("glfwGetFramebufferSize = %d,%d\n", frame_buffer_width_px, frame_buffer_height_px);
-		printf("window width_height = %d,%d\n", window_width_px, window_height_px);
-	}
 
 	// Hint: Ask your TA for how to setup pretty OpenGL error callbacks.
 	// This can not be done in mac os, so do not enable
@@ -103,49 +87,66 @@ void RenderSystem::initializeGlEffects()
 	}
 }
 
-RenderSystem::~RenderSystem()
-{
-	// Don't need to free gl resources since they last for as long as the program,
-	// but it's polite to clean after yourself.
-	glDeleteTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
-	glDeleteTextures(1, &off_screen_render_buffer_color);
-	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
-	gl_has_errors();
-
-	for(uint i = 0; i < effect_count; i++) {
-		glDeleteProgram(effects[i]);
-	}
-	// delete allocated resources
-	glDeleteFramebuffers(1, &frame_buffer);
-	gl_has_errors();
-}
-
 // Initialize the screen texture from a standard sprite
 bool RenderSystem::initScreenTexture()
 {
-	registry.screenStates.emplace(screen_state_entity);
-
-	int framebuffer_width, framebuffer_height;
-	// TODO(Kevin): Don't use this framebuffer size? Diff internal resolution? not sure how it works
-    glfwGetFramebufferSize(const_cast<GLFWwindow*>(window), &framebuffer_width, &framebuffer_height);  // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 
 	glGenTextures(1, &off_screen_render_buffer_color);
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, framebuffer_width, framebuffer_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, backbufferWidth, backbufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	gl_has_errors();
 
 	glGenRenderbuffers(1, &off_screen_render_buffer_depth);
 	glBindRenderbuffer(GL_RENDERBUFFER, off_screen_render_buffer_depth);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, off_screen_render_buffer_color, 0);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, framebuffer_width, framebuffer_height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, backbufferWidth, backbufferHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, off_screen_render_buffer_depth);
 	gl_has_errors();
 
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 	return true;
+}
+
+void RenderSystem::updateScreenTextureSize(i32 newWidth, i32 newHeight)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+    glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glBindRenderbuffer(GL_RENDERBUFFER, off_screen_render_buffer_depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newWidth, newHeight);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("Failed to change size of Internal FrameBuffer Object.\n");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderSystem::cleanUp()
+{
+    // Don't need to free gl resources since they last for as long as the program,
+    // but it's polite to clean after yourself.
+	glDeleteTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
+	glDeleteTextures(1, &off_screen_render_buffer_color);
+	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
+	gl_has_errors();
+
+    for(uint i = 0; i < effect_count; i++) {
+        glDeleteProgram(effects[i]);
+    }
+    // delete allocated resources
+    glDeleteFramebuffers(1, &frame_buffer);
+    gl_has_errors();
+}
+
+void RenderSystem::updateBackBufferSize()
+{
+    SDL_GL_GetDrawableSize(window, &backbufferWidth, &backbufferHeight);
+    // update framebuffer size
+    updateScreenTextureSize(backbufferWidth, backbufferHeight);
 }
 
 bool gl_compile_shader(GLuint shader)
