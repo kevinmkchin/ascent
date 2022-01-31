@@ -94,27 +94,28 @@ bool WorldSystem::step(float deltaTime) {
 		}
 	}
 
-
+    // NOTE(Kevin): this is all temporary - feel free to delete
     Motion& playerMotion = registry.motions.get(player);
+    float playerMoveSpeed = 64.f;
     if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP))
     {
-        playerMotion.position.y -= 128.f * deltaTime;
+        playerMotion.position.y -= playerMoveSpeed * deltaTime;
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN))
     {
-        playerMotion.position.y += 128.f * deltaTime;
+        playerMotion.position.y += playerMoveSpeed * deltaTime;
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
     {
-        playerMotion.position.x -= 128.f * deltaTime;
+        playerMotion.position.x -= playerMoveSpeed * deltaTime;
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT))
     {
-        playerMotion.position.x += 128.f * deltaTime;
+        playerMotion.position.x += playerMoveSpeed * deltaTime;
     }
     if(Input::GetGamepad(0).isConnected)
     {
-        playerMotion.position += Input::GetGamepad(0).leftThumbStickDir * 128.f * deltaTime;
+        playerMotion.position += Input::GetGamepad(0).leftThumbStickDir * playerMoveSpeed * deltaTime;
     }
 
 

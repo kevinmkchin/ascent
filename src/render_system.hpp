@@ -67,6 +67,8 @@ private:
     SDL_Window* window;
     i32 backbufferWidth = 0;
     i32 backbufferHeight = 0;
+    const i32 FRAMEBUFFER_WIDTH = GAME_RESOLUTION_WIDTH * FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+    const i32 FRAMEBUFFER_HEIGHT = GAME_RESOLUTION_HEIGHT * FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
 
 	// Screen texture handles
 	GLuint frame_buffer;

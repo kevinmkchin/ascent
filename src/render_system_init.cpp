@@ -94,7 +94,7 @@ bool RenderSystem::initScreenTexture()
 
 	glGenTextures(1, &off_screen_render_buffer_color);
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GAME_RESOLUTION_WIDTH, GAME_RESOLUTION_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	gl_has_errors();
@@ -102,7 +102,7 @@ bool RenderSystem::initScreenTexture()
 	glGenRenderbuffers(1, &off_screen_render_buffer_depth);
 	glBindRenderbuffer(GL_RENDERBUFFER, off_screen_render_buffer_depth);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, off_screen_render_buffer_color, 0);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, GAME_RESOLUTION_WIDTH, GAME_RESOLUTION_HEIGHT);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, off_screen_render_buffer_depth);
 	gl_has_errors();
 
