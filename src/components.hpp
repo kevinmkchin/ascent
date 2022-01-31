@@ -2,8 +2,8 @@
 #include "common.hpp"
 #include <vector>
 #include <unordered_map>
+#include <array>
 #include "../ext/stb_image/stb_image.h"
-
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -43,6 +43,19 @@ enum class EFFECT_ASSET_ID {
     EFFECT_COUNT = SPRITE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
+
+// Make sure these paths remain in sync with the associated enumerators.
+const std::array<std::string, texture_count> texture_paths = {
+        textures_path("bug.png"),
+        textures_path("eagle.png"),
+        textures_path("spelunky.png"),
+};
+
+// Make sure these paths remain in sync with the associated enumerators.
+const std::array<std::string, effect_count> effect_paths = {
+        shader_path("finalpass"),
+        shader_path("sprite"),
+};
 
 
 /**

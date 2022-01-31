@@ -19,19 +19,7 @@ class RenderSystem {
 	 */
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
-
-	// Make sure these paths remain in sync with the associated enumerators.
-	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("bug.png"),
-			textures_path("eagle.png"),
-            textures_path("spelunky.png") };
-
-	std::array<GLuint, effect_count> effects;
-	// Make sure these paths remain in sync with the associated enumerators.
-	const std::array<std::string, effect_count> effect_paths = {
-        shader_path("finalpass"),
-		shader_path("sprite"),
-    };
+    std::array<GLuint, effect_count> effects;
 
 public:
 	// Initialize the window
