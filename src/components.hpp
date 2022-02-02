@@ -91,8 +91,8 @@ struct Motion
 	vec2 scale = { 1, 1 };
 
     // Collision with respect to position
+    vec2 collision_origin = {0, 0};
     vec2 collision_max = { 0, 0 };
-    vec2 collision_min = { 0, 0 };
 };
 
 struct SpriteComponent

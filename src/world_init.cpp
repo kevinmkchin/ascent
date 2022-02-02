@@ -14,6 +14,7 @@ Entity createBug(vec2 position)
 	motion.rotation = 0.f;
 	motion.velocity = { 0, 50 };
 	motion.position = position;
+	motion.collision_origin = ivec2(32, 32);
     motion.collision_max = ivec2(64, 64);
 
 	registry.eatables.emplace(entity);
@@ -37,6 +38,7 @@ Entity createSpelunkyDude(vec2 position) {
     motion.rotation = 0.f;
     motion.velocity = { 0, 0 };
     motion.position = position;
+    motion.collision_origin = ivec2(32, 32);
     motion.collision_max = ivec2(64, 64);
 
     registry.eatables.emplace(entity);
