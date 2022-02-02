@@ -156,7 +156,7 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-    createBug(vec2(0.f,0.f)); // TODO(Kevin): remove this later - just for testing
+    createBug(vec2(100.f,50.f)); // TODO(Kevin): remove this later - just for testing
     player = createSpelunkyDude(vec2(128.f, 128.f));
 }
 

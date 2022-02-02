@@ -14,15 +14,26 @@ vec2 get_bounding_box(const Motion& motion)
 // surely implement a more accurate detection
 bool collides(const Motion& motion1, const Motion& motion2)
 {
-	vec2 dp = motion1.position - motion2.position;
-	float dist_squared = dot(dp,dp);
-	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
-	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
-	const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	const float r_squared = max(other_r_squared, my_r_squared);
-	if (dist_squared < r_squared)
+	//vec2 dp = motion1.position - motion2.position;
+	//float dist_squared = dot(dp,dp);
+	//const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
+	//const float other_r_squared = dot(other_bonding_box, other_bonding_box);
+	//const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
+	//const float my_r_squared = dot(my_bonding_box, my_bonding_box);
+	//const float r_squared = max(other_r_squared, my_r_squared);
+	//if (dist_squared < r_squared)
+	//	return true;
+	//return false;
+	vec2 max1 = motion1.position + motion1.collision_max * abs(motion1.scale);
+	vec2 min1 = motion1.position + motion1.collision_min * abs(motion1.scale);
+
+	vec2 max2 = motion2.position + motion2.collision_max * abs(motion2.scale);
+	vec2 min2 = motion2.position + motion2.collision_min * abs(motion2.scale);
+
+	if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
+		printf("collision detected");
 		return true;
+	}
 	return false;
 }
 

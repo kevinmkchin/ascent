@@ -14,12 +14,13 @@ Entity createBug(vec2 position)
 	motion.rotation = 0.f;
 	motion.velocity = { 0, 50 };
 	motion.position = position;
+    motion.collision_max = ivec2(64, 64);
 
 	registry.eatables.emplace(entity);
     registry.sprites.insert(
             entity,
             {
-                    ivec2(128,128),
+                    ivec2(64,64),
                     TEXTURE_ASSET_ID::BUG
             }
             );
@@ -36,6 +37,7 @@ Entity createSpelunkyDude(vec2 position) {
     motion.rotation = 0.f;
     motion.velocity = { 0, 0 };
     motion.position = position;
+    motion.collision_max = ivec2(64, 64);
 
     registry.eatables.emplace(entity);
     registry.sprites.insert(
