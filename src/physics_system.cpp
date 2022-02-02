@@ -24,11 +24,11 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	//if (dist_squared < r_squared)
 	//	return true;
 	//return false;
-	vec2 max1 = motion1.position + motion1.collision_max * abs(motion1.scale);
-	vec2 min1 = motion1.position + motion1.collision_min * abs(motion1.scale);
+	vec2 max1 = motion1.position + motion1.collision_origin + (motion1.collision_max / 2.f) * abs(motion1.scale);
+	vec2 min1 = motion1.position + motion1.collision_origin - (motion1.collision_max / 2.f) * abs(motion1.scale);
 
-	vec2 max2 = motion2.position + motion2.collision_max * abs(motion2.scale);
-	vec2 min2 = motion2.position + motion2.collision_min * abs(motion2.scale);
+	vec2 max2 = motion2.position + motion2.collision_origin + (motion2.collision_max / 2.f) * abs(motion2.scale);
+	vec2 min2 = motion2.position + motion2.collision_origin - (motion2.collision_max / 2.f) * abs(motion2.scale);
 
 	if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
 		printf("collision detected");
