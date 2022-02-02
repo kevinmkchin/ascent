@@ -25,28 +25,34 @@ bool collides(Motion& motion1, Motion& motion2)
 	//	return true;
 	//return false;
 
-	// motion1 is the player and the only entity that should be moved back
-	vec2 max1 = motion1.position + motion1.collision_origin + (motion1.collision_max / 2.f) * abs(motion1.scale);
-	vec2 min1 = motion1.position + motion1.collision_origin - (motion1.collision_max / 2.f) * abs(motion1.scale);
+	vec2 max1 = motion1.position + (motion1.center + motion1.collision_pos) * abs(motion1.scale);
+	vec2 min1 = motion1.position + (motion1.center - motion1.collision_neg) * abs(motion1.scale);
 
-	vec2 max2 = motion2.position + motion2.collision_origin + (motion2.collision_max / 2.f) * abs(motion2.scale);
-	vec2 min2 = motion2.position + motion2.collision_origin - (motion2.collision_max / 2.f) * abs(motion2.scale);
+	vec2 max2 = motion2.position + (motion2.center + motion2.collision_pos) * abs(motion2.scale);
+	vec2 min2 = motion2.position + (motion2.center - motion2.collision_neg) * abs(motion2.scale);
 
 	if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
 	    // Calculate the x and y overlap between the two colliding entities
         float dx = min(max1.x, max2.x) - max(min1.x, min2.x);
         float dy = min(max1.y, max2.y) - max(min1.y, min2.y);
-        motion1.collision_overlap = vec2(max(0.f, dx), max(0.f, dy));
-        printf("%.6f, %.6f \n", motion1.collision_overlap.x, motion1.collision_overlap.y);
 
-        // Move back during collision so entities stop colliding
-        // Check which is the moving entity
-        if (motion1.velocity.x > motion2.velocity.x && motion1.velocity.y > motion2.velocity.y) {
-            motion1.position += motion1.collision_overlap;
-        } else {
-            motion2.position += motion1.collision_overlap;
-        }
+		// Reset collision overlaps of both entities
+		motion1.collision_overlap = { 0, 0 };
+		motion2.collision_overlap = { 0, 0 };
 
+		Motion& motion_to_resolve = motion1;
+		// Pick the fastest moving entity to resolve/move back
+		if (length(motion2.velocity) > length(motion1.velocity)) {
+			motion_to_resolve = motion2;
+		}
+
+		printf("velocity1: %.6f, %.6f \n", motion1.velocity.x, motion1.velocity.y);
+		printf("velocity2: %.6f, %.6f \n", motion2.velocity.x, motion2.velocity.y);
+
+		motion_to_resolve.collision_overlap = { max(0.f, dx), max(0.f, dy) };
+		//printf("motion1: %.6f, %.6f \n", motion1.collision_overlap.x, motion1.collision_overlap.y);
+		//printf("motion2: %.6f, %.6f \n", motion2.collision_overlap.x, motion2.collision_overlap.y);
+		//printf("motionresolve: %.6f, %.6f \n", motion_to_resolve.collision_overlap.x, motion_to_resolve.collision_overlap.y);
         return true;
 	}
 	return false;
@@ -82,6 +88,37 @@ void PhysicsSystem::step(float deltaTime)
 				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+
+				// Start resolving collision
+
+				// Only one of the two entities should have a non-zero collision_overlap value
+				Motion& motion_to_resolve = motion_i;
+				if (length(motion_j.collision_overlap) > 0) {
+					motion_to_resolve = motion_j;
+				}
+
+				// Here we find the shortest axis collision, this will be the axis that we resolve 
+
+				// 0 for x, 1 for y
+				int axis_to_resolve = 1;
+
+				if (motion_to_resolve.collision_overlap.x < motion_to_resolve.collision_overlap.y) {
+					axis_to_resolve = 0;
+				}
+
+				vec2 position_change = { 0, 0 };
+				position_change[axis_to_resolve] = motion_to_resolve.collision_overlap[axis_to_resolve];
+
+				//printf("positionchange: %.6f, %.6f \n", position_change.x, position_change.y);
+				//printf("velocity: %.6f, %.6f \n", motion_to_resolve.velocity.x, motion_to_resolve.velocity.y);
+
+				if (motion_to_resolve.velocity[axis_to_resolve] > 0) {
+					motion_to_resolve.position -= position_change;
+				}
+				else if (motion_to_resolve.velocity[axis_to_resolve] < 0) {
+					motion_to_resolve.position += position_change;
+				}
+
 			}
 		}
 	}
