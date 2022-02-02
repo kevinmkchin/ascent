@@ -12,7 +12,7 @@ vec2 get_bounding_box(const Motion& motion)
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
+bool collides(Motion& motion1, Motion& motion2)
 {
 	//vec2 dp = motion1.position - motion2.position;
 	//float dist_squared = dot(dp,dp);
@@ -24,6 +24,8 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	//if (dist_squared < r_squared)
 	//	return true;
 	//return false;
+
+	// motion1 is the player and the only entity that should be moved back
 	vec2 max1 = motion1.position + motion1.collision_origin + (motion1.collision_max / 2.f) * abs(motion1.scale);
 	vec2 min1 = motion1.position + motion1.collision_origin - (motion1.collision_max / 2.f) * abs(motion1.scale);
 
@@ -31,8 +33,21 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	vec2 min2 = motion2.position + motion2.collision_origin - (motion2.collision_max / 2.f) * abs(motion2.scale);
 
 	if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
-		printf("collision detected");
-		return true;
+	    // Calculate the x and y overlap between the two colliding entities
+        float dx = min(max1.x, max2.x) - max(min1.x, min2.x);
+        float dy = min(max1.y, max2.y) - max(min1.y, min2.y);
+        motion1.collision_overlap = vec2(max(0.f, dx), max(0.f, dy));
+        printf("%.6f, %.6f \n", motion1.collision_overlap.x, motion1.collision_overlap.y);
+
+        // Move back during collision so entities stop colliding
+        // Check which is the moving entity
+        if (motion1.velocity.x > motion2.velocity.x && motion1.velocity.y > motion2.velocity.y) {
+            motion1.position += motion1.collision_overlap;
+        } else {
+            motion2.position += motion1.collision_overlap;
+        }
+
+        return true;
 	}
 	return false;
 }

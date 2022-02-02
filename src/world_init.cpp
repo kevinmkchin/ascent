@@ -17,7 +17,7 @@ Entity createBug(vec2 position)
 	motion.collision_origin = ivec2(32, 32);
     motion.collision_max = ivec2(64, 64);
 
-	registry.eatables.emplace(entity);
+    registry.eatables.emplace(entity);
     registry.sprites.insert(
             entity,
             {
