@@ -49,7 +49,6 @@ Entity createSpelunkyDude(vec2 position) {
     motion.collision_pos = dimensions / 2.f;
     motion.collision_neg = dimensions / 2.f;
 
-    registry.eatables.emplace(entity);
     registry.sprites.insert(
             entity,
             {

@@ -9,12 +9,7 @@
 #include "physics_system.hpp"
 #include "input.hpp"
 
-// Game configuration
-const size_t MAX_EAGLES = 15;
-const size_t MAX_BUG = 5;
-const size_t EAGLE_DELAY_MS = 2000 * 3;
-const size_t BUG_DELAY_MS = 5000 * 3;
-
+// Put game configuration stuff here maybe
 INTERNAL Entity player;
 
 // Create the bug world
@@ -175,6 +170,7 @@ void WorldSystem::restart_game() {
 
     createBox(vec2(100.f,50.f)); // TODO(Kevin): remove this later - just for testing
     player = createBox(vec2(128.f, 128.f));
+    registry.players.emplace(player);
 }
 
 // Compute collisions between entities
@@ -183,31 +179,44 @@ void WorldSystem::handle_collisions() {
 	auto& collisionsRegistry = registry.collisions;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
+        const Collision colEvent = collisionsRegistry.components[i];
 		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = collisionsRegistry.components[i].other;
+		Entity entity_other = colEvent.other;
 
 		// For now, we are only interested in collisions that involve the chicken
 		if (registry.players.has(entity)) {
-			//Player& player = registry.players.get(entity);
+            Player& player = registry.players.get(entity);
+            Motion& playerMotion = registry.motions.get(entity);
 
-			// Checking Player - Deadly collisions
-			if (registry.deadlys.has(entity_other)) {
-				// initiate death unless already dying
-				if (!registry.deathTimers.has(entity)) {
-					// Scream, reset timer, and make the chicken sink
-					registry.deathTimers.emplace(entity);
-					Mix_PlayChannel(-1, chicken_dead_sound, 0);
-				}
-			}
-			// Checking Player - Eatable collisions
-			else if (registry.eatables.has(entity_other)) {
-				if (!registry.deathTimers.has(entity)) {
-					// chew, count points, and set the LightUp timer
-					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, chicken_eat_sound, 0);
-					++points;
-				}
-			}
+            // Here we find the shortest axis collision, this will be the axis that we resolve
+            // 0 for x, 1 for y
+            int axis_to_resolve = 1;
+            if (colEvent.collision_overlap.x < colEvent.collision_overlap.y)
+            {
+                axis_to_resolve = 0;
+            }
+
+            vec2 position_change = { 0, 0 };
+            position_change[axis_to_resolve] = colEvent.collision_overlap[axis_to_resolve];
+
+            // For now we only resolve the entity if it has velocity, might need to change if we want the non-moving player to be knocked back when hit by an attack or something
+            if (playerMotion.velocity[axis_to_resolve] > 0)
+            {
+                playerMotion.position -= position_change;
+            }
+            else if (playerMotion.velocity[axis_to_resolve] < 0)
+            {
+                playerMotion.position += position_change;
+            }
+
+//			// Checking Player - Deadly collisions
+//			if (registry.deadlys.has(entity_other)) {
+//
+//			}
+//			// Checking Player - Eatable collisions
+//			else if (registry.eatables.has(entity_other)) {
+//
+//			}
 		}
 	}
 

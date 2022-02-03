@@ -97,7 +97,6 @@ struct Motion
     vec2 collision_pos = { 0, 0 };
     // Collision box x,y size in the negative direction from the center
     vec2 collision_neg = { 0, 0 };
-    vec2 collision_overlap = {0, 0};
 };
 
 struct SpriteComponent
@@ -116,6 +115,7 @@ struct SpriteComponent
 // Stucture to store collision information
 struct Collision
 {
+    vec2 collision_overlap = {0, 0};
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
