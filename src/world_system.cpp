@@ -242,17 +242,26 @@ void WorldSystem::handle_collisions() {
                 axis_to_resolve = 0;
             }
 
-            vec2 position_change = { 0, 0 };
-            position_change[axis_to_resolve] = colEvent.collision_overlap[axis_to_resolve];
+            /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
+             *  by moving entities around, the initial collection of collision events may become outdated.
+             *  Checking that the two entities are still colliding is not a perfect solution (if there
+             *  even is one), but it should be good enough... We can revisit this and attempt other
+             *  solutions down the line if needed. */
+            CollisionInfo collisionCheckAgain = CheckCollision(playerMotion, registry.motions.get(entity_other));
+            if(collisionCheckAgain.collides)
+            {
+                vec2 position_change = { 0, 0 };
+                position_change[axis_to_resolve] = collisionCheckAgain.collision_overlap[axis_to_resolve];
 
-            // For now we only resolve the entity if it has velocity, might need to change if we want the non-moving player to be knocked back when hit by an attack or something
-            if (playerMotion.velocity[axis_to_resolve] > 0)
-            {
-                playerMotion.position -= position_change;
-            }
-            else if (playerMotion.velocity[axis_to_resolve] < 0)
-            {
-                playerMotion.position += position_change;
+                // For now we only resolve the entity if it has velocity, might need to change if we want the non-moving player to be knocked back when hit by an attack or something
+                if (playerMotion.velocity[axis_to_resolve] > 0)
+                {
+                    playerMotion.position -= position_change;
+                }
+                else if (playerMotion.velocity[axis_to_resolve] < 0)
+                {
+                    playerMotion.position += position_change;
+                }
             }
 
 //			// Checking Player - Deadly collisions

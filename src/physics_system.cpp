@@ -2,13 +2,7 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
-struct CollisionInfo
-{
-    vec2 collision_overlap = {0.f, 0.f};
-    bool collides = false;
-};
-
-CollisionInfo collides(Motion& motion1, Motion& motion2)
+CollisionInfo CheckCollision(Motion& motion1, Motion& motion2)
 {
 	vec2 max1 = motion1.position + (motion1.center + motion1.collision_pos) * abs(motion1.scale);
 	vec2 min1 = motion1.position + (motion1.center - motion1.collision_neg) * abs(motion1.scale);
@@ -57,7 +51,7 @@ void PhysicsSystem::step(float deltaTime)
 			Motion& motion_j = motion_container.components[j];
             Entity entity_j = motion_container.entities[j];
 
-            CollisionInfo colInfo = collides(motion_i, motion_j);
+            CollisionInfo colInfo = CheckCollision(motion_i, motion_j);
 			if (colInfo.collides)
 			{
 				// Create a collisions event
