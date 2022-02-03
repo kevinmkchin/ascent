@@ -174,7 +174,7 @@ void WorldSystem::restart_game() {
     registry.players.emplace(player);
 	HealthBar& playerHealth = registry.healthBar.get(player);
 	printf("%f \n", registry.healthBar.get(player).health);
-	playerHealth.health = 100.f;
+	playerHealth.health = 2000.f;
 	printf("%f \n", playerHealth.health);
 	enemy1 = createEnemy(vec2(230.f, 110.f));
 }
@@ -198,12 +198,16 @@ void WorldSystem::handle_collisions() {
 			printf("inside collisions %f \n", hb.health);
 
 			if (registry.enemy.has(entity_other)) {
-
-				hb.health -= 20;
-				printf("%f \n", hb.health);
-				if (hb.health == 0) {
-					Mix_PlayChannel(-1, chicken_dead_sound, 0);
+				if (hb.health > 0) {
+					hb.health -= 20;
 				}
+				else {
+					//Mix_PlayChannel(-1, chicken_dead_sound, 0);
+				}
+				printf("%f \n", hb.health);
+				
+					
+				
 			}
 
             // Here we find the shortest axis collision, this will be the axis that we resolve
