@@ -12,12 +12,12 @@ Entity createBug(vec2 position)
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
 	motion.rotation = 0.f;
-	motion.velocity = { 0, 50 };
+	motion.velocity = { 0, 0 };
 	motion.position = position;
 
     vec2 dimensions = { 64, 64 };
 
-	motion.center = (dimensions / 2.f) * motion.scale;
+	motion.center = dimensions / 2.f;
     motion.collision_pos = dimensions / 2.f;
     motion.collision_neg = dimensions / 2.f;
 

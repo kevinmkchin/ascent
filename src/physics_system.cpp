@@ -2,29 +2,8 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
-// Returns the local bounding coordinates scaled by the current size of the entity
-vec2 get_bounding_box(const Motion& motion)
-{
-	// abs is to avoid negative scale due to the facing direction.
-	return { abs(motion.scale.x), abs(motion.scale.y) };
-}
-
-// This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
-// if the center point of either object is inside the other's bounding-box-circle. You can
-// surely implement a more accurate detection
 bool collides(Motion& motion1, Motion& motion2)
 {
-	//vec2 dp = motion1.position - motion2.position;
-	//float dist_squared = dot(dp,dp);
-	//const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
-	//const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	//const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
-	//const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	//const float r_squared = max(other_r_squared, my_r_squared);
-	//if (dist_squared < r_squared)
-	//	return true;
-	//return false;
-
 	vec2 max1 = motion1.position + (motion1.center + motion1.collision_pos) * abs(motion1.scale);
 	vec2 min1 = motion1.position + (motion1.center - motion1.collision_neg) * abs(motion1.scale);
 
@@ -40,19 +19,13 @@ bool collides(Motion& motion1, Motion& motion2)
 		motion1.collision_overlap = { 0, 0 };
 		motion2.collision_overlap = { 0, 0 };
 
-		Motion& motion_to_resolve = motion1;
+		Motion* motion_to_resolve = &motion1;
 		// Pick the fastest moving entity to resolve/move back
 		if (length(motion2.velocity) > length(motion1.velocity)) {
-			motion_to_resolve = motion2;
+			motion_to_resolve = &motion2;
 		}
 
-		printf("velocity1: %.6f, %.6f \n", motion1.velocity.x, motion1.velocity.y);
-		printf("velocity2: %.6f, %.6f \n", motion2.velocity.x, motion2.velocity.y);
-
-		motion_to_resolve.collision_overlap = { max(0.f, dx), max(0.f, dy) };
-		//printf("motion1: %.6f, %.6f \n", motion1.collision_overlap.x, motion1.collision_overlap.y);
-		//printf("motion2: %.6f, %.6f \n", motion2.collision_overlap.x, motion2.collision_overlap.y);
-		//printf("motionresolve: %.6f, %.6f \n", motion_to_resolve.collision_overlap.x, motion_to_resolve.collision_overlap.y);
+		motion_to_resolve->collision_overlap = { max(0.f, dx), max(0.f, dy) };
         return true;
 	}
 	return false;
@@ -68,6 +41,7 @@ void PhysicsSystem::step(float deltaTime)
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
+		motion.position += motion.velocity * step_seconds;
 	}
 
 	// Check for collisions between all moving entities
@@ -92,9 +66,9 @@ void PhysicsSystem::step(float deltaTime)
 				// Start resolving collision
 
 				// Only one of the two entities should have a non-zero collision_overlap value
-				Motion& motion_to_resolve = motion_i;
+				Motion* motion_to_resolve = &motion_i;
 				if (length(motion_j.collision_overlap) > 0) {
-					motion_to_resolve = motion_j;
+					motion_to_resolve = &motion_j;
 				}
 
 				// Here we find the shortest axis collision, this will be the axis that we resolve 
@@ -102,23 +76,20 @@ void PhysicsSystem::step(float deltaTime)
 				// 0 for x, 1 for y
 				int axis_to_resolve = 1;
 
-				if (motion_to_resolve.collision_overlap.x < motion_to_resolve.collision_overlap.y) {
+				if (motion_to_resolve->collision_overlap.x < motion_to_resolve->collision_overlap.y) {
 					axis_to_resolve = 0;
 				}
 
 				vec2 position_change = { 0, 0 };
-				position_change[axis_to_resolve] = motion_to_resolve.collision_overlap[axis_to_resolve];
+				position_change[axis_to_resolve] = motion_to_resolve->collision_overlap[axis_to_resolve];
 
-				//printf("positionchange: %.6f, %.6f \n", position_change.x, position_change.y);
-				//printf("velocity: %.6f, %.6f \n", motion_to_resolve.velocity.x, motion_to_resolve.velocity.y);
-
-				if (motion_to_resolve.velocity[axis_to_resolve] > 0) {
-					motion_to_resolve.position -= position_change;
+				// For now we only resolve the entity if it has velocity, might need to change if we want the non-moving player to be knocked back when hit by an attack or something
+				if (motion_to_resolve->velocity[axis_to_resolve] > 0) {
+					motion_to_resolve->position -= position_change;
 				}
-				else if (motion_to_resolve.velocity[axis_to_resolve] < 0) {
-					motion_to_resolve.position += position_change;
+				else if (motion_to_resolve->velocity[axis_to_resolve] < 0) {
+					motion_to_resolve->position += position_change;
 				}
-
 			}
 		}
 	}
