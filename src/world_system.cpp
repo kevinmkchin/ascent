@@ -9,6 +9,8 @@
 #include "physics_system.hpp"
 #include "input.hpp"
 
+#include "levels.cpp"
+
 // Put game configuration stuff here maybe
 INTERNAL Entity player;
 INTERNAL Entity enemy1;
@@ -169,14 +171,41 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-    //createBox(vec2(100.f,50.f)); // TODO(Kevin): remove this later - just for testing
-    player = createBox(vec2(128.f, 128.f));
+    player = createBox(vec2(128.f, 96.f));
     registry.players.emplace(player);
 	HealthBar& playerHealth = registry.healthBar.get(player);
 	printf("%f \n", registry.healthBar.get(player).health);
 	playerHealth.health = 2000.f;
 	printf("%f \n", playerHealth.health);
-	enemy1 = createEnemy(vec2(230.f, 110.f));
+	enemy1 = createEnemy(vec2(230.f, 128.f));
+
+    CreateBasicLevelTile(1,9);
+    CreateBasicLevelTile(2,9);
+    CreateBasicLevelTile(3,9);
+    CreateBasicLevelTile(4,9);
+    CreateBasicLevelTile(5,9);
+    CreateBasicLevelTile(6,9);
+    CreateBasicLevelTile(7,9);
+    CreateBasicLevelTile(8,9);
+    CreateBasicLevelTile(9,9);
+    CreateBasicLevelTile(10,9);
+    CreateBasicLevelTile(11,9);
+    CreateBasicLevelTile(12,9);
+    CreateBasicLevelTile(13,9);
+    CreateBasicLevelTile(14,9);
+    CreateBasicLevelTile(15,9);
+    CreateBasicLevelTile(16,9);
+    CreateBasicLevelTile(17,9);
+    CreateBasicLevelTile(18,9);
+    CreateBasicLevelTile(3,8);
+    CreateBasicLevelTile(4,8);
+    CreateBasicLevelTile(7,8);
+    CreateBasicLevelTile(8,8);
+    CreateBasicLevelTile(9,8);
+    CreateBasicLevelTile(8,7);
+    CreateBasicLevelTile(13,5);
+    CreateBasicLevelTile(14,5);
+    CreateBasicLevelTile(15,5);
 }
 
 // Compute collisions between entities
@@ -195,8 +224,6 @@ void WorldSystem::handle_collisions() {
 			HealthBar& hb = registry.healthBar.get(entity);
             Motion& playerMotion = registry.motions.get(entity);
 
-			printf("inside collisions %f \n", hb.health);
-
 			if (registry.enemy.has(entity_other)) {
 				if (hb.health > 0) {
 					hb.health -= 20;
@@ -204,10 +231,7 @@ void WorldSystem::handle_collisions() {
 				else {
 					//Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
-				printf("%f \n", hb.health);
-				
-					
-				
+				printf("Colliding with enemy. Reduced health to: %f \n", hb.health);
 			}
 
             // Here we find the shortest axis collision, this will be the axis that we resolve

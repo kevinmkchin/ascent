@@ -33,7 +33,9 @@ enum class TEXTURE_ASSET_ID {
     BUG = 0,
 	EAGLE = BUG + 1,
     SPELUNKY = EAGLE + 1,
-    BOX = SPELUNKY + 1,
+    MONSTER = SPELUNKY + 1,
+    TILE_EXAMPLE = MONSTER + 1,
+    BOX = TILE_EXAMPLE + 1,
     TEXTURE_COUNT = BOX + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -50,8 +52,9 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bug.png"),
         textures_path("eagle.png"),
         textures_path("spelunky.png"),
+        textures_path("monster.png"),
+        textures_path("tile_example.png"),
         textures_path("box.png"),
-		//textures_path("monster.png"),
 };
 
 // Make sure these paths remain in sync with the associated enumerators.
