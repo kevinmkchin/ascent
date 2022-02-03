@@ -11,6 +11,7 @@
 
 // Put game configuration stuff here maybe
 INTERNAL Entity player;
+INTERNAL Entity enemy1;
 
 // Create the bug world
 WorldSystem::WorldSystem()
@@ -168,9 +169,14 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-    createBox(vec2(100.f,50.f)); // TODO(Kevin): remove this later - just for testing
+    //createBox(vec2(100.f,50.f)); // TODO(Kevin): remove this later - just for testing
     player = createBox(vec2(128.f, 128.f));
     registry.players.emplace(player);
+	HealthBar& playerHealth = registry.healthBar.get(player);
+	printf("%f \n", registry.healthBar.get(player).health);
+	playerHealth.health = 100.f;
+	printf("%f \n", playerHealth.health);
+	enemy1 = createEnemy(vec2(230.f, 110.f));
 }
 
 // Compute collisions between entities
@@ -186,7 +192,19 @@ void WorldSystem::handle_collisions() {
 		// For now, we are only interested in collisions that involve the chicken
 		if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
+			HealthBar& hb = registry.healthBar.get(entity);
             Motion& playerMotion = registry.motions.get(entity);
+
+			printf("inside collisions %f \n", hb.health);
+
+			if (registry.enemy.has(entity_other)) {
+
+				hb.health -= 20;
+				printf("%f \n", hb.health);
+				if (hb.health == 0) {
+					Mix_PlayChannel(-1, chicken_dead_sound, 0);
+				}
+			}
 
             // Here we find the shortest axis collision, this will be the axis that we resolve
             // 0 for x, 1 for y
