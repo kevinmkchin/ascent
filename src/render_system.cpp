@@ -10,8 +10,7 @@ void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 
 	Transform transform;
     vec2 scaledPosition = motion.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-    vec2 roundedPosition = vec2(floor(scaledPosition.x), floor(scaledPosition.y));
-	transform.translate(roundedPosition);
+	transform.translate(scaledPosition);
     transform.rotate(motion.rotation * DEG2RAD);
     transform.scale(vec2(sprite.dimensions) * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL);
 	transform.scale(motion.scale);
