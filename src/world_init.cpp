@@ -73,7 +73,7 @@ Entity createBox(vec2 position) {
     motion.velocity = { 0, 0 };
     motion.position = position;
 
-    vec2 dimensions = { 64, 64 };
+    vec2 dimensions = { 16, 16 };
 
     motion.center = dimensions / 2.f;
     motion.collision_pos = dimensions / 2.f;
@@ -107,7 +107,7 @@ Entity createEnemy(vec2 position) {
 	motion.velocity = { 0, 0 };
 	motion.position = position;
 
-	vec2 dimensions = { 64, 64 };
+	vec2 dimensions = { 16, 16 };
 
 	motion.center = dimensions / 2.f;
 	motion.collision_pos = dimensions / 2.f;
@@ -119,8 +119,8 @@ Entity createEnemy(vec2 position) {
 	registry.sprites.insert(
 		entity,
 		{
-				ivec2(80, 80),
-				TEXTURE_ASSET_ID::BOX
+				dimensions,
+				TEXTURE_ASSET_ID::MONSTER
 		}
 	);
 

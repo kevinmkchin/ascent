@@ -18,7 +18,7 @@ CollisionInfo collides(Motion& motion1, Motion& motion2)
 
     CollisionInfo cinfo;
 
-	if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
+	if (min1.x < max2.x && max1.x > min2.x && min1.y < max2.y && max1.y > min2.y) {
 	    // Calculate the x and y overlap between the two colliding entities
         float dx = min(max1.x, max2.x) - max(min1.x, min2.x);
         float dy = min(max1.y, max2.y) - max(min1.y, min2.y);
