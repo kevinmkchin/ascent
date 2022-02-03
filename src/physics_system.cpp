@@ -2,28 +2,34 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
-// Returns the local bounding coordinates scaled by the current size of the entity
-vec2 get_bounding_box(const Motion& motion)
+struct CollisionInfo
 {
-	// abs is to avoid negative scale due to the facing direction.
-	return { abs(motion.scale.x), abs(motion.scale.y) };
-}
+    vec2 collision_overlap = {0.f, 0.f};
+    bool collides = false;
+};
 
-// This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
-// if the center point of either object is inside the other's bounding-box-circle. You can
-// surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
+CollisionInfo collides(Motion& motion1, Motion& motion2)
 {
-	vec2 dp = motion1.position - motion2.position;
-	float dist_squared = dot(dp,dp);
-	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
-	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
-	const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	const float r_squared = max(other_r_squared, my_r_squared);
-	if (dist_squared < r_squared)
-		return true;
-	return false;
+	vec2 max1 = motion1.position + (motion1.center + motion1.collision_pos) * abs(motion1.scale);
+	vec2 min1 = motion1.position + (motion1.center - motion1.collision_neg) * abs(motion1.scale);
+
+	vec2 max2 = motion2.position + (motion2.center + motion2.collision_pos) * abs(motion2.scale);
+	vec2 min2 = motion2.position + (motion2.center - motion2.collision_neg) * abs(motion2.scale);
+
+    CollisionInfo cinfo;
+
+	if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
+	    // Calculate the x and y overlap between the two colliding entities
+        float dx = min(max1.x, max2.x) - max(min1.x, min2.x);
+        float dy = min(max1.y, max2.y) - max(min1.y, min2.y);
+
+		cinfo.collision_overlap = { max(0.f, dx), max(0.f, dy) };
+        cinfo.collides = true;
+        return cinfo;
+	}
+
+    cinfo.collides = false;
+	return cinfo;
 }
 
 void PhysicsSystem::step(float deltaTime)
@@ -34,8 +40,8 @@ void PhysicsSystem::step(float deltaTime)
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{
 		Motion& motion = motion_registry.components[i];
-		Entity entity = motion_registry.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
+		motion.position += motion.velocity * step_seconds;
 	}
 
 	// Check for collisions between all moving entities
@@ -49,13 +55,20 @@ void PhysicsSystem::step(float deltaTime)
 		for(uint j = i+1; j<motion_container.components.size(); j++)
 		{
 			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
+            Entity entity_j = motion_container.entities[j];
+
+            CollisionInfo colInfo = collides(motion_i, motion_j);
+			if (colInfo.collides)
 			{
-				Entity entity_j = motion_container.entities[j];
 				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+                Collision colEventJ(entity_j);
+                Collision colEventI(entity_i);
+                colEventJ.collision_overlap = colInfo.collision_overlap;
+                colEventI.collision_overlap = colInfo.collision_overlap;
+
+				// We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
+				registry.collisions.insert(entity_i, colEventJ);
+				registry.collisions.insert(entity_j, colEventI);
 			}
 		}
 	}
@@ -63,11 +76,6 @@ void PhysicsSystem::step(float deltaTime)
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
 	{
-		uint size_before_adding_new = (uint)motion_container.components.size();
-		for (uint i = 0; i < size_before_adding_new; i++)
-		{
-			Motion& motion_i = motion_container.components[i];
-			Entity entity_i = motion_container.entities[i];
-		}
+
 	}
 }

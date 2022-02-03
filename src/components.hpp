@@ -33,7 +33,8 @@ enum class TEXTURE_ASSET_ID {
     BUG = 0,
     EAGLE = BUG + 1,
     SPELUNKY = EAGLE + 1,
-    TEXTURE_COUNT = SPELUNKY + 1
+    BOX = SPELUNKY + 1,
+    TEXTURE_COUNT = BOX + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -49,6 +50,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bug.png"),
         textures_path("eagle.png"),
         textures_path("spelunky.png"),
+        textures_path("box.png"),
 };
 
 // Make sure these paths remain in sync with the associated enumerators.
@@ -89,13 +91,19 @@ struct Motion
 	float rotation = 0;
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 1, 1 };
+    vec2 center = { 0, 0 };
+
+    // Collision box x,y size in the positive direction from the center
+    vec2 collision_pos = { 0, 0 };
+    // Collision box x,y size in the negative direction from the center
+    vec2 collision_neg = { 0, 0 };
 };
 
 struct SpriteComponent
 {
     // TODO(Kevin)
 
-    ivec2 dimensions; // in pixels
+    vec2 dimensions; // in pixels
     TEXTURE_ASSET_ID texId;
     // some ID for the texture we want to use
 
@@ -107,6 +115,7 @@ struct SpriteComponent
 // Stucture to store collision information
 struct Collision
 {
+    vec2 collision_overlap = {0, 0};
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };

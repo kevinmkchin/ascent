@@ -12,14 +12,20 @@ Entity createBug(vec2 position)
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
 	motion.rotation = 0.f;
-	motion.velocity = { 0, 50 };
+	motion.velocity = { 0, 0 };
 	motion.position = position;
 
-	registry.eatables.emplace(entity);
+    vec2 dimensions = { 64, 64 };
+
+	motion.center = dimensions / 2.f;
+    motion.collision_pos = dimensions / 2.f;
+    motion.collision_neg = dimensions / 2.f;
+
+    registry.eatables.emplace(entity);
     registry.sprites.insert(
             entity,
             {
-                    ivec2(128,128),
+                    dimensions,
                     TEXTURE_ASSET_ID::BUG
             }
             );
@@ -37,13 +43,46 @@ Entity createSpelunkyDude(vec2 position) {
     motion.velocity = { 0, 0 };
     motion.position = position;
 
-    registry.eatables.emplace(entity);
+    vec2 dimensions = { 64, 64 };
+
+    motion.center = dimensions / 2.f;
+    motion.collision_pos = dimensions / 2.f;
+    motion.collision_neg = dimensions / 2.f;
+
     registry.sprites.insert(
             entity,
             {
-                    ivec2(64, 64),
+                    dimensions,
                     TEXTURE_ASSET_ID::SPELUNKY
             }
+    );
+
+    return entity;
+}
+
+Entity createBox(vec2 position) {
+    // Reserve an entity
+    auto entity = Entity();
+
+    // Initialize the position, scale, and physics components
+    auto& motion = registry.motions.emplace(entity);
+    motion.rotation = 0.f;
+    motion.velocity = { 0, 0 };
+    motion.position = position;
+
+    vec2 dimensions = { 64, 64 };
+
+    motion.center = dimensions / 2.f;
+    motion.collision_pos = dimensions / 2.f;
+    motion.collision_neg = dimensions / 2.f;
+
+    registry.eatables.emplace(entity);
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                TEXTURE_ASSET_ID::BOX
+        }
     );
 
     return entity;
