@@ -31,7 +31,7 @@
 
 enum class TEXTURE_ASSET_ID {
     BUG = 0,
-    EAGLE = BUG + 1,
+	EAGLE = BUG + 1,
     SPELUNKY = EAGLE + 1,
     BOX = SPELUNKY + 1,
     TEXTURE_COUNT = BOX + 1
@@ -51,6 +51,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("eagle.png"),
         textures_path("spelunky.png"),
         textures_path("box.png"),
+		//textures_path("monster.png"),
 };
 
 // Make sure these paths remain in sync with the associated enumerators.
@@ -80,6 +81,11 @@ struct Deadly
 
 // Bug and Chicken have a soft shell
 struct Eatable
+{
+
+};
+
+struct Enemy
 {
 
 };
@@ -138,4 +144,9 @@ struct DebugComponent
 struct DeathTimer
 {
 	float counter_ms = 3000;
+};
+
+struct HealthBar
+{
+	float health = 0;
 };
