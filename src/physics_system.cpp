@@ -67,8 +67,8 @@ void PhysicsSystem::step(float deltaTime)
                 colEventI.collision_overlap = colInfo.collision_overlap;
 
 				// We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-				registry.collisions.insert(entity_i, colEventJ);
-				registry.collisions.insert(entity_j, colEventI);
+				registry.collisions.insert(entity_i, colEventJ, false);
+				registry.collisions.insert(entity_j, colEventI, false);
 			}
 		}
 	}
