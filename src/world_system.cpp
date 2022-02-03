@@ -99,23 +99,40 @@ bool WorldSystem::step(float deltaTime) {
     float playerMoveSpeed = 64.f;
     if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP))
     {
-        playerMotion.position.y -= playerMoveSpeed * deltaTime;
+        playerMotion.velocity.y = -playerMoveSpeed;
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN))
     {
-        playerMotion.position.y += playerMoveSpeed * deltaTime;
+        playerMotion.velocity.y = playerMoveSpeed;
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
     {
-        playerMotion.position.x -= playerMoveSpeed * deltaTime;
+        playerMotion.velocity.x = -playerMoveSpeed;
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT))
     {
-        playerMotion.position.x += playerMoveSpeed * deltaTime;
+        playerMotion.velocity.x = playerMoveSpeed;
     }
     if(Input::GetGamepad(0).isConnected)
     {
-        playerMotion.position += Input::GetGamepad(0).leftThumbStickDir * playerMoveSpeed * deltaTime;
+        playerMotion.velocity = Input::GetGamepad(0).leftThumbStickDir * playerMoveSpeed;
+    }
+
+    if (Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_UP))
+    {
+        playerMotion.velocity.y = 0;
+    }
+    if (Input::HasKeyBeenReleased(SDL_SCANCODE_S) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_DOWN))
+    {
+        playerMotion.velocity.y = 0;
+    }
+    if (Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
+    {
+        playerMotion.velocity.x = 0;
+    }
+    if (Input::HasKeyBeenReleased(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_RIGHT))
+    {
+        playerMotion.velocity.x = 0;
     }
 
 
