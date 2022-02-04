@@ -250,17 +250,13 @@ void WorldSystem::handle_collisions() {
             CollisionInfo collisionCheckAgain = CheckCollision(playerMotion, registry.motions.get(entity_other));
             if(collisionCheckAgain.collides)
             {
-                vec2 position_change = { 0, 0 };
-                position_change[axis_to_resolve] = collisionCheckAgain.collision_overlap[axis_to_resolve];
-
-                // For now we only resolve the entity if it has velocity, might need to change if we want the non-moving player to be knocked back when hit by an attack or something
-                if (playerMotion.velocity[axis_to_resolve] > 0)
+                if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
                 {
-                    playerMotion.position -= position_change;
+                    playerMotion.position.x += collisionCheckAgain.collision_overlap.x;
                 }
-                else if (playerMotion.velocity[axis_to_resolve] < 0)
+                else
                 {
-                    playerMotion.position += position_change;
+                    playerMotion.position.y += collisionCheckAgain.collision_overlap.y;
                 }
             }
 
