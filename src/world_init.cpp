@@ -104,7 +104,7 @@ Entity createEnemy(vec2 position) {
 	// Initialize the position, scale, and physics components
 	auto& motion = registry.motions.emplace(entity);
 	motion.rotation = 0.f;
-	motion.velocity = { 0, 0 };
+	motion.velocity = { 32.f, 0 };
 	motion.position = position;
 
 	vec2 dimensions = { 16, 16 };
