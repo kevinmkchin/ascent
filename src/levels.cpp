@@ -1,4 +1,5 @@
 #include "common.hpp"
+#include "tiny_ecs_registry.hpp"
 
 #define TILE_SIZE 16
 
