@@ -234,14 +234,6 @@ void WorldSystem::handle_collisions() {
 				printf("Colliding with enemy. Reduced health to: %f \n", hb.health);
 			}
 
-            // Here we find the shortest axis collision, this will be the axis that we resolve
-            // 0 for x, 1 for y
-            int axis_to_resolve = 1;
-            if (colEvent.collision_overlap.x < colEvent.collision_overlap.y)
-            {
-                axis_to_resolve = 0;
-            }
-
             /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
              *  by moving entities around, the initial collection of collision events may become outdated.
              *  Checking that the two entities are still colliding is not a perfect solution (if there
