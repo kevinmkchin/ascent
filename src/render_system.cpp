@@ -15,6 +15,15 @@ void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
     transform.scale(vec2(sprite.dimensions) * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL);
 	transform.scale(motion.scale);
 
+    Transform cameraTransform;
+    Entity player = registry.players.entities[0];
+    Motion& playerMotion = registry.motions.get(player);
+    float playerPositionX = playerMotion.position.x - (GAME_RESOLUTION_WIDTH / 2.0f);
+    float playerPositionY = playerMotion.position.y - (GAME_RESOLUTION_HEIGHT / 2.0f);
+    vec2 playerPosition = vec2(playerPositionX, playerPositionY);
+    vec2 scaledPlayerPosition = playerPosition * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+    cameraTransform.translate(-scaledPlayerPosition);
+
 	const GLuint used_effect_enum = (GLuint) EFFECT_ASSET_ID::SPRITE;
 	const GLuint program = (GLuint)effects[used_effect_enum];
 
@@ -27,6 +36,8 @@ void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 	// Setting uniform values to the currently bound program
 	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+    GLuint camera_loc = glGetUniformLocation(currProgram, "cameraTransform");
+    glUniformMatrix3fv(camera_loc, 1, GL_FALSE, (float*)&cameraTransform.mat);
     GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
     GLuint fcolor_loc = glGetUniformLocation(currProgram, "fcolor");
