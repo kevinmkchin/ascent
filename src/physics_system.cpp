@@ -13,11 +13,22 @@ CollisionInfo CheckCollision(Motion& motion1, Motion& motion2)
     CollisionInfo cinfo;
 
 	if (min1.x < max2.x && max1.x > min2.x && min1.y < max2.y && max1.y > min2.y) {
+
+        // Note(Kevin): doesn't work when one box is fully enveloped by the other box
 	    // Calculate the x and y overlap between the two colliding entities
         float dx = min(max1.x, max2.x) - max(min1.x, min2.x);
         float dy = min(max1.y, max2.y) - max(min1.y, min2.y);
 
-		cinfo.collision_overlap = { max(0.f, dx), max(0.f, dy) };
+        if(max1.x - min2.x == dx)
+        {
+            dx = -dx;
+        }
+        if(max1.y - min2.y == dy)
+        {
+            dy = -dy;
+        }
+
+		cinfo.collision_overlap = { dx, dy };
         cinfo.collides = true;
         return cinfo;
 	}
@@ -55,14 +66,16 @@ void PhysicsSystem::step(float deltaTime)
 			if (colInfo.collides)
 			{
 				// Create a collisions event
-                Collision colEventJ(entity_j);
-                Collision colEventI(entity_i);
-                colEventJ.collision_overlap = colInfo.collision_overlap;
-                colEventI.collision_overlap = colInfo.collision_overlap;
+                Collision colEventAgainstJ(entity_j);
+                Collision colEventAgainstI(entity_i);
+                // Note(Kevin): colInfo.collision_overlap is relative to entity_i, therefore
+                //              it needs to be inverted for colEventAgainstI
+                colEventAgainstJ.collision_overlap = colInfo.collision_overlap;
+                colEventAgainstI.collision_overlap = -colInfo.collision_overlap;
 
 				// We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-				registry.collisions.insert(entity_i, colEventJ, false);
-				registry.collisions.insert(entity_j, colEventI, false);
+				registry.collisions.insert(entity_i, colEventAgainstJ, false);
+				registry.collisions.insert(entity_j, colEventAgainstI, false);
 			}
 		}
 	}
