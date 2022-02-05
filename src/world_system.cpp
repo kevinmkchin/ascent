@@ -54,6 +54,8 @@ void WorldSystem::loadAllContent()
                 audio_path("chicken_dead.wav").c_str(),
                 audio_path("chicken_eat.wav").c_str());
     }
+
+    LoadAllLevelData();
 }
 
 void WorldSystem::unloadAllContent()
@@ -206,6 +208,8 @@ void WorldSystem::restart_game() {
     CreateBasicLevelTile(13,5);
     CreateBasicLevelTile(14,5);
     CreateBasicLevelTile(15,5);
+
+    GenerateNewLevel();
 }
 
 // Compute collisions between entities
