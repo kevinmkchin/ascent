@@ -57,7 +57,7 @@ void PhysicsSystem::step(float deltaTime)
 		Entity entity_i = motion_container.entities[i];
 		
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for(uint j = i+1; j<motion_container.components.size(); j++)
+		for(uint j = i+1; j<motion_container.components.size(); j++) // MAKE SURE THAT JUMP REQUEST IS HANDLED PROPERLY (set to 0 at END, and not before unless you jump)
 		{
 			Motion& motion_j = motion_container.components[j];
             Entity entity_j = motion_container.entities[j];
@@ -83,6 +83,9 @@ void PhysicsSystem::step(float deltaTime)
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
 	{
-
+		for (uint i = 0; i < registry.collisions.size(); i++) 
+		{
+			
+		}
 	}
 }
