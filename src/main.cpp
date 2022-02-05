@@ -11,6 +11,7 @@
 #include "render_system.hpp"
 #include "world_system.hpp"
 #include "input.hpp"
+#include "player_system.hpp"
 
 #include <SDL.h>
 
@@ -121,6 +122,7 @@ int main(int argc, char* argv[])
 		world.step(deltaTime);
 		ai.step(deltaTime);
 		physics.step(deltaTime);
+        world.player_step();
 		world.handle_collisions();
 
         Input::ResetControllerStates();
