@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "physics_system.hpp"
+#include "player_system.hpp"
 #include "input.hpp"
 
 #include "levels.cpp"
@@ -76,7 +77,7 @@ bool WorldSystem::step(float deltaTime) {
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
-	    registry.remove_all_components_of(registry.debugComponents.entities.back());
+        registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
@@ -85,54 +86,12 @@ bool WorldSystem::step(float deltaTime) {
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	for (int i = (int)motions_registry.components.size()-1; i>=0; --i) {
-	    Motion& motion = motions_registry.components[i];
+        Motion& motion = motions_registry.components[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f) {
 			if(!registry.players.has(motions_registry.entities[i])) // don't remove the player
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
-
-    // NOTE(Kevin): this is all temporary - feel free to delete
-    Motion& playerMotion = registry.motions.get(player);
-    float playerMoveSpeed = 64.f;
-    if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP))
-    {
-        playerMotion.velocity.y = -playerMoveSpeed;
-    }
-    if(Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN))
-    {
-        playerMotion.velocity.y = playerMoveSpeed;
-    }
-    if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
-    {
-        playerMotion.velocity.x = -playerMoveSpeed;
-    }
-    if(Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT))
-    {
-        playerMotion.velocity.x = playerMoveSpeed;
-    }
-    if(Input::GetGamepad(0).isConnected)
-    {
-        playerMotion.velocity = Input::GetGamepad(0).leftThumbStickDir * playerMoveSpeed;
-    }
-
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_UP))
-    {
-        playerMotion.velocity.y = 0;
-    }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_S) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_DOWN))
-    {
-        playerMotion.velocity.y = 0;
-    }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
-    {
-        playerMotion.velocity.x = 0;
-    }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_RIGHT))
-    {
-        playerMotion.velocity.x = 0;
-    }
-
 
     float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
@@ -233,6 +192,9 @@ void WorldSystem::handle_collisions() {
 				}
 				printf("Colliding with enemy. Reduced health to: %f \n", hb.health);
 			}
+            // Here we find the shortest axis collision, this will be the axis that we resolve
+            // 0 for x, 1 for y
+            int axis_to_resolve = (colEvent.collision_overlap.x < colEvent.collision_overlap.y) ? 0 : 1;
 
             /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
              *  by moving entities around, the initial collection of collision events may become outdated.
@@ -251,7 +213,6 @@ void WorldSystem::handle_collisions() {
                     playerMotion.position.y += collisionCheckAgain.collision_overlap.y;
                 }
             }
-
 //			// Checking Player - Deadly collisions
 //			if (registry.deadlys.has(entity_other)) {
 //
@@ -262,7 +223,6 @@ void WorldSystem::handle_collisions() {
 //			}
 		}
 	}
-
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
@@ -317,4 +277,12 @@ void WorldSystem::SDLProcessEvents()
             }break;
         }
     }
+}
+
+void WorldSystem::player_step()
+{
+    PlayerSystem playerSystem;
+    Motion& playerMotion = registry.motions.get(player);
+    playerSystem.handle_buttons(playerMotion);
+    playerSystem.handle_physics(playerMotion);
 }
