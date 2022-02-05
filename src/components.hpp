@@ -106,6 +106,7 @@ struct Motion
     vec2 collision_pos = { 0, 0 };
     // Collision box x,y size in the negative direction from the center
     vec2 collision_neg = { 0, 0 };
+    float jumpRequest = 0; // requesting a jump with this speed
 };
 
 struct SpriteComponent
