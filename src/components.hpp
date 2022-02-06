@@ -85,17 +85,19 @@ struct Enemy
 struct Motion
 {
     // Transform
-	vec2 position = { 0, 0 };
-	float rotation = 0;
-	vec2 scale = { 1, 1 };
-    vec2 center = { 0, 0 };
+	vec2 position = { 0.f, 0.f };
+	float rotation = 0.f;
+	vec2 scale = { 1.f, 1.f };
+    vec2 center = { 0.f, 0.f };
 
     // Physics
-    vec2 velocity = { 0, 0 };
+    vec2 velocity = { 0.f, 0.f };               // signed
+    vec2 acceleration = { 0.f, 0.f };           // signed
+    vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
 
     // Collision
-    vec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
-    vec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
+    vec2 collision_pos = { 0.f, 0.f }; // Collision box x,y size in the positive direction from the center
+    vec2 collision_neg = { 0.f, 0.f }; // Collision box x,y size in the negative direction from the center
 };
 
 struct SpriteComponent

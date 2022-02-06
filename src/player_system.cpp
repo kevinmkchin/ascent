@@ -4,46 +4,70 @@
 #include "physics_system.hpp"
 
 /* PLAYER CONTROLLER CONFIGURATION */
-INTERNAL float playerMoveSpeed = 64.f;
+INTERNAL float playerGravity = 150.f;
 INTERNAL float playerJumpSpeed = 100.f;
+INTERNAL float playerMaxMoveSpeed = 64.f;
+INTERNAL float playerMaxFallSpeed = 200.f;
+INTERNAL float playerGroundAcceleration = 700.f;
+INTERNAL float playerGroundDeceleration = 1000.f;
+INTERNAL float playerAirAcceleration = 540.f;
+INTERNAL float playerAirDeceleration = 200.f;
 
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
 
 INTERNAL void HandleInput(Motion& playerMotion)
 {
-    if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
+    bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
+    bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
+    bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
+
+    float currentXAcceleration = 0.f;
+
+    if(bLeftKeyPressed)
     {
-        playerMotion.velocity.x = -playerMoveSpeed;
+        currentXAcceleration += -(bJumping ? playerAirAcceleration : playerGroundAcceleration);
     }
-    if(Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT))
+    else if(playerMotion.velocity.x < -5.f)
     {
-        playerMotion.velocity.x = playerMoveSpeed;
+        currentXAcceleration += bJumping ? playerAirDeceleration : playerGroundDeceleration;
+    }
+    else if(playerMotion.velocity.x < 0.f)
+    {
+        playerMotion.velocity.x = 0.f;
     }
 
-    if(Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
+    if(bRightKeyPressed)
     {
-        playerMotion.velocity.x = 0;
+        currentXAcceleration += bJumping ? playerAirAcceleration : playerGroundAcceleration;
     }
-    if(Input::HasKeyBeenReleased(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_RIGHT))
+    else if(playerMotion.velocity.x > 5.f)
     {
-        playerMotion.velocity.x = 0;
+        currentXAcceleration += -(bJumping ? playerAirDeceleration : playerGroundDeceleration);
+    }
+    else if(playerMotion.velocity.x > 0.f)
+    {
+        playerMotion.velocity.x = 0.f;
     }
 
-    bool bJumpKeyPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
+    playerMotion.acceleration.x = currentXAcceleration;
 
-    if(bJumpKeyPressed && !bJumping)
+    if(bJumpKeyJustPressed && !bJumping)
     {
         bPendingJump = true;
     }
+
+    playerMotion.acceleration.y = playerGravity;
+    playerMotion.terminalVelocity.x = playerMaxMoveSpeed;
+    playerMotion.terminalVelocity.y = playerMaxFallSpeed;
 }
 
-//handle jump request + gravity
-INTERNAL void ResolveJump(float deltaTime, Motion& playerMotion)
+INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
 {
     bool bGrounded = false;
     bool bCollidedDirectlyAbove = false;
 
+    //handle jump request + gravity
     const auto& collisionsRegistry = registry.collisionEvents;
     for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
     {
@@ -75,11 +99,6 @@ INTERNAL void ResolveJump(float deltaTime, Motion& playerMotion)
         bJumping = false;
         playerMotion.velocity.y = 0.f;
     }
-    else
-    {
-        float gravity = 150.f;
-        playerMotion.velocity.y += gravity * deltaTime;
-    }
 
     if(bCollidedDirectlyAbove)
     {
@@ -102,5 +121,5 @@ void PlayerSystem::Step(float deltaTime)
     Motion& playerMotion = registry.motions.get(playerEntity);
 
     HandleInput(playerMotion);
-    ResolveJump(deltaTime, playerMotion);
+    ResolveMovement(deltaTime, playerMotion);
 }

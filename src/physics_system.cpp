@@ -39,13 +39,16 @@ CollisionInfo CheckCollision(Motion& motion1, Motion& motion2)
 
 INTERNAL void MoveEntities(float deltaTime)
 {
-    float elapsed_ms = deltaTime * 1000.f;
     auto& motion_registry = registry.motions;
-    for(uint i = 0; i< motion_registry.size(); i++)
+    for(u32 i = 0; i< motion_registry.size(); i++)
     {
         Motion& motion = motion_registry.components[i];
-        float step_seconds = elapsed_ms / 1000.f;
-        motion.position += motion.velocity * step_seconds;
+        motion.velocity += motion.acceleration * deltaTime;
+        motion.velocity.x = motion.velocity.x >= 0.f ? min(abs(motion.velocity.x), motion.terminalVelocity.x)
+                : -min(abs(motion.velocity.x), motion.terminalVelocity.x);
+        motion.velocity.y = motion.velocity.y >= 0.f ? min(abs(motion.velocity.y), motion.terminalVelocity.y)
+                : -min(abs(motion.velocity.y), motion.terminalVelocity.y);
+        motion.position += motion.velocity * deltaTime;
     }
 }
 
