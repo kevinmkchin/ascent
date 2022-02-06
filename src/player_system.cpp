@@ -12,15 +12,21 @@ INTERNAL float playerGroundAcceleration = 700.f;
 INTERNAL float playerGroundDeceleration = 1000.f;
 INTERNAL float playerAirAcceleration = 540.f;
 INTERNAL float playerAirDeceleration = 200.f;
+// JUMP BUFFERING https://twitter.com/MaddyThorson/status/1238338575545978880?s=20&t=iRoDq7J9Um83kDeZYr_dvg
+INTERNAL float jumpBufferMaxHoldSeconds = 0.30f;
+INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
 
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
+INTERNAL bool bJumpKeyHeld = false;
+INTERNAL float jumpBufferTimer = 999.f;
 
 INTERNAL void HandleInput(Motion& playerMotion)
 {
     bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
     bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
     bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
+    bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 
     float currentXAcceleration = 0.f;
 
@@ -52,9 +58,10 @@ INTERNAL void HandleInput(Motion& playerMotion)
 
     playerMotion.acceleration.x = currentXAcceleration;
 
-    if(bJumpKeyJustPressed && !bJumping)
+    if(bJumpKeyJustPressed)
     {
         bPendingJump = true;
+        jumpBufferTimer = 0.f;
     }
 
     playerMotion.acceleration.y = playerGravity;
@@ -67,7 +74,7 @@ INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
     bool bGrounded = false;
     bool bCollidedDirectlyAbove = false;
 
-    //handle jump request + gravity
+    // Check if grounded or colliding above
     const auto& collisionsRegistry = registry.collisionEvents;
     for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
     {
@@ -106,11 +113,20 @@ INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
         if(playerMotion.velocity.y < 0.f) { playerMotion.velocity.y = 0.f; }
     }
 
-    if(bPendingJump && bGrounded)
+    if (bPendingJump)
     {
-        bPendingJump = false;
-        bJumping = true;
-        playerMotion.velocity.y = -playerJumpSpeed;
+        // Jump buffering
+        jumpBufferTimer += deltaTime; // tick the jump buffer timer
+        if (!bJumpKeyHeld && jumpBufferTimer > jumpBufferMaxTapSeconds) { bPendingJump = false; }
+        if (jumpBufferTimer > jumpBufferMaxHoldSeconds) { bPendingJump = false; }
+
+        // Actually jump
+        if(bGrounded && !bCollidedDirectlyAbove)
+        {
+            bPendingJump = false;
+            bJumping = true;
+            playerMotion.velocity.y = -playerJumpSpeed;
+        }
     }
 }
 
