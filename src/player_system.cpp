@@ -15,11 +15,14 @@ INTERNAL float playerAirDeceleration = 200.f;
 // JUMP BUFFERING https://twitter.com/MaddyThorson/status/1238338575545978880?s=20&t=iRoDq7J9Um83kDeZYr_dvg
 INTERNAL float jumpBufferMaxHoldSeconds = 0.30f;
 INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
+// COYOTE TIME
+INTERNAL float coyoteTimeDefaultSeconds = 0.08f;
 
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
 INTERNAL bool bJumpKeyHeld = false;
 INTERNAL float jumpBufferTimer = 999.f;
+INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
 
 INTERNAL void HandleInput(Motion& playerMotion)
 {
@@ -105,6 +108,11 @@ INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
     {
         bJumping = false;
         playerMotion.velocity.y = 0.f;
+        coyoteTimer = coyoteTimeDefaultSeconds;
+    }
+    else if(!bJumping) // if not grounded and not jumping, then we must be falling
+    {
+        coyoteTimer -= deltaTime;
     }
 
     if(bCollidedDirectlyAbove)
@@ -121,7 +129,7 @@ INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
         if (jumpBufferTimer > jumpBufferMaxHoldSeconds) { bPendingJump = false; }
 
         // Actually jump
-        if(bGrounded && !bCollidedDirectlyAbove)
+        if(!bCollidedDirectlyAbove && (bGrounded || coyoteTimer > 0.f))
         {
             bPendingJump = false;
             bJumping = true;
