@@ -4,8 +4,8 @@
 #include "physics_system.hpp"
 
 /* PLAYER CONTROLLER CONFIGURATION */
-INTERNAL float playerGravity = 150.f;
-INTERNAL float playerJumpSpeed = 100.f;
+INTERNAL float playerGravity = 500.f;
+INTERNAL float playerJumpSpeed = 200.f;
 INTERNAL float playerMaxMoveSpeed = 64.f;
 INTERNAL float playerMaxFallSpeed = 200.f;
 INTERNAL float playerGroundAcceleration = 700.f;
@@ -129,7 +129,7 @@ INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
         if (jumpBufferTimer > jumpBufferMaxHoldSeconds) { bPendingJump = false; }
 
         // Actually jump
-        if(!bCollidedDirectlyAbove && (bGrounded || coyoteTimer > 0.f))
+        if(!bCollidedDirectlyAbove && (bGrounded || (coyoteTimer > 0.f && !bJumping)))
         {
             bPendingJump = false;
             bJumping = true;
