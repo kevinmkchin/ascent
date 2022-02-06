@@ -76,18 +76,6 @@ struct Player
 
 };
 
-// Eagles have a hard shell
-struct Deadly
-{
-
-};
-
-// Bug and Chicken have a soft shell
-struct Eatable
-{
-
-};
-
 struct Enemy
 {
 
@@ -96,16 +84,18 @@ struct Enemy
 // All data relevant to the shape and motion of entities
 struct Motion
 {
+    // Transform
 	vec2 position = { 0, 0 };
 	float rotation = 0;
-	vec2 velocity = { 0, 0 };
 	vec2 scale = { 1, 1 };
     vec2 center = { 0, 0 };
 
-    // Collision box x,y size in the positive direction from the center
-    vec2 collision_pos = { 0, 0 };
-    // Collision box x,y size in the negative direction from the center
-    vec2 collision_neg = { 0, 0 };
+    // Physics
+    vec2 velocity = { 0, 0 };
+
+    // Collision
+    vec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
+    vec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
 };
 
 struct SpriteComponent
@@ -135,12 +125,6 @@ extern Debug debugging;
 struct DebugComponent
 {
 	// Note, an empty struct has size 1
-};
-
-// A timer that will be associated to dying chicken
-struct DeathTimer
-{
-	float counter_ms = 3000;
 };
 
 struct HealthBar
