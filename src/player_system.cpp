@@ -3,9 +3,12 @@
 #include "player_system.hpp"
 #include "physics_system.hpp"
 
-
+/* PLAYER CONTROLLER CONFIGURATION */
 INTERNAL float playerMoveSpeed = 64.f;
-INTERNAL float playerJumpSpeed = 48.f;
+INTERNAL float playerJumpSpeed = 100.f;
+
+INTERNAL bool bPendingJump = false;
+INTERNAL bool bJumping = false;
 
 INTERNAL void HandleInput(Motion& playerMotion)
 {
@@ -17,51 +20,78 @@ INTERNAL void HandleInput(Motion& playerMotion)
     {
         playerMotion.velocity.x = playerMoveSpeed;
     }
-    if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A)) // @TODO controller bind
+
+    if(Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
     {
-        playerMotion.velocity.y = -playerJumpSpeed;
+        playerMotion.velocity.x = 0;
+    }
+    if(Input::HasKeyBeenReleased(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_RIGHT))
+    {
+        playerMotion.velocity.x = 0;
     }
 
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
+    bool bJumpKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A); // @TODO controller bind
+
+    if(bJumpKeyPressed && !bJumping)
     {
-        playerMotion.velocity.x = 0;
-    }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_RIGHT))
-    {
-        playerMotion.velocity.x = 0;
-    }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A))
-    {
-        playerMotion.velocity.y = 0;
+        bPendingJump = true;
     }
 }
 
-INTERNAL void ResolveJump(Motion& playerMotion)
+//handle jump request + gravity
+INTERNAL void ResolveJump(float deltaTime, Motion& playerMotion)
 {
-    //handle jump request + gravity
-    auto& collisionsRegistry = registry.collisions;
-    bool touchingFloor = false;
-    float gravity = 1.f;
+    bool bGrounded = false;
+    bool bCollidedDirectlyAbove = false;
+
+    const auto& collisionsRegistry = registry.collisions;
     for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
     {
-        // The entity and its collider
         const Collision colEvent = collisionsRegistry.components[i];
         Entity entity = collisionsRegistry.entities[i];
         Entity entity_other = colEvent.other;
         if (registry.players.has(entity))
         {
             Player& player = registry.players.get(entity);
-            Motion& playerMotion = registry.motions.get(entity);
+            // Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
             CollisionInfo collisionCheck = CheckCollision(playerMotion, registry.motions.get(entity_other));
-            if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x) && collisionCheck.collision_overlap.y <= 0)
+            if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
             {
-                touchingFloor = true;
+                if(collisionCheck.collision_overlap.y <= 0.f
+                    && playerMotion.velocity.y >= 0.f) // check we are not already moving up otherwise glitches.
+                {
+                    bGrounded = true;
+                }
+                if(collisionCheck.collision_overlap.y > 0.f)
+                {
+                    bCollidedDirectlyAbove = true;
+                }
             }
         }
     }
-    if (!touchingFloor)
+
+    if(bGrounded)
     {
-        playerMotion.velocity.y += gravity;
+        bJumping = false;
+        playerMotion.velocity.y = 0.f;
+    }
+    else
+    {
+        float gravity = 150.f;
+        playerMotion.velocity.y += gravity * deltaTime;
+    }
+
+    if(bCollidedDirectlyAbove)
+    {
+        // Check velocity is negative otherwise we can reset velocity to 0 when already falling
+        if(playerMotion.velocity.y < 0.f) { playerMotion.velocity.y = 0.f; }
+    }
+
+    if(bPendingJump && bGrounded)
+    {
+        bPendingJump = false;
+        bJumping = true;
+        playerMotion.velocity.y = -playerJumpSpeed;
     }
 }
 
@@ -72,5 +102,5 @@ void PlayerSystem::Step(float deltaTime)
     Motion& playerMotion = registry.motions.get(playerEntity);
 
     HandleInput(playerMotion);
-    ResolveJump(playerMotion);
+    ResolveJump(deltaTime, playerMotion);
 }
