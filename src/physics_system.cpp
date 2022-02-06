@@ -68,16 +68,16 @@ INTERNAL void CheckAllCollisions()
             if (colInfo.collides)
             {
                 // Create a collisions event
-                Collision colEventAgainstJ(entity_j);
-                Collision colEventAgainstI(entity_i);
+                CollisionEvent colEventAgainstJ(entity_j);
+                CollisionEvent colEventAgainstI(entity_i);
                 // Note(Kevin): colInfo.collision_overlap is relative to entity_i, therefore
                 //              it needs to be inverted for colEventAgainstI
                 colEventAgainstJ.collision_overlap = colInfo.collision_overlap;
                 colEventAgainstI.collision_overlap = -colInfo.collision_overlap;
 
                 // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-                registry.collisions.insert(entity_i, colEventAgainstJ, false);
-                registry.collisions.insert(entity_j, colEventAgainstI, false);
+                registry.collisionEvents.insert(entity_i, colEventAgainstJ, false);
+                registry.collisionEvents.insert(entity_j, colEventAgainstI, false);
             }
         }
     }

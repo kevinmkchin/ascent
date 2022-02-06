@@ -93,8 +93,8 @@ bool WorldSystem::step(float deltaTime) {
 		}
 	}
 
-    float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
+//  float min_counter_ms = 3000.f;
+//	for (Entity entity : registry.deathTimers.entities) {
 //		// progress timer
 //		DeathTimer& counter = registry.deathTimers.get(entity);
 //		counter.counter_ms -= elapsed_ms_since_last_update;
@@ -108,7 +108,7 @@ bool WorldSystem::step(float deltaTime) {
 //            restart_game();
 //			return true;
 //		}
-	}
+//	}
 
 	return true;
 }
@@ -170,10 +170,10 @@ void WorldSystem::restart_game() {
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions;
+	auto& collisionsRegistry = registry.collisionEvents;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
-        const Collision colEvent = collisionsRegistry.components[i];
+        const CollisionEvent colEvent = collisionsRegistry.components[i];
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
@@ -221,7 +221,7 @@ void WorldSystem::handle_collisions() {
 		}
 	}
 	// Remove all collisions from this simulation Step
-	registry.collisions.clear();
+	registry.collisionEvents.clear();
 }
 
 // Should the game be over ?

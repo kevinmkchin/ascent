@@ -44,10 +44,10 @@ INTERNAL void ResolveJump(float deltaTime, Motion& playerMotion)
     bool bGrounded = false;
     bool bCollidedDirectlyAbove = false;
 
-    const auto& collisionsRegistry = registry.collisions;
+    const auto& collisionsRegistry = registry.collisionEvents;
     for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
     {
-        const Collision colEvent = collisionsRegistry.components[i];
+        const CollisionEvent colEvent = collisionsRegistry.components[i];
         Entity entity = collisionsRegistry.entities[i];
         Entity entity_other = colEvent.other;
         if (registry.players.has(entity))
