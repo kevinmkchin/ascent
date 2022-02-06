@@ -53,10 +53,9 @@ INTERNAL void ResolveJump(Motion& playerMotion)
             Player& player = registry.players.get(entity);
             Motion& playerMotion = registry.motions.get(entity);
             CollisionInfo collisionCheck = CheckCollision(playerMotion, registry.motions.get(entity_other));
-            if (collisionCheck.collides && collisionCheck.collision_overlap.y <= 0)
+            if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x) && collisionCheck.collision_overlap.y <= 0)
             {
                 touchingFloor = true;
-                printf("touchingFloor'\n'");
             }
         }
     }
