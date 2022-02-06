@@ -115,13 +115,13 @@ struct SpriteComponent
     // TODO(Kevin): Info about which region of the texture to use as sprite
 };
 
-// Stucture to store collision information
-struct Collision
+struct CollisionEvent
 {
+    // Stucture to store collision information
     vec2 collision_overlap = {0, 0};
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
-	Collision(Entity& other) { this->other = other; };
+	CollisionEvent(Entity& other) { this->other = other; };
 };
 
 // Data structure for toggling debug mode
