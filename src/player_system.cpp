@@ -3,12 +3,12 @@
 #include "player_system.hpp"
 #include "physics_system.hpp"
 
-// go through movement requests for player
-void PlayerSystem::handle_buttons(Motion& playerMotion) 
-{
-    float playerMoveSpeed = 64.f;
-    float playerJumpSpeed = 48.f;
 
+INTERNAL float playerMoveSpeed = 64.f;
+INTERNAL float playerJumpSpeed = 48.f;
+
+INTERNAL void HandleInput(Motion& playerMotion)
+{
     if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
     {
         playerMotion.velocity.x = -playerMoveSpeed;
@@ -19,13 +19,8 @@ void PlayerSystem::handle_buttons(Motion& playerMotion)
     }
     if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A)) // @TODO controller bind
     {
-        playerMotion.jumpRequest = playerJumpSpeed;
-        printf("requesting a jump'\n'");
+        playerMotion.velocity.y = -playerJumpSpeed;
     }
-    // if(Input::GetGamepad(0).isConnected)
-    // {
-    //     playerMotion.velocity = Input::GetGamepad(0).leftThumbStickDir * playerMoveSpeed;
-    // }
 
     if (Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
     {
@@ -37,39 +32,46 @@ void PlayerSystem::handle_buttons(Motion& playerMotion)
     }
     if (Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A))
     {
-        playerMotion.jumpRequest = 0;
+        playerMotion.velocity.y = 0;
     }
 }
 
-//handle jump request + gravity
-void PlayerSystem::handle_physics(Motion& playerMotion)
+INTERNAL void ResolveJump(Motion& playerMotion)
 {
+    //handle jump request + gravity
     auto& collisionsRegistry = registry.collisions;
     bool touchingFloor = false;
     float gravity = 1.f;
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++) 
+    for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
     {
-		// The entity and its collider
+        // The entity and its collider
         const Collision colEvent = collisionsRegistry.components[i];
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = colEvent.other;
-		if (registry.players.has(entity)) 
+        Entity entity = collisionsRegistry.entities[i];
+        Entity entity_other = colEvent.other;
+        if (registry.players.has(entity))
         {
             Player& player = registry.players.get(entity);
             Motion& playerMotion = registry.motions.get(entity);
             CollisionInfo collisionCheck = CheckCollision(playerMotion, registry.motions.get(entity_other));
-            if (collisionCheck.collides && collisionCheck.collision_overlap.y <= 0) 
+            if (collisionCheck.collides && collisionCheck.collision_overlap.y <= 0)
             {
                 touchingFloor = true;
                 printf("touchingFloor'\n'");
             }
         }
     }
-    if (!touchingFloor) 
+    if (!touchingFloor)
     {
         playerMotion.velocity.y += gravity;
-    } else {
-        playerMotion.velocity.y = -playerMotion.jumpRequest;
-        printf("jumping'\n'");
     }
+}
+
+void PlayerSystem::Step(float deltaTime)
+{
+    const Entity playerEntity = registry.players.entities[0];
+
+    Motion& playerMotion = registry.motions.get(playerEntity);
+
+    HandleInput(playerMotion);
+    ResolveJump(playerMotion);
 }
