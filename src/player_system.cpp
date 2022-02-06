@@ -30,7 +30,7 @@ INTERNAL void HandleInput(Motion& playerMotion)
         playerMotion.velocity.x = 0;
     }
 
-    bool bJumpKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A); // @TODO controller bind
+    bool bJumpKeyPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
 
     if(bJumpKeyPressed && !bJumping)
     {
