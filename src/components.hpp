@@ -106,20 +106,13 @@ struct Motion
     vec2 collision_pos = { 0, 0 };
     // Collision box x,y size in the negative direction from the center
     vec2 collision_neg = { 0, 0 };
-    float jumpRequest = 0; // requesting a jump with this speed
 };
 
 struct SpriteComponent
 {
-    // TODO(Kevin)
-
     vec2 dimensions; // in pixels
-    TEXTURE_ASSET_ID texId;
-    // some ID for the texture we want to use
-
-    // Texture we want to use
-    // Dimensions of that texture
-    // Info about which region of the texture to use as sprite
+    TEXTURE_ASSET_ID texId; // ID for the texture we want to use
+    // TODO(Kevin): Info about which region of the texture to use as sprite
 };
 
 // Stucture to store collision information
