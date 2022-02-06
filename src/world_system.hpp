@@ -33,9 +33,6 @@ public:
     // Handle input events
     void SDLProcessEvents();
 
-	// Handle player events
-	void player_step();
-
 	// Should the game be over ?
 	bool is_over()const;
     void set_is_over(bool over) { gameIsRunning = over; }

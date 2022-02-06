@@ -75,7 +75,7 @@ void WorldSystem::unloadAllContent()
 // Update our game world
 bool WorldSystem::step(float deltaTime) {
 
-	// Remove debug info from the last step
+	// Remove debug info from the last Step
 	while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
@@ -93,8 +93,8 @@ bool WorldSystem::step(float deltaTime) {
 		}
 	}
 
-    float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
+//  float min_counter_ms = 3000.f;
+//	for (Entity entity : registry.deathTimers.entities) {
 //		// progress timer
 //		DeathTimer& counter = registry.deathTimers.get(entity);
 //		counter.counter_ms -= elapsed_ms_since_last_update;
@@ -108,7 +108,7 @@ bool WorldSystem::step(float deltaTime) {
 //            restart_game();
 //			return true;
 //		}
-	}
+//	}
 
 	return true;
 }
@@ -170,10 +170,10 @@ void WorldSystem::restart_game() {
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions;
+	auto& collisionsRegistry = registry.collisionEvents;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
-        const Collision colEvent = collisionsRegistry.components[i];
+        const CollisionEvent colEvent = collisionsRegistry.components[i];
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
@@ -192,9 +192,6 @@ void WorldSystem::handle_collisions() {
 				}
 				printf("Colliding with enemy. Reduced health to: %f \n", hb.health);
 			}
-            // Here we find the shortest axis collision, this will be the axis that we resolve
-            // 0 for x, 1 for y
-            int axis_to_resolve = (colEvent.collision_overlap.x < colEvent.collision_overlap.y) ? 0 : 1;
 
             /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
              *  by moving entities around, the initial collection of collision events may become outdated.
@@ -223,8 +220,8 @@ void WorldSystem::handle_collisions() {
 //			}
 		}
 	}
-	// Remove all collisions from this simulation step
-	registry.collisions.clear();
+	// Remove all collisions from this simulation Step
+	registry.collisionEvents.clear();
 }
 
 // Should the game be over ?
@@ -277,12 +274,4 @@ void WorldSystem::SDLProcessEvents()
             }break;
         }
     }
-}
-
-void WorldSystem::player_step()
-{
-    PlayerSystem playerSystem;
-    Motion& playerMotion = registry.motions.get(player);
-    playerSystem.handle_buttons(playerMotion);
-    playerSystem.handle_physics(playerMotion);
 }

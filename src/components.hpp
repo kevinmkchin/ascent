@@ -76,18 +76,6 @@ struct Player
 
 };
 
-// Eagles have a hard shell
-struct Deadly
-{
-
-};
-
-// Bug and Chicken have a soft shell
-struct Eatable
-{
-
-};
-
 struct Enemy
 {
 
@@ -96,39 +84,36 @@ struct Enemy
 // All data relevant to the shape and motion of entities
 struct Motion
 {
-	vec2 position = { 0, 0 };
-	float rotation = 0;
-	vec2 velocity = { 0, 0 };
-	vec2 scale = { 1, 1 };
-    vec2 center = { 0, 0 };
+    // Transform
+	vec2 position = { 0.f, 0.f };
+	float rotation = 0.f;
+	vec2 scale = { 1.f, 1.f };
+    vec2 center = { 0.f, 0.f };
 
-    // Collision box x,y size in the positive direction from the center
-    vec2 collision_pos = { 0, 0 };
-    // Collision box x,y size in the negative direction from the center
-    vec2 collision_neg = { 0, 0 };
-    float jumpRequest = 0; // requesting a jump with this speed
+    // Physics
+    vec2 velocity = { 0.f, 0.f };               // signed
+    vec2 acceleration = { 0.f, 0.f };           // signed
+    vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
+
+    // Collision
+    vec2 collision_pos = { 0.f, 0.f }; // Collision box x,y size in the positive direction from the center
+    vec2 collision_neg = { 0.f, 0.f }; // Collision box x,y size in the negative direction from the center
 };
 
 struct SpriteComponent
 {
-    // TODO(Kevin)
-
     vec2 dimensions; // in pixels
-    TEXTURE_ASSET_ID texId;
-    // some ID for the texture we want to use
-
-    // Texture we want to use
-    // Dimensions of that texture
-    // Info about which region of the texture to use as sprite
+    TEXTURE_ASSET_ID texId; // ID for the texture we want to use
+    // TODO(Kevin): Info about which region of the texture to use as sprite
 };
 
-// Stucture to store collision information
-struct Collision
+struct CollisionEvent
 {
+    // Stucture to store collision information
     vec2 collision_overlap = {0, 0};
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
-	Collision(Entity& other) { this->other = other; };
+	CollisionEvent(Entity& other) { this->other = other; };
 };
 
 // Data structure for toggling debug mode
@@ -142,12 +127,6 @@ extern Debug debugging;
 struct DebugComponent
 {
 	// Note, an empty struct has size 1
-};
-
-// A timer that will be associated to dying chicken
-struct DeathTimer
-{
-	float counter_ms = 3000;
 };
 
 struct HealthBar

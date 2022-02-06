@@ -37,55 +37,67 @@ CollisionInfo CheckCollision(Motion& motion1, Motion& motion2)
 	return cinfo;
 }
 
-void PhysicsSystem::step(float deltaTime)
+INTERNAL void MoveEntities(float deltaTime)
 {
-    float elapsed_ms = deltaTime * 1000.f;
+    auto& motion_registry = registry.motions;
+    for(u32 i = 0; i< motion_registry.size(); i++)
+    {
+        Motion& motion = motion_registry.components[i];
+        motion.velocity += motion.acceleration * deltaTime;
+        motion.velocity.x = motion.velocity.x >= 0.f ? min(abs(motion.velocity.x), motion.terminalVelocity.x)
+                : -min(abs(motion.velocity.x), motion.terminalVelocity.x);
+        motion.velocity.y = motion.velocity.y >= 0.f ? min(abs(motion.velocity.y), motion.terminalVelocity.y)
+                : -min(abs(motion.velocity.y), motion.terminalVelocity.y);
+        motion.position += motion.velocity * deltaTime;
+    }
+}
 
-	auto& motion_registry = registry.motions;
-	for(uint i = 0; i< motion_registry.size(); i++)
-	{
-		Motion& motion = motion_registry.components[i];
-		float step_seconds = elapsed_ms / 1000.f;
-		motion.position += motion.velocity * step_seconds;
-	}
-
-	// Check for collisions between all moving entities
+INTERNAL void CheckAllCollisions()
+{
+    // Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
-	for(uint i = 0; i<motion_container.components.size(); i++)
-	{
-		Motion& motion_i = motion_container.components[i];
-		Entity entity_i = motion_container.entities[i];
-		
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for(uint j = i+1; j<motion_container.components.size(); j++) // MAKE SURE THAT JUMP REQUEST IS HANDLED PROPERLY (set to 0 at END, and not before unless you jump)
-		{
-			Motion& motion_j = motion_container.components[j];
+    for(uint i = 0; i<motion_container.components.size(); i++)
+    {
+        Motion& motion_i = motion_container.components[i];
+        Entity entity_i = motion_container.entities[i];
+
+        // note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
+        for(uint j = i+1; j<motion_container.components.size(); j++)
+        {
+            Motion& motion_j = motion_container.components[j];
             Entity entity_j = motion_container.entities[j];
 
             CollisionInfo colInfo = CheckCollision(motion_i, motion_j);
-			if (colInfo.collides)
-			{
-				// Create a collisions event
-                Collision colEventAgainstJ(entity_j);
-                Collision colEventAgainstI(entity_i);
+            if (colInfo.collides)
+            {
+                // Create a collisions event
+                CollisionEvent colEventAgainstJ(entity_j);
+                CollisionEvent colEventAgainstI(entity_i);
                 // Note(Kevin): colInfo.collision_overlap is relative to entity_i, therefore
                 //              it needs to be inverted for colEventAgainstI
                 colEventAgainstJ.collision_overlap = colInfo.collision_overlap;
                 colEventAgainstI.collision_overlap = -colInfo.collision_overlap;
 
-				// We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-				registry.collisions.insert(entity_i, colEventAgainstJ, false);
-				registry.collisions.insert(entity_j, colEventAgainstI, false);
-			}
-		}
-	}
+                // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
+                registry.collisionEvents.insert(entity_i, colEventAgainstJ, false);
+                registry.collisionEvents.insert(entity_j, colEventAgainstI, false);
+            }
+        }
+    }
+}
 
-	// debugging of bounding boxes
-	if (debugging.in_debug_mode)
-	{
-		for (uint i = 0; i < registry.collisions.size(); i++) 
-		{
-			
-		}
-	}
+INTERNAL void DoDebugging()
+{
+    // debugging of bounding boxes
+    if (debugging.in_debug_mode)
+    {
+
+    }
+}
+
+void PhysicsSystem::step(float deltaTime)
+{
+    MoveEntities(deltaTime);
+    CheckAllCollisions();
+    DoDebugging();
 }
