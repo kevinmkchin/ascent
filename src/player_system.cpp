@@ -3,73 +3,147 @@
 #include "player_system.hpp"
 #include "physics_system.hpp"
 
-// go through movement requests for player
-void PlayerSystem::handle_buttons(Motion& playerMotion) 
+/* PLAYER CONTROLLER CONFIGURATION */
+INTERNAL float playerGravity = 500.f;
+INTERNAL float playerJumpSpeed = 200.f;
+INTERNAL float playerMaxMoveSpeed = 64.f;
+INTERNAL float playerMaxFallSpeed = 200.f;
+INTERNAL float playerGroundAcceleration = 700.f;
+INTERNAL float playerGroundDeceleration = 1000.f;
+INTERNAL float playerAirAcceleration = 540.f;
+INTERNAL float playerAirDeceleration = 200.f;
+// JUMP BUFFERING https://twitter.com/MaddyThorson/status/1238338575545978880?s=20&t=iRoDq7J9Um83kDeZYr_dvg
+INTERNAL float jumpBufferMaxHoldSeconds = 0.30f;
+INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
+// COYOTE TIME
+INTERNAL float coyoteTimeDefaultSeconds = 0.08f;
+
+INTERNAL bool bPendingJump = false;
+INTERNAL bool bJumping = false;
+INTERNAL bool bJumpKeyHeld = false;
+INTERNAL float jumpBufferTimer = 999.f;
+INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
+
+INTERNAL void HandleInput(Motion& playerMotion)
 {
-    float playerMoveSpeed = 64.f;
-    float playerJumpSpeed = 48.f;
+    bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
+    bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
+    bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
+    bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 
-    if(Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT))
-    {
-        playerMotion.velocity.x = -playerMoveSpeed;
-    }
-    if(Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT))
-    {
-        playerMotion.velocity.x = playerMoveSpeed;
-    }
-    if(Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A)) // @TODO controller bind
-    {
-        playerMotion.jumpRequest = playerJumpSpeed;
-        printf("requesting a jump'\n'");
-    }
-    // if(Input::GetGamepad(0).isConnected)
-    // {
-    //     playerMotion.velocity = Input::GetGamepad(0).leftThumbStickDir * playerMoveSpeed;
-    // }
+    float currentXAcceleration = 0.f;
 
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_LEFT))
+    if(bLeftKeyPressed)
     {
-        playerMotion.velocity.x = 0;
+        currentXAcceleration += -(bJumping ? playerAirAcceleration : playerGroundAcceleration);
     }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_DPAD_RIGHT))
+    else if(playerMotion.velocity.x < -5.f)
     {
-        playerMotion.velocity.x = 0;
+        currentXAcceleration += bJumping ? playerAirDeceleration : playerGroundDeceleration;
     }
-    if (Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A))
+    else if(playerMotion.velocity.x < 0.f)
     {
-        playerMotion.jumpRequest = 0;
+        playerMotion.velocity.x = 0.f;
     }
+
+    if(bRightKeyPressed)
+    {
+        currentXAcceleration += bJumping ? playerAirAcceleration : playerGroundAcceleration;
+    }
+    else if(playerMotion.velocity.x > 5.f)
+    {
+        currentXAcceleration += -(bJumping ? playerAirDeceleration : playerGroundDeceleration);
+    }
+    else if(playerMotion.velocity.x > 0.f)
+    {
+        playerMotion.velocity.x = 0.f;
+    }
+
+    playerMotion.acceleration.x = currentXAcceleration;
+
+    if(bJumpKeyJustPressed)
+    {
+        bPendingJump = true;
+        jumpBufferTimer = 0.f;
+    }
+
+    playerMotion.acceleration.y = playerGravity;
+    playerMotion.terminalVelocity.x = playerMaxMoveSpeed;
+    playerMotion.terminalVelocity.y = playerMaxFallSpeed;
 }
 
-//handle jump request + gravity
-void PlayerSystem::handle_physics(Motion& playerMotion)
+INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
 {
-    auto& collisionsRegistry = registry.collisions;
-    bool touchingFloor = false;
-    float gravity = 1.f;
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++) 
+    bool bGrounded = false;
+    bool bCollidedDirectlyAbove = false;
+
+    // Check if grounded or colliding above
+    const auto& collisionsRegistry = registry.collisionEvents;
+    for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
     {
-		// The entity and its collider
-        const Collision colEvent = collisionsRegistry.components[i];
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = colEvent.other;
-		if (registry.players.has(entity)) 
+        const CollisionEvent colEvent = collisionsRegistry.components[i];
+        Entity entity = collisionsRegistry.entities[i];
+        Entity entity_other = colEvent.other;
+        if (registry.players.has(entity))
         {
             Player& player = registry.players.get(entity);
-            Motion& playerMotion = registry.motions.get(entity);
+            // Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
             CollisionInfo collisionCheck = CheckCollision(playerMotion, registry.motions.get(entity_other));
-            if (collisionCheck.collides && collisionCheck.collision_overlap.y <= 0) 
+            if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
             {
-                touchingFloor = true;
-                printf("touchingFloor'\n'");
+                if(collisionCheck.collision_overlap.y <= 0.f
+                    && playerMotion.velocity.y >= 0.f) // check we are not already moving up otherwise glitches.
+                {
+                    bGrounded = true;
+                }
+                if(collisionCheck.collision_overlap.y > 0.f)
+                {
+                    bCollidedDirectlyAbove = true;
+                }
             }
         }
     }
-    if (!touchingFloor) 
+
+    if(bGrounded)
     {
-        playerMotion.velocity.y += gravity;
-    } else {
-        playerMotion.velocity.y = -playerMotion.jumpRequest;
-        printf("jumping'\n'");
+        bJumping = false;
+        playerMotion.velocity.y = 0.f;
+        coyoteTimer = coyoteTimeDefaultSeconds;
     }
+    else if(!bJumping) // if not grounded and not jumping, then we must be falling
+    {
+        coyoteTimer -= deltaTime;
+    }
+
+    if(bCollidedDirectlyAbove)
+    {
+        // Check velocity is negative otherwise we can reset velocity to 0 when already falling
+        if(playerMotion.velocity.y < 0.f) { playerMotion.velocity.y = 0.f; }
+    }
+
+    if (bPendingJump)
+    {
+        // Jump buffering
+        jumpBufferTimer += deltaTime; // tick the jump buffer timer
+        if (!bJumpKeyHeld && jumpBufferTimer > jumpBufferMaxTapSeconds) { bPendingJump = false; }
+        if (jumpBufferTimer > jumpBufferMaxHoldSeconds) { bPendingJump = false; }
+
+        // Actually jump
+        if(!bCollidedDirectlyAbove && (bGrounded || (coyoteTimer > 0.f && !bJumping)))
+        {
+            bPendingJump = false;
+            bJumping = true;
+            playerMotion.velocity.y = -playerJumpSpeed;
+        }
+    }
+}
+
+void PlayerSystem::Step(float deltaTime)
+{
+    const Entity playerEntity = registry.players.entities[0];
+
+    Motion& playerMotion = registry.motions.get(playerEntity);
+
+    HandleInput(playerMotion);
+    ResolveMovement(deltaTime, playerMotion);
 }
