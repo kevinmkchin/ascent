@@ -27,7 +27,7 @@ using namespace glm;
 // the game resolution.
 #define GAME_RESOLUTION_WIDTH 320
 #define GAME_RESOLUTION_HEIGHT 180
-#define FRAMEBUFFER_PIXELS_PER_GAME_PIXEL 1
+#define FRAMEBUFFER_PIXELS_PER_GAME_PIXEL 6
 
 // Simple utility functions to avoid mistyping directory name
 // audio_path("audio.ogg") -> data/audio/audio.ogg

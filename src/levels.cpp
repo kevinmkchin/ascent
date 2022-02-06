@@ -15,7 +15,6 @@ INTERNAL Entity CreateBasicLevelTile(u32 column, u32 row)
     motion.collision_neg = {0.f,0.f};
     motion.collision_pos = dimensions;
 
-    registry.eatables.emplace(entity);
     registry.sprites.insert(
             entity,
             {

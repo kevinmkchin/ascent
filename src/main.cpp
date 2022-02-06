@@ -97,6 +97,7 @@ int main(int argc, char* argv[])
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
+    PlayerSystem playerSystem;
 	AISystem ai;
 
     // Initialize SDL window and OpenGL context
@@ -122,7 +123,7 @@ int main(int argc, char* argv[])
 		world.step(deltaTime);
 		ai.step(deltaTime);
 		physics.step(deltaTime);
-        world.player_step();
+        playerSystem.Step(deltaTime);
 		world.handle_collisions();
 
         Input::ResetControllerStates();
