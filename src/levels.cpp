@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 #include <json.hpp>
 
 #include "common.hpp"
@@ -7,7 +8,7 @@
 
 #define TILE_SIZE 16
 
-INTERNAL Entity CreateBasicLevelTile(u32 column, u32 row)
+INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
 {
     auto entity = Entity();
 
@@ -40,8 +41,8 @@ namespace ns
         std::string name;
         std::string type;
         std::string data;
-        int width;
-        int height;
+        int width = -1;
+        int height = -1;
     };
 
     INTERNAL void from_json(const JSON& j, RoomRawData& roomRawData)
@@ -91,9 +92,8 @@ struct CurrentLevelData
 };
 INTERNAL CurrentLevelData currentLevelData;
 
-INTERNAL void GenerateNewLevel()
+INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
-    const ns::RoomRawData& r = chapterOneRooms.at("start")[0];
     for(int i = 0; i < r.height; ++i)
     {
         for(int j = 0; j < r.width; ++j)
@@ -102,13 +102,96 @@ INTERNAL void GenerateNewLevel()
             switch(c)
             {
                 case 'A':{
-                    CreateBasicLevelTile(j, i);
+                    CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
                 case '1':{
-                    currentLevelData.playerStart = { j*TILE_SIZE + (TILE_SIZE/2.f) , i*TILE_SIZE + (TILE_SIZE/2.f) };
+                    currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f) ,
+                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) };
                 }break;
                 default:{}break;
             }
         }
     }
+}
+
+#define NUMFLOORS 4
+#define NUMROOMSWIDE 4
+
+INTERNAL void GenerateNewLevel(u32 seed)
+{
+    srand(seed);
+
+    std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
+    const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
+    i32 rw = sampleRoom.width;
+    i32 rh = sampleRoom.height;
+    char* tileDataArray = (char*) malloc(rw * rh);
+
+    // FALLING AND LANDING ROOMS
+    for(size_t floor = 0; floor < NUMFLOORS-1; ++floor)
+    {
+        u32 fallingAndLanding = rand() % NUMROOMSWIDE;
+        while(!roomDataArray[floor][fallingAndLanding].data.empty()
+           || !roomDataArray[floor + 1][fallingAndLanding].data.empty())
+        {
+            fallingAndLanding = rand() % NUMROOMSWIDE;
+        }
+        u32 fallingRoomIndex = rand() % chapterOneRooms["falling"].size();
+        roomDataArray[floor][fallingAndLanding] = chapterOneRooms["falling"][fallingRoomIndex];
+
+        u32 landingRoomIndex = rand() % chapterOneRooms["landing"].size();
+        roomDataArray[floor + 1][fallingAndLanding] = chapterOneRooms["landing"][landingRoomIndex];
+    }
+
+    // START ROOM
+    u32 start = rand() % NUMROOMSWIDE;
+    while(!roomDataArray[0][start].data.empty())
+    {
+        start = rand() % NUMROOMSWIDE;
+    }
+    u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
+    roomDataArray[0][start] = chapterOneRooms["start"][startRoomIndex];
+
+    // END ROOM
+    u32 end = rand() % NUMROOMSWIDE;
+    while(!roomDataArray[NUMFLOORS-1][end].data.empty())
+    {
+        end = rand() % NUMROOMSWIDE;
+    }
+    u32 endRoomIndex = rand() % chapterOneRooms["end"].size();
+    roomDataArray[NUMFLOORS-1][end] = chapterOneRooms["end"][endRoomIndex];
+
+    // CORRIDORS
+    for(int i = 0; i < NUMFLOORS; ++i)
+    {
+        for(int j = 0; j < NUMROOMSWIDE; ++j)
+        {
+            if(roomDataArray[i][j].data.empty())
+            {
+                u32 corridorRoomIndex = rand() % chapterOneRooms["corridor"].size();
+                roomDataArray[i][j] = chapterOneRooms["corridor"][corridorRoomIndex];
+            }
+        }
+    }
+
+    for(int i = 0; i < NUMFLOORS; ++i)
+    {
+        for(int j = 0; j < NUMROOMSWIDE; ++j)
+        {
+            ParseRoomData(roomDataArray[i][j], j, i);
+        }
+    }
+
+    for(int i = -1; i < 45; ++i)
+    {
+        CreateBasicLevelTile(i, -1);
+        CreateBasicLevelTile(i, 36);
+    }
+    for(int i = -1; i < 37; ++i)
+    {
+        CreateBasicLevelTile(-1, i);
+        CreateBasicLevelTile(44, i);
+    }
+
+    free(tileDataArray);
 }

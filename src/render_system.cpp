@@ -16,13 +16,14 @@ void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 	transform.scale(motion.scale);
 
     Transform cameraTransform;
-    Entity player = registry.players.entities[0];
-    Motion& playerMotion = registry.motions.get(player);
-    float playerPositionX = playerMotion.position.x - (GAME_RESOLUTION_WIDTH / 2.0f);
-    float playerPositionY = playerMotion.position.y - (GAME_RESOLUTION_HEIGHT / 2.0f);
-    vec2 playerPosition = vec2(playerPositionX, playerPositionY);
-    vec2 scaledPlayerPosition = playerPosition * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-    cameraTransform.translate(-scaledPlayerPosition);
+//    Entity player = registry.players.entities[0];
+//    Motion& playerMotion = registry.motions.get(player);
+//    float playerPositionX = playerMotion.position.x - (GAME_RESOLUTION_WIDTH / 2.0f);
+//    float playerPositionY = playerMotion.position.y - (GAME_RESOLUTION_HEIGHT / 2.0f);
+//    vec2 playerPosition = vec2(playerPositionX, playerPositionY);
+//    vec2 scaledPlayerPosition = playerPosition * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+//    cameraTransform.translate(-scaledPlayerPosition);
+    cameraTransform.translate({ 300.f,0.f });
 
 	const GLuint used_effect_enum = (GLuint) EFFECT_ASSET_ID::SPRITE;
 	const GLuint program = (GLuint)effects[used_effect_enum];
