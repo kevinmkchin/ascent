@@ -4,11 +4,11 @@
 
 CollisionInfo CheckCollision(Motion& motion1, Motion& motion2)
 {
-	vec2 max1 = motion1.position + (motion1.center + motion1.collision_pos) * abs(motion1.scale);
-	vec2 min1 = motion1.position + (motion1.center - motion1.collision_neg) * abs(motion1.scale);
+	vec2 max1 = motion1.position + (motion1.collision_pos) * abs(motion1.scale);
+	vec2 min1 = motion1.position + (-motion1.collision_neg) * abs(motion1.scale);
 
-	vec2 max2 = motion2.position + (motion2.center + motion2.collision_pos) * abs(motion2.scale);
-	vec2 min2 = motion2.position + (motion2.center - motion2.collision_neg) * abs(motion2.scale);
+	vec2 max2 = motion2.position + (motion2.collision_pos) * abs(motion2.scale);
+	vec2 min2 = motion2.position + (-motion2.collision_neg) * abs(motion2.scale);
 
     CollisionInfo cinfo;
 
