@@ -3,6 +3,8 @@
 
 #include "tiny_ecs_registry.hpp"
 
+#define FRAMEBUFFER_PIXELS_PER_GAME_PIXEL 1.7
+
 void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 {
     Motion& motion = registry.motions.get(entity);
