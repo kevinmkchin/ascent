@@ -61,7 +61,7 @@ INTERNAL void LoadAllLevelData()
 {
     using JSON = nlohmann::json;
 
-    std::ifstream ifs = std::ifstream(level_path("filename.json"));
+    std::ifstream ifs = std::ifstream(level_path("chapter1.json"));
     if(!ifs.is_open()){
         std::cerr <<" Failed to open level data..."<<std::endl;
         assert(0);
@@ -85,10 +85,30 @@ INTERNAL void LoadAllLevelData()
     }
 }
 
+struct CurrentLevelData
+{
+    vec2 playerStart;
+};
+INTERNAL CurrentLevelData currentLevelData;
+
 INTERNAL void GenerateNewLevel()
 {
-    printf("%s\n", chapterOneRooms.at("shop").at(0).name.c_str());
-    printf("%s\n", chapterOneRooms.at("shop").at(0).data.c_str());
-    printf("%s\n", chapterOneRooms.at("shop").at(1).name.c_str());
-    printf("%s\n", chapterOneRooms.at("shop").at(1).data.c_str());
+    const ns::RoomRawData& r = chapterOneRooms.at("start")[0];
+    for(int i = 0; i < r.height; ++i)
+    {
+        for(int j = 0; j < r.width; ++j)
+        {
+            const char& c = r.data.at(i * r.width + j);
+            switch(c)
+            {
+                case 'A':{
+                    CreateBasicLevelTile(j, i);
+                }break;
+                case '1':{
+                    currentLevelData.playerStart = { j*TILE_SIZE + (TILE_SIZE/2.f) , i*TILE_SIZE + (TILE_SIZE/2.f) };
+                }break;
+                default:{}break;
+            }
+        }
+    }
 }
