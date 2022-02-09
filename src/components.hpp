@@ -88,7 +88,7 @@ struct Motion
 	vec2 position = { 0.f, 0.f };
 	float rotation = 0.f;
 	vec2 scale = { 1.f, 1.f };
-    vec2 center = { 0.f, 0.f };
+    vec2 center = { 0.f, 0.f }; // offset from "top-left". If a sprite has dimensions 16x16, then center of 8x8 points to center of sprite
 
     // Physics
     vec2 velocity = { 0.f, 0.f };               // signed
