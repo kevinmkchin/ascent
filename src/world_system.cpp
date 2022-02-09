@@ -132,13 +132,13 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-    player = createBox(vec2(128.f, 96.f));
+    player = createBox(vec2(136.f, 96.f));
     registry.players.emplace(player);
 	HealthBar& playerHealth = registry.healthBar.get(player);
 	printf("%f \n", registry.healthBar.get(player).health);
 	playerHealth.health = 2000.f;
 	printf("%f \n", playerHealth.health);
-	enemy1 = createEnemy(vec2(230.f, 128.f));
+	enemy1 = createEnemy(vec2(238.f, 136.f));
 
     CreateBasicLevelTile(1,9);
     CreateBasicLevelTile(2,9);
