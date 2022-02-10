@@ -3,27 +3,20 @@
 
 #include "tiny_ecs_registry.hpp"
 
-void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
+void RenderSystem::drawSprite(const TransformComponent entityTransform, const SpriteComponent sprite, const mat3 &projection)
 {
-    Motion motion;
-    if(registry.motions.has(entity))
-    {
-        motion = registry.motions.get(entity);
-    }
-    const SpriteComponent& sprite = registry.sprites.get(entity);
-
 	Transform transform;
-    vec2 scaledPosition = motion.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-	transform.translate(scaledPosition - (motion.center * motion.scale * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL));
-    transform.rotate(motion.rotation * DEG2RAD);
+    vec2 scaledPosition = entityTransform.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+	transform.translate(scaledPosition - (entityTransform.center * entityTransform.scale * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL));
+    transform.rotate(entityTransform.rotation * DEG2RAD);
     transform.scale(vec2(sprite.dimensions) * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL);
-	transform.scale(motion.scale);
+	transform.scale(entityTransform.scale);
 
     Transform cameraTransform;
     Entity player = registry.players.entities[0];
-    Motion& playerMotion = registry.motions.get(player);
-    float playerPositionX = clamp(playerMotion.position.x, cameraBoundMin.x, cameraBoundMax.x);
-    float playerPositionY = clamp(playerMotion.position.y, cameraBoundMin.y, cameraBoundMax.y);
+    TransformComponent& playerTransform = registry.transforms.get(player);
+    float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
+    float playerPositionY = clamp(playerTransform.position.y, cameraBoundMin.y, cameraBoundMax.y);
     playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
     playerPositionY = playerPositionY - (GAME_RESOLUTION_HEIGHT / 2.0f);
     vec2 playerPosition = vec2(playerPositionX, playerPositionY);
@@ -186,21 +179,21 @@ void RenderSystem::draw()
     drawBackground();
 
     // DRAW PLAYER
-    for(Entity entWithSprite : registry.players.entities)
+    for(Entity e : registry.players.entities)
     {
-        drawSprite(entWithSprite, projection_2D);
+        drawSprite(registry.transforms.get(e), registry.sprites.get(e), projection_2D);
     }
 
     // DRAW ENEMIES
-    for(Entity entWithSprite : registry.enemy.entities)
+    for(Entity e : registry.enemy.entities)
     {
-        drawSprite(entWithSprite, projection_2D);
+        drawSprite(registry.transforms.get(e), registry.sprites.get(e), projection_2D);
     }
 
     // DRAW LEVEL
-    for(Entity entWithSprite : registry.levelgeoms.entities)
+    for(Entity e : registry.levelgeoms.entities)
     {
-        drawSprite(entWithSprite, projection_2D);
+        drawSprite(registry.transforms.get(e), registry.sprites.get(e), projection_2D);
     }
 
 	// Truely render to the screen
