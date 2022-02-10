@@ -18,8 +18,10 @@ void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
     Transform cameraTransform;
     Entity player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
-    float playerPositionX = playerMotion.position.x - (GAME_RESOLUTION_WIDTH / 2.0f);
-    float playerPositionY = playerMotion.position.y - (GAME_RESOLUTION_HEIGHT / 2.0f);
+    float playerPositionX = clamp(playerMotion.position.x, cameraBoundMin.x, cameraBoundMax.x);
+    float playerPositionY = clamp(playerMotion.position.y, cameraBoundMin.y, cameraBoundMax.y);
+    playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
+    playerPositionY = playerPositionY - (GAME_RESOLUTION_HEIGHT / 2.0f);
     vec2 playerPosition = vec2(playerPositionX, playerPositionY);
     vec2 scaledPlayerPosition = playerPosition * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
     cameraTransform.translate(-scaledPlayerPosition);
