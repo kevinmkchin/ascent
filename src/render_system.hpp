@@ -33,6 +33,10 @@ public:
 
     // Call this when the display resolution (i.e. the window size) changes
     void updateBackBufferSize();
+    
+    // Camera bounds
+    vec2 cameraBoundMin;
+    vec2 cameraBoundMax;
 private:
     void initializeGlTextures();
 

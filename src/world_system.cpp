@@ -126,6 +126,8 @@ void WorldSystem::restart_game() {
     srand((u32) time(nullptr));
     u32 seed = rand()%1000000000;
     GenerateNewLevel(seed);
+    renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
+    renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
 
     player = createBox(currentLevelData.playerStart);
     registry.players.emplace(player);
