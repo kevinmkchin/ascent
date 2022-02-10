@@ -38,7 +38,8 @@ enum class TEXTURE_ASSET_ID {
     MIDTILE1 = TOPTILE1 + 1,
     BOTTILE1 = MIDTILE1 + 1,
     TOPBOTTILE1 = BOTTILE1 + 1,
-    TILE_EXAMPLE = TOPBOTTILE1 + 1,
+    BG1 = TOPBOTTILE1 + 1,
+    TILE_EXAMPLE = BG1 + 1,
     BOX = TILE_EXAMPLE + 1,
     TEXTURE_COUNT = BOX + 1
 };
@@ -47,7 +48,8 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 enum class EFFECT_ASSET_ID {
     FINAL_PASS = 0,
     SPRITE = 1,
-    EFFECT_COUNT = SPRITE + 1
+    BACKGROUND = 2,
+    EFFECT_COUNT = BACKGROUND + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -61,6 +63,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("midtile.png"),
         textures_path("bottile.png"),
         textures_path("topbottile.png"),
+        textures_path("bg.png"),
         textures_path("tile_example.png"),
         textures_path("box.png"),
 };
@@ -69,6 +72,7 @@ const std::array<std::string, texture_count> texture_paths = {
 const std::array<std::string, effect_count> effect_paths = {
         shader_path("finalpass"),
         shader_path("sprite"),
+        shader_path("background"),
 };
 
 
@@ -126,7 +130,7 @@ struct CollisionEvent
 
 struct LevelGeometryComponent
 {
-    
+
 };
 
 
