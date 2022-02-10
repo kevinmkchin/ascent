@@ -12,18 +12,15 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
 {
     auto entity = Entity();
 
-    auto& motion = registry.motions.emplace(entity);
-    motion.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
-    vec2 dimensions = { TILE_SIZE, TILE_SIZE };
+    auto& transform = registry.transforms.emplace(entity);
 
-    motion.center = {0.f,0.f};
-    motion.collision_neg = {0.f,0.f};
-    motion.collision_pos = { TILE_SIZE, TILE_SIZE };
+    transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
+    transform.center = {0.f,0.f};
 
     registry.sprites.insert(
             entity,
             {
-                dimensions,
+                { TILE_SIZE, TILE_SIZE },
                 TEXTURE_ASSET_ID::MIDTILE1
             }
     );
@@ -33,6 +30,13 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
     return entity;
 }
 
+
+INTERNAL void AddTileSizedCollider(Entity tileEntity)
+{
+    auto& collider = registry.colliders.emplace(tileEntity);
+    collider.collision_neg = {0.f,0.f};
+    collider.collision_pos = { TILE_SIZE, TILE_SIZE };
+}
 
 namespace ns
 {
@@ -126,7 +130,49 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
     }
 }
 
-INTERNAL void ChangeSpritesBasedOnTopBottom()
+INTERNAL void ChangeSpritesBasedOnTopBottom(u32 e, i32 col, i32 row)
+{
+    bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
+    bool botClear = row + 1 < 36 && levelTiles[col][row + 1] == 0;
+    if (topClear && botClear)
+    {
+        auto& spr = registry.sprites.get(e);
+        spr.texId = TEXTURE_ASSET_ID::TOPBOTTILE1;
+        spr.dimensions.y += 3;
+        registry.transforms.get(e).center.y += 2;
+    }
+    else if(botClear)
+    {
+        auto& spr = registry.sprites.get(e);
+        spr.texId = TEXTURE_ASSET_ID::BOTTILE1;
+        spr.dimensions.y = spr.dimensions.y + 1;
+    }
+    else if(topClear)
+    {
+        auto& spr = registry.sprites.get(e);
+        spr.texId = TEXTURE_ASSET_ID::TOPTILE1;
+        spr.dimensions.y += 2;
+        registry.transforms.get(e).center.y += 2;
+    }
+}
+
+INTERNAL void AddColliderIfRequired(u32 tileEntity, i32 col, i32 row)
+{
+    bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
+    bool botClear = row + 1 < 36 && levelTiles[col][row + 1] == 0;
+    bool leftClear = col - 1 >= 0 && levelTiles[col - 1][row] == 0;
+    bool rightClear = col + 1 < 44 && levelTiles[col + 1][row] == 0;
+    bool atLeastOneFaceIsClear = topClear || botClear || leftClear || rightClear;
+    if(atLeastOneFaceIsClear)
+    {
+        AddTileSizedCollider(tileEntity);
+    }
+}
+
+/** Process and ready the level for gameplay.
+ *  Change sprites for top or bottom tiles.
+ *  Add colliders to tiles that can be collided with. */
+INTERNAL void UpdateLevelGeometry()
 {
     for(int col = 0; col < 44; ++col)
     {
@@ -135,28 +181,8 @@ INTERNAL void ChangeSpritesBasedOnTopBottom()
             unsigned int e = levelTiles[col][row];
             if(e != 0)
             {
-                bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
-                bool botClear = row + 1 < 36 && levelTiles[col][row + 1] == 0;
-                if (topClear && botClear)
-                {
-                    auto& spr = registry.sprites.get(e);
-                    spr.texId = TEXTURE_ASSET_ID::TOPBOTTILE1;
-                    spr.dimensions.y += 3;
-                    registry.motions.get(e).center.y += 2;
-                }
-                else if(botClear)
-                {
-                    auto& spr = registry.sprites.get(e);
-                    spr.texId = TEXTURE_ASSET_ID::BOTTILE1;
-                    spr.dimensions.y = spr.dimensions.y + 1;
-                }
-                else if(topClear)
-                {
-                    auto& spr = registry.sprites.get(e);
-                    spr.texId = TEXTURE_ASSET_ID::TOPTILE1;
-                    spr.dimensions.y += 2;
-                    registry.motions.get(e).center.y += 2;
-                }
+                ChangeSpritesBasedOnTopBottom(e, col, row);
+                AddColliderIfRequired(e, col, row);
             }
         }
     }
@@ -231,19 +257,23 @@ INTERNAL void GenerateNewLevel(u32 seed)
         }
     }
 
-    // Static analysis
-    ChangeSpritesBasedOnTopBottom();
+    // Process and prepare the level
+    UpdateLevelGeometry();
 
     // Boundary
     for(int i = -1; i < 45; ++i)
     {
-        CreateBasicLevelTile(i, -1);
-        CreateBasicLevelTile(i, 36);
+        auto _a = CreateBasicLevelTile(i, -1);
+        auto _b = CreateBasicLevelTile(i, 36);
+        AddTileSizedCollider(_a);
+        AddTileSizedCollider(_b);
     }
     for(int i = -1; i < 37; ++i)
     {
-        CreateBasicLevelTile(-1, i);
-        CreateBasicLevelTile(44, i);
+        auto _a = CreateBasicLevelTile(-1, i);
+        auto _b = CreateBasicLevelTile(44, i);
+        AddTileSizedCollider(_a);
+        AddTileSizedCollider(_b);
     }
 
     float halfWidth = (float) GAME_RESOLUTION_WIDTH / 2.f;

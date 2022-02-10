@@ -25,7 +25,7 @@ using namespace glm;
 // (e.g. Celeste has an internal resolution of 320x180 regardless of the window size)
 // FRAMEBUFFER_PIXELS_PER_GAME_PIXEL is the ratio between internal frame buffer and
 // the game resolution.
-#define GAME_RESOLUTION_WIDTH 320
+#define GAME_RESOLUTION_WIDTH 240
 #define GAME_RESOLUTION_HEIGHT 180
 #define FRAMEBUFFER_PIXELS_PER_GAME_PIXEL 1
 
