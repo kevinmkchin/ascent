@@ -129,13 +129,8 @@ void WorldSystem::restart_game() {
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
 
-    player = createBox(currentLevelData.playerStart);
-    registry.players.emplace(player);
-	HealthBar& playerHealth = registry.healthBar.get(player);
-	printf("%f \n", registry.healthBar.get(player).health);
-	playerHealth.health = 2000.f;
-	printf("%f \n", playerHealth.health);
-	enemy1 = createEnemy(vec2(238.f, 136.f));
+    player = createPlayer(currentLevelData.playerStart);
+	enemy1 = createEnemy(vec2(238.f, 64.f));
 }
 
 // Compute collisions between entities

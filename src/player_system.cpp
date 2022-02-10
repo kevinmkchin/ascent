@@ -13,7 +13,7 @@ INTERNAL float playerGroundDeceleration = 1000.f;
 INTERNAL float playerAirAcceleration = 540.f;
 INTERNAL float playerAirDeceleration = 200.f;
 // JUMP BUFFERING https://twitter.com/MaddyThorson/status/1238338575545978880?s=20&t=iRoDq7J9Um83kDeZYr_dvg
-INTERNAL float jumpBufferMaxHoldSeconds = 0.30f;
+INTERNAL float jumpBufferMaxHoldSeconds = 0.22f;
 INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
 // COYOTE TIME
 INTERNAL float coyoteTimeDefaultSeconds = 0.08f;

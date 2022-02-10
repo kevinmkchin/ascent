@@ -20,9 +20,6 @@ Entity createBox(vec2 position) {
     motion.collision_pos = dimensions / 2.f;
     motion.collision_neg = dimensions / 2.f;
 
-	auto& hb = registry.healthBar.emplace(entity);
-	hb.health = 0.f;
-
     registry.sprites.insert(
         entity,
         {
@@ -30,6 +27,37 @@ Entity createBox(vec2 position) {
                 TEXTURE_ASSET_ID::BOX
         }
     );
+
+    return entity;
+}
+
+Entity createPlayer(vec2 position)
+{
+    auto entity = Entity();
+
+    auto& motion = registry.motions.emplace(entity);
+    motion.rotation = 0.f;
+    motion.velocity = { 0, 0 };
+    motion.position = position;
+
+    vec2 dimensions = { 12, 14 };
+
+    motion.center = dimensions / 2.f;
+    motion.collision_pos = dimensions / 2.f;
+    motion.collision_neg = dimensions / 2.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+            dimensions,
+            TEXTURE_ASSET_ID::BOX
+        }
+    );
+
+    auto& hb = registry.healthBar.emplace(entity);
+    hb.health = 2000.f;
+
+    registry.players.emplace(entity);
 
     return entity;
 }
