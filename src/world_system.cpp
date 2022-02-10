@@ -45,7 +45,7 @@ void WorldSystem::cleanUp()
 
 void WorldSystem::loadAllContent()
 {
-    background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+    background_music = Mix_LoadMUS(audio_path("hadesmusiclmao.wav").c_str());
     chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
     chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
 
