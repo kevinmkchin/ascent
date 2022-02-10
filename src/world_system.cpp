@@ -51,7 +51,7 @@ void WorldSystem::loadAllContent()
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-                audio_path("music.wav").c_str(),
+                audio_path("hadesmusiclmao.wav").c_str(),
                 audio_path("chicken_dead.wav").c_str(),
                 audio_path("chicken_eat.wav").c_str());
     }
