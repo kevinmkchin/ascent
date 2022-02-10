@@ -7,6 +7,12 @@
 #include "components.hpp"
 #include "tiny_ecs.hpp"
 
+struct SpriteTransformSorting
+{
+    SpriteComponent sprite;
+    TransformComponent transform;
+};
+
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {
@@ -50,6 +56,8 @@ private:
 
 	// Internal drawing functions for each entity type
     void drawSprite(TransformComponent entityTransform, SpriteComponent sprite, const mat3 &projection);
+
+    void idontfuckingknow(std::vector<SpriteTransformSorting>& sortedSprites, const mat3 &projection);
 
     void drawBackground();
 
