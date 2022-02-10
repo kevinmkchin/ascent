@@ -83,7 +83,7 @@ INTERNAL bool OpenGLInitialize()
     }
     printf("gl3w initialized.\n");
 
-    SDL_GL_SetSwapInterval(0); // vsync
+    SDL_GL_SetSwapInterval(1); // vsync
 
     return true;
 }

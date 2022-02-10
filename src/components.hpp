@@ -101,10 +101,9 @@ struct TransformComponent
     vec2 center = { 0.f, 0.f }; // offset from "top-left". If a sprite has dimensions 16x16, then center of 8x8 points to center of sprite
 };
 
-// All data relevant to the shape and motion of entities
+// All data relevant to the motion of entities
 struct MotionComponent
 {
-    // Physics
     vec2 velocity = { 0.f, 0.f };               // signed
     vec2 acceleration = { 0.f, 0.f };           // signed
     vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
