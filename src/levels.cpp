@@ -18,15 +18,17 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
 
     motion.center = {0.f,0.f};
     motion.collision_neg = {0.f,0.f};
-    motion.collision_pos = dimensions;
+    motion.collision_pos = { TILE_SIZE, TILE_SIZE };
 
     registry.sprites.insert(
             entity,
             {
                 dimensions,
-                TEXTURE_ASSET_ID::TILE_EXAMPLE
+                TEXTURE_ASSET_ID::MIDTILE1
             }
     );
+
+    registry.levelgeoms.emplace(entity);
 
     return entity;
 }
@@ -94,6 +96,8 @@ struct CurrentLevelData
 };
 INTERNAL CurrentLevelData currentLevelData;
 
+INTERNAL unsigned int levelTiles[44][36];
+
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
     for(int i = 0; i < r.height; ++i)
@@ -101,16 +105,58 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
         for(int j = 0; j < r.width; ++j)
         {
             const char& c = r.data.at(i * r.width + j);
+            unsigned int tile = 0;
             switch(c)
             {
                 case 'A':{
-                    CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                    tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
                 case '1':{
                     currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f) ,
                                                      roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) };
                 }break;
-                default:{}break;
+                default:{
+                }break;
+            }
+            if(tile != 0)
+            {
+                levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+            }
+        }
+    }
+}
+
+INTERNAL void ChangeSpritesBasedOnTopBottom()
+{
+    for(int col = 0; col < 44; ++col)
+    {
+        for(int row = 0; row < 36; ++row)
+        {
+            unsigned int e = levelTiles[col][row];
+            if(e != 0)
+            {
+                bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
+                bool botClear = row + 1 < 36 && levelTiles[col][row + 1] == 0;
+                if (topClear && botClear)
+                {
+                    auto& spr = registry.sprites.get(e);
+                    spr.texId = TEXTURE_ASSET_ID::TOPBOTTILE1;
+                    spr.dimensions.y += 3;
+                    registry.motions.get(e).center.y += 2;
+                }
+                else if(botClear)
+                {
+                    auto& spr = registry.sprites.get(e);
+                    spr.texId = TEXTURE_ASSET_ID::BOTTILE1;
+                    spr.dimensions.y = spr.dimensions.y + 1;
+                }
+                else if(topClear)
+                {
+                    auto& spr = registry.sprites.get(e);
+                    spr.texId = TEXTURE_ASSET_ID::TOPTILE1;
+                    spr.dimensions.y += 2;
+                    registry.motions.get(e).center.y += 2;
+                }
             }
         }
     }
@@ -184,6 +230,9 @@ INTERNAL void GenerateNewLevel(u32 seed)
             ParseRoomData(roomDataArray[i][j], j, i);
         }
     }
+
+    // Static analysis
+    ChangeSpritesBasedOnTopBottom();
 
     // Boundary
     for(int i = -1; i < 45; ++i)

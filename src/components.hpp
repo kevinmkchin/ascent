@@ -34,7 +34,11 @@ enum class TEXTURE_ASSET_ID {
 	EAGLE = BUG + 1,
     SPELUNKY = EAGLE + 1,
     MONSTER = SPELUNKY + 1,
-    TILE_EXAMPLE = MONSTER + 1,
+    TOPTILE1 = MONSTER + 1,
+    MIDTILE1 = TOPTILE1 + 1,
+    BOTTILE1 = MIDTILE1 + 1,
+    TOPBOTTILE1 = BOTTILE1 + 1,
+    TILE_EXAMPLE = TOPBOTTILE1 + 1,
     BOX = TILE_EXAMPLE + 1,
     TEXTURE_COUNT = BOX + 1
 };
@@ -53,6 +57,10 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("eagle.png"),
         textures_path("spelunky.png"),
         textures_path("monster.png"),
+        textures_path("toptile.png"),
+        textures_path("midtile.png"),
+        textures_path("bottile.png"),
+        textures_path("topbottile.png"),
         textures_path("tile_example.png"),
         textures_path("box.png"),
 };
@@ -115,6 +123,12 @@ struct CollisionEvent
 	Entity other; // the second object involved in the collision
 	CollisionEvent(Entity& other) { this->other = other; };
 };
+
+struct LevelGeometryComponent
+{
+    
+};
+
 
 // Data structure for toggling debug mode
 struct Debug {
