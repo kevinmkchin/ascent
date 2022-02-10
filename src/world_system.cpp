@@ -55,6 +55,8 @@ void WorldSystem::loadAllContent()
                 audio_path("chicken_dead.wav").c_str(),
                 audio_path("chicken_eat.wav").c_str());
     }
+
+    LoadAllLevelData();
 }
 
 void WorldSystem::unloadAllContent()
@@ -79,19 +81,10 @@ bool WorldSystem::step(float deltaTime) {
 	while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
-	// Removing out of screen entities
-	auto& motions_registry = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size()-1; i>=0; --i) {
-        Motion& motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if(!registry.players.has(motions_registry.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
+    if(Input::HasKeyBeenPressed(SDL_SCANCODE_R))
+    {
+        restart_game();
+    }
 
 //  float min_counter_ms = 3000.f;
 //	for (Entity entity : registry.deathTimers.entities) {
@@ -130,41 +123,19 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-    player = createBox(vec2(136.f, 96.f));
+    srand((u32) time(nullptr));
+    u32 seed = rand()%1000000000;
+    GenerateNewLevel(seed);
+    renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
+    renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
+
+    player = createBox(currentLevelData.playerStart);
     registry.players.emplace(player);
 	HealthBar& playerHealth = registry.healthBar.get(player);
 	printf("%f \n", registry.healthBar.get(player).health);
 	playerHealth.health = 2000.f;
 	printf("%f \n", playerHealth.health);
 	enemy1 = createEnemy(vec2(238.f, 136.f));
-
-    CreateBasicLevelTile(1,9);
-    CreateBasicLevelTile(2,9);
-    CreateBasicLevelTile(3,9);
-    CreateBasicLevelTile(4,9);
-    CreateBasicLevelTile(5,9);
-    CreateBasicLevelTile(6,9);
-    CreateBasicLevelTile(7,9);
-    CreateBasicLevelTile(8,9);
-    CreateBasicLevelTile(9,9);
-    CreateBasicLevelTile(10,9);
-    CreateBasicLevelTile(11,9);
-    CreateBasicLevelTile(12,9);
-    CreateBasicLevelTile(13,9);
-    CreateBasicLevelTile(14,9);
-    CreateBasicLevelTile(15,9);
-    CreateBasicLevelTile(16,9);
-    CreateBasicLevelTile(17,9);
-    CreateBasicLevelTile(18,9);
-    CreateBasicLevelTile(3,8);
-    CreateBasicLevelTile(4,8);
-    CreateBasicLevelTile(7,8);
-    CreateBasicLevelTile(8,8);
-    CreateBasicLevelTile(9,8);
-    CreateBasicLevelTile(8,7);
-    CreateBasicLevelTile(13,5);
-    CreateBasicLevelTile(14,5);
-    CreateBasicLevelTile(15,5);
 }
 
 // Compute collisions between entities
