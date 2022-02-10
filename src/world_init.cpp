@@ -4,21 +4,24 @@
 
 // Entity initialization code
 
-Entity createBox(vec2 position) {
+Entity createBox(vec2 position)
+{
     // Reserve an entity
     auto entity = Entity();
 
-    // Initialize the position, scale, and physics components
+    auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
-    motion.rotation = 0.f;
-    motion.velocity = { 0, 0 };
-    motion.position = position;
+    auto& collider = registry.colliders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
 
-    motion.center = dimensions / 2.f;
-    motion.collision_pos = dimensions / 2.f;
-    motion.collision_neg = dimensions / 2.f;
+    motion.velocity = { 0, 0 };
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
 
     registry.sprites.insert(
         entity,
@@ -35,16 +38,21 @@ Entity createPlayer(vec2 position)
 {
     auto entity = Entity();
 
+    auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
-    motion.rotation = 0.f;
-    motion.velocity = { 0, 0 };
-    motion.position = position;
+    auto& collider = registry.colliders.emplace(entity);
+    registry.players.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
 
     vec2 dimensions = { 12, 14 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
 
-    motion.center = dimensions / 2.f;
-    motion.collision_pos = dimensions / 2.f;
-    motion.collision_neg = dimensions / 2.f;
+    motion.velocity = { 0, 0 };
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
 
     registry.sprites.insert(
         entity,
@@ -54,31 +62,29 @@ Entity createPlayer(vec2 position)
         }
     );
 
-    auto& hb = registry.healthBar.emplace(entity);
     hb.health = 2000.f;
-
-    registry.players.emplace(entity);
 
     return entity;
 }
 
-Entity createEnemy(vec2 position) {
-	// Reserve an entity
+Entity createEnemy(vec2 position)
+{
 	auto entity = Entity();
 
-	// Initialize the position, scale, and physics components
-	auto& motion = registry.motions.emplace(entity);
-	motion.rotation = 0.f;
-	motion.velocity = { 32.f, 0 };
-	motion.position = position;
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.enemy.emplace(entity);
 
-	vec2 dimensions = { 16, 16 };
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
 
-	motion.center = dimensions / 2.f;
-	motion.collision_pos = dimensions / 2.f;
-	motion.collision_neg = dimensions / 2.f;
+    motion.velocity = { 32.f, 0 };
 
-	registry.enemy.emplace(entity);
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
 
 	registry.sprites.insert(
 		entity,

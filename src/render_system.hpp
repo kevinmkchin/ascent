@@ -7,6 +7,12 @@
 #include "components.hpp"
 #include "tiny_ecs.hpp"
 
+struct SpriteTransformPair
+{
+    SpriteComponent sprite;
+    TransformComponent transform;
+};
+
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {
@@ -49,7 +55,10 @@ private:
     void updateScreenTextureSize(i32 newWidth, i32 newHeight);
 
 	// Internal drawing functions for each entity type
-	void drawSprite(Entity entity, const mat3& projection);
+    void drawSprite(TransformComponent entityTransform, SpriteComponent sprite, const mat3 &projection);
+
+    // BATCH DRAWING
+    void BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3 &projection);
 
     void drawBackground();
 

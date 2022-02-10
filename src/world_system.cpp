@@ -146,17 +146,18 @@ void WorldSystem::handle_collisions() {
 		// For now, we are only interested in collisions that involve the chicken
 		if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
-			HealthBar& hb = registry.healthBar.get(entity);
-            Motion& playerMotion = registry.motions.get(entity);
+            TransformComponent& playerTransform = registry.transforms.get(entity);
+            CollisionComponent& playerCollider = registry.colliders.get(entity);
+			HealthBar& playerHealth = registry.healthBar.get(entity);
 
 			if (registry.enemy.has(entity_other)) {
-				if (hb.health > 0) {
-					hb.health -= 20;
+				if (playerHealth.health > 0) {
+                    playerHealth.health -= 20;
 				}
 				else {
 					//Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
-				printf("Colliding with enemy. Reduced health to: %f \n", hb.health);
+				printf("Colliding with enemy. Reduced health to: %f \n", playerHealth.health);
 			}
 
             /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
@@ -164,16 +165,17 @@ void WorldSystem::handle_collisions() {
              *  Checking that the two entities are still colliding is not a perfect solution (if there
              *  even is one), but it should be good enough... We can revisit this and attempt other
              *  solutions down the line if needed. */
-            CollisionInfo collisionCheckAgain = CheckCollision(playerMotion, registry.motions.get(entity_other));
+            CollisionInfo collisionCheckAgain = CheckCollision(playerTransform, playerCollider,
+                registry.transforms.get(entity_other), registry.colliders.get(entity_other));
             if(collisionCheckAgain.collides)
             {
                 if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
                 {
-                    playerMotion.position.x += collisionCheckAgain.collision_overlap.x;
+                    playerTransform.position.x += collisionCheckAgain.collision_overlap.x;
                 }
                 else
                 {
-                    playerMotion.position.y += collisionCheckAgain.collision_overlap.y;
+                    playerTransform.position.y += collisionCheckAgain.collision_overlap.y;
                 }
             }
 //			// Checking Player - Deadly collisions

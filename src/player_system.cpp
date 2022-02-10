@@ -24,7 +24,7 @@ INTERNAL bool bJumpKeyHeld = false;
 INTERNAL float jumpBufferTimer = 999.f;
 INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
 
-INTERNAL void HandleInput(Motion& playerMotion)
+INTERNAL void HandleInput(MotionComponent& playerMotion)
 {
     bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
     bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
@@ -72,7 +72,7 @@ INTERNAL void HandleInput(Motion& playerMotion)
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
 }
 
-INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
+INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
 {
     bool bGrounded = false;
     bool bCollidedDirectlyAbove = false;
@@ -87,8 +87,12 @@ INTERNAL void ResolveMovement(float deltaTime, Motion& playerMotion)
         if (registry.players.has(entity))
         {
             Player& player = registry.players.get(entity);
+            TransformComponent& playerTransform = registry.transforms.get(entity);
+            CollisionComponent& playerCollider = registry.colliders.get(entity);
+
             // Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
-            CollisionInfo collisionCheck = CheckCollision(playerMotion, registry.motions.get(entity_other));
+            CollisionInfo collisionCheck = CheckCollision(playerTransform, playerCollider,
+                registry.transforms.get(entity_other), registry.colliders.get(entity_other));
             if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
             {
                 if(collisionCheck.collision_overlap.y <= 0.f
@@ -142,7 +146,7 @@ void PlayerSystem::Step(float deltaTime)
 {
     const Entity playerEntity = registry.players.entities[0];
 
-    Motion& playerMotion = registry.motions.get(playerEntity);
+    MotionComponent& playerMotion = registry.motions.get(playerEntity);
 
     HandleInput(playerMotion);
     ResolveMovement(deltaTime, playerMotion);

@@ -1,8 +1,8 @@
 #version 330
 
 // Input attributes
-in vec2 in_position;
-in vec2 in_texcoord;
+layout (location = 0) in vec2 in_position;
+layout (location = 1) in vec2 in_texcoord;
 
 // Passed to fragment shader
 out vec2 texcoord;
