@@ -5,7 +5,11 @@
 
 void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 {
-    Motion& motion = registry.motions.get(entity);
+    Motion motion;
+    if(registry.motions.has(entity))
+    {
+        motion = registry.motions.get(entity);
+    }
     const SpriteComponent& sprite = registry.sprites.get(entity);
 
 	Transform transform;
@@ -95,6 +99,67 @@ void RenderSystem::drawSprite(Entity entity, const mat3 &projection)
 	gl_has_errors();
 }
 
+void RenderSystem::drawBackground()
+{
+    const GLuint used_effect_enum = (GLuint) EFFECT_ASSET_ID::BACKGROUND;
+    const GLuint program = (GLuint)effects[used_effect_enum];
+
+    glUseProgram(program);
+    gl_has_errors();
+
+    GLint currProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+    gl_has_errors();
+
+    LOCAL_PERSIST u32 bgQuadVAO;
+    LOCAL_PERSIST u32 bgQuadVBO;
+    LOCAL_PERSIST u32 bgQuadIBO;
+    if(!bgQuadVAO)
+    {
+        u32 refQuadIndices[6] = {
+                0, 1, 3,
+                0, 3, 2
+        };
+        float refQuadVertices[16] = {
+                //  x   y    u    v
+                -1.f, -1.f, 0.f, 0.f,
+                1.f, -1.f, 1.f, 0.f,
+                -1.f, 1.f, 0.f, 1.f,
+                1.f, 1.f, 1.f, 1.f
+        };
+
+        glGenVertexArrays(1, &bgQuadVAO);
+        glBindVertexArray(bgQuadVAO);
+        glGenBuffers(1, &bgQuadVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, bgQuadVBO);
+        glBufferData(GL_ARRAY_BUFFER, 4 /*bytes cuz float*/ * 16, refQuadVertices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
+        glEnableVertexAttribArray(1);
+
+        glGenBuffers(1, &bgQuadIBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bgQuadIBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 /*bytes cuz uint32*/ * 6, refQuadIndices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0); // Unbind the VAO;
+    }
+
+    // Bind our texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::BG1];
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    // Draw
+    glBindVertexArray(bgQuadVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bgQuadIBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    gl_has_errors();
+}
+
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw()
@@ -117,16 +182,22 @@ void RenderSystem::draw()
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
 
+    // DRAW BACKGROUND
+    drawBackground();
+
+    // DRAW PLAYER
     for(Entity entWithSprite : registry.players.entities)
     {
         drawSprite(entWithSprite, projection_2D);
     }
 
+    // DRAW ENEMIES
     for(Entity entWithSprite : registry.enemy.entities)
     {
         drawSprite(entWithSprite, projection_2D);
     }
 
+    // DRAW LEVEL
     for(Entity entWithSprite : registry.levelgeoms.entities)
     {
         drawSprite(entWithSprite, projection_2D);

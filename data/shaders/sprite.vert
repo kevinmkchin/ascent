@@ -1,7 +1,7 @@
 #version 330
 
 // Input attributes
-in vec2 in_position; // TODO(Kevin): make this a vec3 with z for depth
+in vec2 in_position;
 in vec2 in_texcoord;
 
 // Passed to fragment shader

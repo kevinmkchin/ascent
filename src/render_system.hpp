@@ -51,6 +51,8 @@ private:
 	// Internal drawing functions for each entity type
 	void drawSprite(Entity entity, const mat3& projection);
 
+    void drawBackground();
+
 	void finalDrawToScreen();
 
     mat3 createProjectionMatrix();
