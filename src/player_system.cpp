@@ -17,6 +17,8 @@ INTERNAL float jumpBufferMaxHoldSeconds = 0.22f;
 INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
 // COYOTE TIME
 INTERNAL float coyoteTimeDefaultSeconds = 0.08f;
+// VARIABLE JUMP HEIGHT
+INTERNAL float percentYVelocityOnJumpRelease = 0.5f;
 
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
@@ -29,6 +31,7 @@ INTERNAL void HandleInput(MotionComponent& playerMotion)
     bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
     bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
     bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
+    bool bJumpKeyJustReleased = Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
     bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 
     float currentXAcceleration = 0.f;
@@ -65,6 +68,13 @@ INTERNAL void HandleInput(MotionComponent& playerMotion)
     {
         bPendingJump = true;
         jumpBufferTimer = 0.f;
+    }
+
+    if(bJumpKeyJustReleased && bJumping && playerMotion.velocity.y < 0.f && !bPendingJump)
+    {
+        // variable jump height
+        // only if we are moving up, and if this is the first time we released jump while jumping
+        playerMotion.velocity.y *= percentYVelocityOnJumpRelease;
     }
 
     playerMotion.acceleration.y = playerGravity;
