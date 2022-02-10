@@ -105,7 +105,8 @@ void RenderSystem::draw()
 	// Clearing backbuffer
 	glViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	glDepthRange(0.00001f, 10.f);
-	glClearColor(0.674f, 0.847f, 1.0f, 1.0f);
+	//glClearColor(0.674f, 0.847f, 1.0f, 1.0f);
+	glClearColor(27.f/255.f, 28.f/255.f, 23.f/255.f, 1.0f);
 	glClearDepth(10.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -116,9 +117,18 @@ void RenderSystem::draw()
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
 
-    for (Entity entWithSprite : registry.sprites.entities)
+    for(Entity entWithSprite : registry.players.entities)
     {
-        if (!registry.motions.has(entWithSprite)) continue;
+        drawSprite(entWithSprite, projection_2D);
+    }
+
+    for(Entity entWithSprite : registry.enemy.entities)
+    {
+        drawSprite(entWithSprite, projection_2D);
+    }
+
+    for(Entity entWithSprite : registry.levelgeoms.entities)
+    {
         drawSprite(entWithSprite, projection_2D);
     }
 

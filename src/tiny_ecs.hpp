@@ -11,15 +11,21 @@
 // Unique identifyer for all entities
 class Entity
 {
-	unsigned int id;
-	static unsigned int id_count; // starts from 1, entit 0 is the default initialization
+    unsigned int id = 0;
+    static unsigned int id_count; // starts from 1, entit 0 is the default initialization
 public:
-	Entity()
-	{
-		id = id_count++;
-		// Note, indices of already deleted entities arent re-used in this simple implementation.
-	}
-	operator unsigned int() { return id; } // this enables automatic casting to int
+    Entity()
+    {
+        id = ++id_count;
+        // Note, indices of already deleted entities arent re-used in this simple implementation.
+    }
+
+    Entity(unsigned int _id)
+    {
+        id = _id;
+    }
+
+    operator unsigned int() { return id; } // this enables automatic casting to int
 };
 
 // Common interface to refer to all containers in the ECS registry
