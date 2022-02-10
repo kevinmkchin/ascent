@@ -11,7 +11,9 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	ComponentContainer<Motion> motions;
+	ComponentContainer<TransformComponent> transforms;
+	ComponentContainer<MotionComponent> motions;
+	ComponentContainer<CollisionComponent> colliders;
 	ComponentContainer<CollisionEvent> collisionEvents;
 	ComponentContainer<Player> players;
 	ComponentContainer<SpriteComponent> sprites;
@@ -24,7 +26,9 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
+		registry_list.push_back(&transforms);
 		registry_list.push_back(&motions);
+		registry_list.push_back(&colliders);
 		registry_list.push_back(&collisionEvents);
 		registry_list.push_back(&players);
 		registry_list.push_back(&sprites);
