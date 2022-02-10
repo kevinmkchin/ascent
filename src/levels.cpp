@@ -89,6 +89,8 @@ INTERNAL void LoadAllLevelData()
 struct CurrentLevelData
 {
     vec2 playerStart;
+    vec2 cameraBoundMin;
+    vec2 cameraBoundMax;
 };
 INTERNAL CurrentLevelData currentLevelData;
 
@@ -174,6 +176,7 @@ INTERNAL void GenerateNewLevel(u32 seed)
         }
     }
 
+    // actually create tiles
     for(int i = 0; i < NUMFLOORS; ++i)
     {
         for(int j = 0; j < NUMROOMSWIDE; ++j)
@@ -182,6 +185,7 @@ INTERNAL void GenerateNewLevel(u32 seed)
         }
     }
 
+    // Boundary
     for(int i = -1; i < 45; ++i)
     {
         CreateBasicLevelTile(i, -1);
@@ -192,6 +196,14 @@ INTERNAL void GenerateNewLevel(u32 seed)
         CreateBasicLevelTile(-1, i);
         CreateBasicLevelTile(44, i);
     }
+
+    float halfWidth = (float) GAME_RESOLUTION_WIDTH / 2.f;
+    float halfHeight = (float) GAME_RESOLUTION_HEIGHT / 2.f;
+
+    currentLevelData.cameraBoundMin.x = (-1 * TILE_SIZE) + halfWidth;
+    currentLevelData.cameraBoundMin.y = (-1 * TILE_SIZE) + halfHeight;
+    currentLevelData.cameraBoundMax.x = (45 * TILE_SIZE) - halfWidth;
+    currentLevelData.cameraBoundMax.y = (37 * TILE_SIZE) - halfHeight;
 
     free(tileDataArray);
 }
