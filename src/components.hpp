@@ -122,7 +122,8 @@ struct CollisionComponent
 
 struct SpriteComponent
 {
-    vec2 dimensions; // in pixels
+    vec2 dimensions = {0.f,0.f}; // in pixels
+    u8 layer = 0; // render layer. higher layer is drawn on top of lower layers.
     TEXTURE_ASSET_ID texId; // ID for the texture we want to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
 };

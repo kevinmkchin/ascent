@@ -27,6 +27,7 @@ Entity createBox(vec2 position)
         entity,
         {
                 dimensions,
+                0,
                 TEXTURE_ASSET_ID::BOX
         }
     );
@@ -58,6 +59,7 @@ Entity createPlayer(vec2 position)
         entity,
         {
             dimensions,
+            0,
             TEXTURE_ASSET_ID::BOX
         }
     );
@@ -90,6 +92,7 @@ Entity createEnemy(vec2 position)
 		entity,
 		{
 				dimensions,
+                0,
 				TEXTURE_ASSET_ID::MONSTER
 		}
 	);
