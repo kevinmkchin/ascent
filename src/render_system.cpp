@@ -3,6 +3,22 @@
 
 #include "tiny_ecs_registry.hpp"
 
+INTERNAL u32 GetRenderState(const SpriteComponent& sprite)
+{
+    u32 state = 0;
+    state |= sprite.layer;
+    state <<= 16;
+    state |= (u16) sprite.texId;
+    state <<= 8; // TODO(Kevin): also encode shader information
+
+    return state;
+};
+
+INTERNAL u32 GetTexIDFromRenderState(u32 state)
+{
+    return (state & 0x00FFFF00) >> 8;
+}
+
 // Using counting sort to sort the elements in the basis of significant places
 INTERNAL void countingSort(std::vector<SpriteTransformPair>& array, int size, int place) {
     const int max = 10;
@@ -14,7 +30,7 @@ INTERNAL void countingSort(std::vector<SpriteTransformPair>& array, int size, in
 
     // Calculate count of elements
     for (int i = 0; i < size; i++)
-        count[(array[i].GetRenderState() / place) % 10]++;
+        count[(array[i].renderState / place) % 10]++;
 
     // Calculate cumulative count
     for (int i = 1; i < max; i++)
@@ -22,8 +38,8 @@ INTERNAL void countingSort(std::vector<SpriteTransformPair>& array, int size, in
 
     // Place the elements in sorted order
     for (int i = size - 1; i >= 0; i--) {
-        output[count[(array[i].GetRenderState() / place) % 10] - 1] = array[i];
-        count[(array[i].GetRenderState() / place) % 10]--;
+        output[count[(array[i].renderState / place) % 10] - 1] = array[i];
+        count[(array[i].renderState / place) % 10]--;
     }
 
     for (int i = 0; i < size; i++)
@@ -36,10 +52,10 @@ INTERNAL void radixSort(std::vector<SpriteTransformPair>& array)
     int size = array.size();
 
     // Get maximum element
-    u32 max = array[0].GetRenderState();
+    u32 max = array[0].renderState;
     for (int i = 1; i < size; i++)
-        if (array[i].GetRenderState() > max)
-            max = array[i].GetRenderState();
+        if (array[i].renderState > max)
+            max = array[i].renderState;
 
     // Apply counting sort to sort elements based on place value.
     for (int place = 1; max / place > 0; place *= 10)
@@ -237,7 +253,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
     cameraTransform.translate(-scaledPlayerPosition);
 
     // STD::VECTORS TO HOLD VERTICES AND INDICES BATCH
-    u32 renderState = sortedSprites[0].GetRenderState();
+    u32 renderState = sortedSprites[0].renderState;
     std::vector<float> vertices(16 * sortedSprites.size());
     u32 verticesCount = 0;
     std::vector<u32> indices(6 * sortedSprites.size());
@@ -245,7 +261,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
     for(auto& sortedSprite : sortedSprites)
     {
-        if(renderState != sortedSprite.GetRenderState())
+        if(renderState != sortedSprite.renderState)
         {
             // FLUSH BATCH
 
@@ -280,7 +296,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
             // BIND THE TEXTURE FOR THIS BATCH
             glActiveTexture(GL_TEXTURE0);
-            GLuint texture_id = texture_gl_handles[(GLuint)SpriteTransformPair::GetTexIDFromRenderState(renderState)];
+            GLuint texture_id = texture_gl_handles[(GLuint)GetTexIDFromRenderState(renderState)];
             glBindTexture(GL_TEXTURE_2D, texture_id);
 
             // DRAW
@@ -293,7 +309,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             verticesCount = 0;
             indicesCount = 0;
 
-            renderState = sortedSprite.GetRenderState();
+            renderState = sortedSprite.renderState;
         }
 
         vec2 scaledPosition = sortedSprite.transform.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
@@ -361,6 +377,7 @@ void RenderSystem::draw()
         auto e = registry.sprites.entities[i];
         SpriteTransformPair s;
         s.sprite = registry.sprites.get(e);
+        s.renderState = GetRenderState(s.sprite);
         s.transform = registry.transforms.get(e);
         sortedSpriteArray[i] = s;
     }

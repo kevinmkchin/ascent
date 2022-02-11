@@ -9,24 +9,9 @@
 
 struct SpriteTransformPair
 {
+    u32 renderState;
     SpriteComponent sprite;
     TransformComponent transform;
-
-    u32 GetRenderState() const
-    {
-        u32 state = 0;
-        state |= sprite.layer;
-        state <<= 16;
-        state |= (u16) sprite.texId;
-        state <<= 8; // TODO(Kevin): also encode shader information
-
-        return state;
-    };
-
-    static u32 GetTexIDFromRenderState(u32 state)
-    {
-        return (state & 0x00FFFF00) >> 8;
-    }
 };
 
 // System responsible for setting up OpenGL and for rendering all the
