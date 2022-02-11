@@ -21,7 +21,7 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
             entity,
             {
                 { TILE_SIZE, TILE_SIZE },
-                0,
+                10,
                 TEXTURE_ASSET_ID::MIDTILE1
             }
     );
