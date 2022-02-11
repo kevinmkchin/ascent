@@ -374,11 +374,10 @@ void RenderSystem::draw()
     std::vector<SpriteTransformPair> sortedSpriteArray(registry.sprites.size());
     for(u32 i = 0; i < registry.sprites.size(); ++i)
     {
-        auto e = registry.sprites.entities[i];
         SpriteTransformPair s;
-        s.sprite = registry.sprites.get(e);
+        s.sprite = registry.sprites.components[i];
         s.renderState = GetRenderState(s.sprite);
-        s.transform = registry.transforms.get(e);
+        s.transform = registry.transforms.get(registry.sprites.entities[i]);
         sortedSpriteArray[i] = s;
     }
     radixSort(sortedSpriteArray);
