@@ -314,7 +314,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
         vec2 scaledPosition = sortedSprite.transform.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
         vec2 topLeftCorner = scaledPosition - sortedSprite.transform.center * sortedSprite.transform.scale * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-        vec2 scaledDimensions = sortedSprite.sprite.dimensions * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL * sortedSprite.transform.scale;
+        vec2 scaledDimensions = sortedSprite.sprite.dimensions * sortedSprite.transform.scale * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
 
         vertices[verticesCount + 0] = topLeftCorner.x;
         vertices[verticesCount + 1] = topLeftCorner.y;
@@ -332,6 +332,34 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
         vertices[verticesCount + 13] = topLeftCorner.y + scaledDimensions.y;
         vertices[verticesCount + 14] = 1.f; // U
         vertices[verticesCount + 15] = 1.f; // V
+
+        if(sortedSprite.transform.rotation)
+        {
+            float c = cosf(sortedSprite.transform.rotation);
+            float s = sinf(sortedSprite.transform.rotation);
+            mat3 R = { { c, s, 0.f },{ -s, c, 0.f },{ 0.f, 0.f, 1.f } };
+
+            vec2 tl = -sortedSprite.transform.center * sortedSprite.transform.scale * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+            vec2 br = sortedSprite.sprite.dimensions * sortedSprite.transform.scale * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL + tl;
+            vec2 tr = vec2(br.x, tl.y);
+            vec2 bl = vec2(tl.x, br.y);
+
+            tl = vec2(R * vec3(tl, 1.f));
+            vertices[verticesCount + 0] = tl.x + scaledPosition.x;
+            vertices[verticesCount + 1] = tl.y + scaledPosition.y;
+
+            tr = vec2(R * vec3(tr, 1.f));
+            vertices[verticesCount + 4] = tr.x + scaledPosition.x;
+            vertices[verticesCount + 5] = tr.y + scaledPosition.y;
+
+            bl = vec2(R * vec3(bl, 1.f));
+            vertices[verticesCount + 8] = bl.x + scaledPosition.x;
+            vertices[verticesCount + 9] = bl.y + scaledPosition.y;
+
+            br = vec2(R * vec3(br, 1.f));
+            vertices[verticesCount + 12] = br.x + scaledPosition.x;
+            vertices[verticesCount + 13] = br.y + scaledPosition.y;
+        }
 
         indices[indicesCount + 0] = 4*(indicesCount/6) + 0;
         indices[indicesCount + 1] = 4*(indicesCount/6) + 1;
