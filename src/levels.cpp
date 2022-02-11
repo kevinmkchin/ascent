@@ -154,6 +154,23 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(u32 e, i32 col, i32 row)
         spr.dimensions.y += 2;
         registry.transforms.get(e).center.y += 2;
     }
+    else
+    {
+        // mid
+        auto& spr = registry.sprites.get(e);
+        int which = rand()%10;
+        switch(which)
+        {
+            case 0:{
+                spr.texId = TEXTURE_ASSET_ID::SKULLS1;
+            }break;
+            case 1:{
+                spr.texId = TEXTURE_ASSET_ID::SKULLS2;
+            }break;
+            default:{
+            }break;
+        }
+    }
 }
 
 INTERNAL void AddColliderIfRequired(u32 tileEntity, i32 col, i32 row)
