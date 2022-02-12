@@ -10,8 +10,8 @@ INTERNAL float playerMaxMoveSpeed = 64.f;
 INTERNAL float playerMaxFallSpeed = 200.f;
 INTERNAL float playerGroundAcceleration = 700.f;
 INTERNAL float playerGroundDeceleration = 1000.f;
-INTERNAL float playerAirAcceleration = 540.f;
-INTERNAL float playerAirDeceleration = 200.f;
+INTERNAL float playerAirAcceleration = 650.f;
+INTERNAL float playerAirDeceleration = 500.f;
 // JUMP BUFFERING https://twitter.com/MaddyThorson/status/1238338575545978880?s=20&t=iRoDq7J9Um83kDeZYr_dvg
 INTERNAL float jumpBufferMaxHoldSeconds = 0.22f;
 INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
@@ -26,13 +26,13 @@ INTERNAL bool bJumpKeyHeld = false;
 INTERNAL float jumpBufferTimer = 999.f;
 INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
 
-INTERNAL void HandleInput(MotionComponent& playerMotion)
+INTERNAL void HandleMovementInput(MotionComponent& playerMotion)
 {
     bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
     bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
-    bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
-    bool bJumpKeyJustReleased = Input::HasKeyBeenReleased(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
-    bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
+    bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
+    bool bJumpKeyJustReleased = Input::HasKeyBeenReleased(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
+    bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 
     float currentXAcceleration = 0.f;
 
@@ -87,6 +87,10 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
     bool bGrounded = false;
     bool bCollidedDirectlyAbove = false;
 
+    std::vector<CollisionEvent> playerRelevantCollisions;
+    std::vector<CollisionEvent> groundableCollisions;
+    std::vector<CollisionEvent> directlyAboveCollisions;
+
     // Check if grounded or colliding above
     const auto& collisionsRegistry = registry.collisionEvents;
     for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
@@ -96,6 +100,8 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
         Entity entity_other = colEvent.other;
         if (registry.players.has(entity))
         {
+            playerRelevantCollisions.push_back(colEvent);
+
             Player& player = registry.players.get(entity);
             TransformComponent& playerTransform = registry.transforms.get(entity);
             CollisionComponent& playerCollider = registry.colliders.get(entity);
@@ -108,11 +114,48 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
                 if(collisionCheck.collision_overlap.y <= 0.f
                     && playerMotion.velocity.y >= 0.f) // check we are not already moving up otherwise glitches.
                 {
+                    groundableCollisions.push_back(colEvent);
                     bGrounded = true;
                 }
                 if(collisionCheck.collision_overlap.y > 0.f)
                 {
+                    directlyAboveCollisions.push_back(colEvent);
                     bCollidedDirectlyAbove = true;
+                }
+            }
+        }
+    }
+
+    // Check if actually grounded
+    if (bGrounded)
+    {
+        for (auto gcol : groundableCollisions)
+        {
+            for (auto pcol : playerRelevantCollisions)
+            {
+                if (gcol.collision_overlap.x == pcol.collision_overlap.x
+                    && gcol.collision_overlap.y != pcol.collision_overlap.y)
+                {
+                    /* Check we aren't in a wall */
+                    bGrounded = false;
+                    break;
+                }
+            }
+        }
+    }
+    // Check if actually hit head
+    if (bCollidedDirectlyAbove)
+    {
+        for (auto acol : directlyAboveCollisions)
+        {
+            for (auto pcol : playerRelevantCollisions)
+            {
+                if (acol.collision_overlap.x == pcol.collision_overlap.x
+                    && acol.collision_overlap.y != pcol.collision_overlap.y)
+                {
+                    /* Check we aren't in a wall */
+                    bCollidedDirectlyAbove = false;
+                    break;
                 }
             }
         }
@@ -158,6 +201,6 @@ void PlayerSystem::Step(float deltaTime)
 
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
 
-    HandleInput(playerMotion);
+    HandleMovementInput(playerMotion);
     ResolveMovement(deltaTime, playerMotion);
 }
