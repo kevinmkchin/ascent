@@ -7,10 +7,22 @@
 #include "tiny_ecs_registry.hpp"
 
 #define TILE_SIZE 16
+#define NUMROOMSWIDE 5
+#define NUMFLOORS 5
+#define NUMTILESWIDE NUMROOMSWIDE * 11
+#define NUMTILESTALL NUMFLOORS * 9
 
-INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
+INTERNAL void AddTileSizedCollider(Entity tileEntity)
 {
-    auto entity = Entity();
+    auto& collider = registry.colliders.emplace(tileEntity);
+    collider.collision_neg = {0.f,0.f};
+    collider.collision_pos = { TILE_SIZE, TILE_SIZE };
+}
+
+INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::MIDTILE1)
+{
+    Entity entity = Entity::CreateEntity();
+    entity.SetTag(TAG_PLAYERBLOCKABLE);
 
     auto& transform = registry.transforms.emplace(entity);
 
@@ -22,21 +34,35 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 10,
-                TEXTURE_ASSET_ID::MIDTILE1
+                texId
             }
     );
 
-    registry.levelgeoms.emplace(entity);
 
     return entity;
 }
 
-
-INTERNAL void AddTileSizedCollider(Entity tileEntity)
+INTERNAL Entity CreateLadderTile(i32 column, i32 row)
 {
-    auto& collider = registry.colliders.emplace(tileEntity);
-    collider.collision_neg = {0.f,0.f};
-    collider.collision_pos = { TILE_SIZE, TILE_SIZE };
+    Entity entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+
+    transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
+    transform.center = {0.f,0.f};
+
+    registry.sprites.insert(
+            entity,
+            {
+                { TILE_SIZE, TILE_SIZE },
+                0,
+                TEXTURE_ASSET_ID::SKULLS1
+            }
+    );
+
+    AddTileSizedCollider(entity);
+
+    return entity;
 }
 
 namespace ns
@@ -101,7 +127,7 @@ struct CurrentLevelData
 };
 INTERNAL CurrentLevelData currentLevelData;
 
-INTERNAL unsigned int levelTiles[44][36];
+INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
 
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
@@ -110,47 +136,62 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
         for(int j = 0; j < r.width; ++j)
         {
             const char& c = r.data.at(i * r.width + j);
-            unsigned int tile = 0;
             switch(c)
             {
                 case 'A':{
-                    tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                    levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
+
                 case '1':{
                     currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f) ,
                                                      roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) };
                 }break;
+
+                case '2':{
+                    // end point
+                }break;
+
+                case 'L':{
+                    // ladder
+                    CreateLadderTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                }break;
+
+                case 'B':{
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::SKULLS1);
+                    levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+                }break;
+
                 default:{
                 }break;
-            }
-            if(tile != 0)
-            {
-                levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
             }
         }
     }
 }
 
-INTERNAL void ChangeSpritesBasedOnTopBottom(u32 e, i32 col, i32 row)
+INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
 {
+    auto& spr = registry.sprites.get(e);
+    if(spr.texId != TEXTURE_ASSET_ID::MIDTILE1)
+    {
+        return; 
+    }
+
     bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
-    bool botClear = row + 1 < 36 && levelTiles[col][row + 1] == 0;
+    bool botClear = row + 1 < NUMTILESTALL && levelTiles[col][row + 1] == 0;
     if (topClear && botClear)
     {
-        auto& spr = registry.sprites.get(e);
         spr.texId = TEXTURE_ASSET_ID::TOPBOTTILE1;
         spr.dimensions.y += 3;
         registry.transforms.get(e).center.y += 2;
     }
     else if(botClear)
     {
-        auto& spr = registry.sprites.get(e);
         spr.texId = TEXTURE_ASSET_ID::BOTTILE1;
         spr.dimensions.y = spr.dimensions.y + 1;
     }
     else if(topClear)
     {
-        auto& spr = registry.sprites.get(e);
         spr.texId = TEXTURE_ASSET_ID::TOPTILE1;
         spr.dimensions.y += 2;
         registry.transforms.get(e).center.y += 2;
@@ -158,7 +199,6 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(u32 e, i32 col, i32 row)
     else
     {
         // mid
-        auto& spr = registry.sprites.get(e);
         int which = rand()%10;
         switch(which)
         {
@@ -174,12 +214,12 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(u32 e, i32 col, i32 row)
     }
 }
 
-INTERNAL void AddColliderIfRequired(u32 tileEntity, i32 col, i32 row)
+INTERNAL void AddColliderIfRequired(Entity tileEntity, i32 col, i32 row)
 {
     bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
-    bool botClear = row + 1 < 36 && levelTiles[col][row + 1] == 0;
+    bool botClear = row + 1 < NUMTILESTALL && levelTiles[col][row + 1] == 0;
     bool leftClear = col - 1 >= 0 && levelTiles[col - 1][row] == 0;
-    bool rightClear = col + 1 < 44 && levelTiles[col + 1][row] == 0;
+    bool rightClear = col + 1 < NUMTILESWIDE && levelTiles[col + 1][row] == 0;
     bool atLeastOneFaceIsClear = topClear || botClear || leftClear || rightClear;
     if(atLeastOneFaceIsClear)
     {
@@ -192,11 +232,11 @@ INTERNAL void AddColliderIfRequired(u32 tileEntity, i32 col, i32 row)
  *  Add colliders to tiles that can be collided with. */
 INTERNAL void UpdateLevelGeometry()
 {
-    for(int col = 0; col < 44; ++col)
+    for(int col = 0; col < NUMTILESWIDE; ++col)
     {
-        for(int row = 0; row < 36; ++row)
+        for(int row = 0; row < NUMTILESTALL; ++row)
         {
-            unsigned int e = levelTiles[col][row];
+            Entity e = levelTiles[col][row];
             if(e != 0)
             {
                 ChangeSpritesBasedOnTopBottom(e, col, row);
@@ -205,9 +245,6 @@ INTERNAL void UpdateLevelGeometry()
         }
     }
 }
-
-#define NUMFLOORS 4
-#define NUMROOMSWIDE 4
 
 INTERNAL void GenerateNewLevel(u32 seed)
 {
@@ -279,17 +316,17 @@ INTERNAL void GenerateNewLevel(u32 seed)
     UpdateLevelGeometry();
 
     // Boundary
-    for(int i = -1; i < 45; ++i)
+    for(int i = -1; i < ((NUMTILESWIDE)+1); ++i)
     {
         auto _a = CreateBasicLevelTile(i, -1);
-        auto _b = CreateBasicLevelTile(i, 36);
+        auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
         AddTileSizedCollider(_a);
         AddTileSizedCollider(_b);
     }
-    for(int i = -1; i < 37; ++i)
+    for(int i = -1; i < ((NUMTILESTALL)+1); ++i)
     {
         auto _a = CreateBasicLevelTile(-1, i);
-        auto _b = CreateBasicLevelTile(44, i);
+        auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
         AddTileSizedCollider(_a);
         AddTileSizedCollider(_b);
     }
@@ -299,8 +336,8 @@ INTERNAL void GenerateNewLevel(u32 seed)
 
     currentLevelData.cameraBoundMin.x = (-1 * TILE_SIZE) + halfWidth;
     currentLevelData.cameraBoundMin.y = (-1 * TILE_SIZE) + halfHeight;
-    currentLevelData.cameraBoundMax.x = (45 * TILE_SIZE) - halfWidth;
-    currentLevelData.cameraBoundMax.y = (37 * TILE_SIZE) - halfHeight;
+    currentLevelData.cameraBoundMax.x = (((NUMTILESWIDE)+1) * TILE_SIZE) - halfWidth;
+    currentLevelData.cameraBoundMax.y = (((NUMTILESTALL)+1) * TILE_SIZE) - halfHeight;
 
     free(tileDataArray);
 }

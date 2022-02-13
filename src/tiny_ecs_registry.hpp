@@ -17,7 +17,6 @@ public:
 	ComponentContainer<CollisionEvent> collisionEvents;
 	ComponentContainer<Player> players;
 	ComponentContainer<SpriteComponent> sprites;
-	ComponentContainer<LevelGeometryComponent> levelgeoms;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<HealthBar> healthBar;
 	ComponentContainer<Enemy> enemy;
@@ -32,7 +31,6 @@ public:
 		registry_list.push_back(&collisionEvents);
 		registry_list.push_back(&players);
 		registry_list.push_back(&sprites);
-		registry_list.push_back(&levelgeoms);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&healthBar);
 		registry_list.push_back(&enemy);

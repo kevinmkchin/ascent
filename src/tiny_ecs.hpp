@@ -8,24 +8,52 @@
 #include <typeindex>
 #include <assert.h>
 
-// Unique identifyer for all entities
+typedef uint8_t       u8;
+typedef uint32_t      u32;
+
+// Unique identifier for all entities
 class Entity
 {
-    unsigned int id = 0;
-    static unsigned int id_count; // starts from 1, entit 0 is the default initialization
+    u32 tagAndId = 0; // First 8 bits are TAG, next 24 bits are ID
+    static u32 id_count;
+
 public:
-    Entity()
+	Entity()
+	{
+		// DO NOTHING NEVER CALL THIS CONSTRUCTOR MANUALLY
+	}
+
+    static Entity CreateEntity()
     {
-        id = ++id_count;
-        // Note, indices of already deleted entities arent re-used in this simple implementation.
+        Entity e;
+        e.tagAndId = (0x00FFFFFF & ++id_count);
+        return e;
     }
 
-    Entity(unsigned int _id)
+    void SetTag(u8 tag)
     {
-        id = _id;
+    	tagAndId = (tag << 24) | (0x00FFFFFF & tagAndId);
     }
 
-    operator unsigned int() { return id; } // this enables automatic casting to int
+    u8 GetTag() const
+    {
+    	return(tagAndId >> 24);
+    }
+
+    u32 GetTagAndID() const
+    {
+    	return tagAndId;
+    }
+
+	void operator= (const Entity& other)
+	{
+		tagAndId = other.tagAndId;
+	}
+
+    operator unsigned int() // this enables automatic casting to int
+    {
+    	return(0x00FFFFFF & tagAndId); 
+    }
 };
 
 // Common interface to refer to all containers in the ECS registry
