@@ -130,6 +130,17 @@ INTERNAL CurrentLevelData currentLevelData;
 
 INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
 
+INTERNAL void ClearLevelTiles()
+{
+    for(int i = 0; i < NUMTILESWIDE; ++i)
+    {
+        for(int j = 0; j < NUMTILESTALL; ++j)
+        {
+            levelTiles[i][j] = Entity();
+        }
+    }
+}
+
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
     for(int i = 0; i < r.height; ++i)
@@ -249,6 +260,8 @@ INTERNAL void UpdateLevelGeometry()
 
 INTERNAL void GenerateNewLevel()
 {
+    ClearLevelTiles();
+
     std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
     const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
     i32 rw = sampleRoom.width;

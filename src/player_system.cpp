@@ -247,6 +247,11 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
 
 void PlayerSystem::Step(float deltaTime)
 {
+    if(registry.players.entities.empty())
+    {
+        return;
+    }
+    
     const Entity playerEntity = registry.players.entities[0];
 
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
