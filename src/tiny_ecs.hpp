@@ -1,4 +1,16 @@
-#pragma once
+/*  tiny ecs library
+
+    Do this:
+        #define TINY_ECS_LIB_IMPLEMENTATION
+    before you include this file in *one* C++ source file to create the implementation.
+        // i.e. it should look like this:
+        #include ...
+        #define TINY_ECS_LIB_IMPLEMENTATION
+        #include "tiny_ecs.hpp"
+*/
+
+#ifndef _INCLUDE_TINY_ECS_LIBRARY_H_
+#define _INCLUDE_TINY_ECS_LIBRARY_H_
 
 #include <algorithm>
 #include <vector>
@@ -169,3 +181,12 @@ public:
 			map_entity_componentID[entities[i]] = i;
 	}
 };
+
+#endif //_INCLUDE_TINY_ECS_LIBRARY_H_
+
+#ifdef TINY_ECS_LIB_IMPLEMENTATION
+
+// All we need to store besides the containers is the id of every entity and callbacks to be able to remove entities across containers
+unsigned int Entity::id_count = 1;
+
+#endif
