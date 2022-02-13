@@ -33,7 +33,8 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId
             {
                 { TILE_SIZE, TILE_SIZE },
                 10,
-                texId
+                texId,
+                EFFECT_ASSET_ID::SPRITE
             }
     );
 
@@ -55,7 +56,8 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                TEXTURE_ASSET_ID::LADDER
+                TEXTURE_ASSET_ID::LADDER,
+                EFFECT_ASSET_ID::SPRITE
             }
     );
 
@@ -269,23 +271,23 @@ INTERNAL void GenerateNewLevel()
         roomDataArray[floor + 1][fallingAndLanding] = chapterOneRooms["landing"][landingRoomIndex];
     }
 
-    // START ROOM
-    u32 start = rand() % NUMROOMSWIDE;
-    while(!roomDataArray[0][start].data.empty())
-    {
-        start = rand() % NUMROOMSWIDE;
-    }
-    u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
-    roomDataArray[0][start] = chapterOneRooms["start"][startRoomIndex];
-
     // END ROOM
     u32 end = rand() % NUMROOMSWIDE;
-    while(!roomDataArray[NUMFLOORS-1][end].data.empty())
+    while(!roomDataArray[0][end].data.empty())
     {
         end = rand() % NUMROOMSWIDE;
     }
     u32 endRoomIndex = rand() % chapterOneRooms["end"].size();
-    roomDataArray[NUMFLOORS-1][end] = chapterOneRooms["end"][endRoomIndex];
+    roomDataArray[0][end] = chapterOneRooms["end"][endRoomIndex];
+
+    // START ROOM
+    u32 start = rand() % NUMROOMSWIDE;
+    while(!roomDataArray[NUMFLOORS-1][start].data.empty())
+    {
+        start = rand() % NUMROOMSWIDE;
+    }
+    u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
+    roomDataArray[NUMFLOORS-1][start] = chapterOneRooms["start"][startRoomIndex];
 
     // CORRIDORS
     for(int i = 0; i < NUMFLOORS; ++i)

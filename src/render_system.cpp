@@ -9,14 +9,20 @@ INTERNAL u32 GetRenderState(const SpriteComponent& sprite)
     state |= sprite.layer;
     state <<= 16;
     state |= (u16) sprite.texId;
-    state <<= 8; // TODO(Kevin): also encode shader information
+    state <<= 8;
+    state |= (u8) sprite.shaderId;
 
     return state;
 };
 
-INTERNAL u32 GetTexIDFromRenderState(u32 state)
+INTERNAL u16 GetTexIDFromRenderState(u32 state)
 {
     return (state & 0x00FFFF00) >> 8;
+}
+
+INTERNAL u8 GetShaderIDFromRenderState(u32 state)
+{
+    return (state & 0x000000FF);
 }
 
 // Using counting sort to sort the elements in the basis of significant places
@@ -265,7 +271,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
         {
             // FLUSH BATCH
 
-            const GLuint used_effect_enum = (GLuint) EFFECT_ASSET_ID::SPRITE;
+            const GLuint used_effect_enum = (GLuint) GetShaderIDFromRenderState(renderState);
             const GLuint program = (GLuint)effects[used_effect_enum];
 
             glUseProgram(program);

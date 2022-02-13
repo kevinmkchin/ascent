@@ -55,7 +55,8 @@ INTERNAL bool SDLInitialize()
         printf("SDL window failed to create.\n");
         return false;
     }
-    SDL_SetWindowResizable(window, SDL_TRUE); // TODO(Kevin): make window resizable
+    SDL_SetWindowResizable(window, SDL_TRUE);
+    printf("SDL window created.\n");
 
     if ((openglContext = SDL_GL_CreateContext(window)) == nullptr)
     {
