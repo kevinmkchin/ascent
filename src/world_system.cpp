@@ -108,21 +108,20 @@ bool WorldSystem::step(float deltaTime) {
 
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
+    renderer->bgTexId = TEXTURE_ASSET_ID::BG1;
+
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
 
-	// Reset the game speed
-	current_speed = 1.f;
-
 	// Remove all entities that we created
-	// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
-	while (registry.motions.entities.size() > 0)
-	    registry.remove_all_components_of(registry.motions.entities.back());
+	while (registry.transforms.entities.size() > 0)
+	    registry.remove_all_components_of(registry.transforms.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+    // Create random level
     srand((u32) time(nullptr));
     u32 seed = rand()%1000000000;
     SetRandomizerSeed(seed);
@@ -130,7 +129,10 @@ void WorldSystem::restart_game() {
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
 
+    // Create player
     player = createPlayer(currentLevelData.playerStart);
+
+    // Create enemies
 	enemy1 = createEnemy(vec2(238.f, 64.f));
 }
 

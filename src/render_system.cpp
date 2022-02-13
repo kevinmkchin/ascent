@@ -159,6 +159,11 @@ void RenderSystem::drawSprite(const TransformComponent entityTransform, const Sp
 
 void RenderSystem::drawBackground()
 {
+    if(bgTexId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
+    {
+        return;
+    }
+
     const GLuint used_effect_enum = (GLuint) EFFECT_ASSET_ID::BACKGROUND;
     const GLuint program = (GLuint)effects[used_effect_enum];
 
@@ -205,7 +210,7 @@ void RenderSystem::drawBackground()
 
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::BG1];
+    GLuint texture_id = texture_gl_handles[(GLuint)bgTexId];
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
     // Draw

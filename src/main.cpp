@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
 		float elapsed_ms = (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
         float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
+        if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
 
 		world.step(deltaTime);
 		ai.step(deltaTime);
