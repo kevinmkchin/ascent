@@ -21,8 +21,7 @@ INTERNAL void AddTileSizedCollider(Entity tileEntity)
 
 INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::MIDTILE1)
 {
-    Entity entity = Entity::CreateEntity();
-    entity.SetTag(TAG_PLAYERBLOCKABLE);
+    Entity entity = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
 
     auto& transform = registry.transforms.emplace(entity);
 
@@ -44,7 +43,7 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId
 
 INTERNAL Entity CreateLadderTile(i32 column, i32 row)
 {
-    Entity entity = Entity::CreateEntity();
+    Entity entity = Entity::CreateEntity(TAG_LADDER);
 
     auto& transform = registry.transforms.emplace(entity);
 
@@ -56,7 +55,7 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                TEXTURE_ASSET_ID::SKULLS1
+                TEXTURE_ASSET_ID::LADDER
             }
     );
 
