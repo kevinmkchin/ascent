@@ -19,17 +19,22 @@ INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
 INTERNAL float coyoteTimeDefaultSeconds = 0.08f;
 // VARIABLE JUMP HEIGHT
 INTERNAL float percentYVelocityOnJumpRelease = 0.5f;
+// LADDER
+INTERNAL float ladderClimbSpeed = 64.f;
 
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
 INTERNAL bool bJumpKeyHeld = false;
 INTERNAL float jumpBufferTimer = 999.f;
 INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
+INTERNAL bool bLaddered = false;
 
-INTERNAL void HandleMovementInput(MotionComponent& playerMotion)
+INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
 {
     bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
     bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
+    bool bUpKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP);
+    bool bDownKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN);
     bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
     bool bJumpKeyJustReleased = Input::HasKeyBeenReleased(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
     bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
@@ -80,12 +85,11 @@ INTERNAL void HandleMovementInput(MotionComponent& playerMotion)
     playerMotion.acceleration.y = playerGravity;
     playerMotion.terminalVelocity.x = playerMaxMoveSpeed;
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
-}
 
-INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
-{
     bool bGrounded = false;
+    bool bStillLaddered = false;
     bool bCollidedDirectlyAbove = false;
+    bool bJumpingAndAscending = bJumping && playerMotion.velocity.y < 0.f;
 
     std::vector<CollisionEvent> playerRelevantCollisions;
     std::vector<CollisionEvent> groundableCollisions;
@@ -98,7 +102,13 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
         const CollisionEvent colEvent = collisionsRegistry.components[i];
         Entity entity = collisionsRegistry.entities[i];
         Entity entity_other = colEvent.other;
-        if (entity.GetTag() == TAG_PLAYER && entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+
+        if(entity.GetTag() != TAG_PLAYER)
+        {
+            continue;
+        }
+
+        if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
         {
             playerRelevantCollisions.push_back(colEvent);
 
@@ -124,6 +134,21 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
                 }
             }
         }
+
+        /** If pressing up, colliding with a ladder, and not jumping and ascending, then we can climb ladder */
+        if (bUpKeyPressed && entity_other.GetTag() == TAG_LADDER && !bJumpingAndAscending)
+        {
+            bLaddered = true;
+        }
+        if (bLaddered && entity_other.GetTag() == TAG_LADDER)
+        {
+            bStillLaddered = true;
+        }
+    }
+
+    if(!bStillLaddered)
+    {
+        bLaddered = false;
     }
 
     // Check if actually grounded
@@ -160,11 +185,29 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
             }
         }
     }
+    if(bLaddered)
+    {
+        playerMotion.acceleration.y = 0.0;
+        playerMotion.velocity.y = 0.f;
+        if(bUpKeyPressed)
+        {
+            playerMotion.velocity.y += -ladderClimbSpeed;
+        }
+        if(bDownKeyPressed)
+        {
+            playerMotion.velocity.y += ladderClimbSpeed;
+        }
+        bGrounded = true;
+    }
 
     if(bGrounded)
     {
         bJumping = false;
-        playerMotion.velocity.y = 0.f;
+        if(!bLaddered)
+        {
+            // Only set velocity to 0 if we are not climbing ladder
+            playerMotion.velocity.y = 0.f;
+        }
         coyoteTimer = coyoteTimeDefaultSeconds;
     }
     else if(!bJumping) // if not grounded and not jumping, then we must be falling
@@ -190,6 +233,7 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
         {
             bPendingJump = false;
             bJumping = true;
+            bLaddered = false;
             playerMotion.velocity.y = -playerJumpSpeed;
         }
     }
@@ -201,6 +245,5 @@ void PlayerSystem::Step(float deltaTime)
 
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
 
-    HandleMovementInput(playerMotion);
     ResolveMovement(deltaTime, playerMotion);
 }

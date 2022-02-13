@@ -42,6 +42,13 @@ public:
         return e;
     }
 
+    static Entity CreateEntity(u8 tag)
+    {
+        Entity e = CreateEntity();
+        e.SetTag(tag);
+        return e;
+    }
+
     void SetTag(u8 tag)
     {
     	tagAndId = (tag << 24) | (0x00FFFFFF & tagAndId);

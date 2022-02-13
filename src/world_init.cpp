@@ -4,6 +4,8 @@
 
 // Entity initialization code
 
+// NOTE: Do NOT use Entity() constructor to reserve an entity. Use Entity::CreateEntity() instead.
+
 Entity createBox(vec2 position)
 {
     // Reserve an entity
@@ -37,8 +39,7 @@ Entity createBox(vec2 position)
 
 Entity createPlayer(vec2 position)
 {
-    auto entity = Entity::CreateEntity();
-    entity.SetTag(TAG_PLAYER);
+    auto entity = Entity::CreateEntity(TAG_PLAYER);
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);

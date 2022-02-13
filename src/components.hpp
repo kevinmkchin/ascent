@@ -29,29 +29,29 @@
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
-enum class TEXTURE_ASSET_ID {
-    BUG = 0,
-	EAGLE = BUG + 1,
-    SPELUNKY = EAGLE + 1,
-    MONSTER = SPELUNKY + 1,
-    TOPTILE1 = MONSTER + 1,
-    MIDTILE1 = TOPTILE1 + 1,
-    BOTTILE1 = MIDTILE1 + 1,
-    TOPBOTTILE1 = BOTTILE1 + 1,
-    SKULLS1 = TOPBOTTILE1 + 1,
-    SKULLS2 = SKULLS1 + 1,
-    BG1 = SKULLS2 + 1,
-    TILE_EXAMPLE = BG1 + 1,
-    BOX = TILE_EXAMPLE + 1,
-    TEXTURE_COUNT = BOX + 1
+enum class TEXTURE_ASSET_ID : u32 
+{
+	EAGLE,
+    MONSTER,
+    TOPTILE1,
+    MIDTILE1,
+    BOTTILE1,
+    TOPBOTTILE1,
+    SKULLS1,
+    SKULLS2,
+    BG1,
+    BOX,
+    LADDER,
+    TILE_EXAMPLE,
+
+
+    TEXTURE_COUNT
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 // Make sure these paths remain in sync with the associated enumerators.
 const std::array<std::string, texture_count> texture_paths = {
-        textures_path("bug.png"),
         textures_path("eagle.png"),
-        textures_path("spelunky.png"),
         textures_path("monster.png"),
         textures_path("toptile.png"),
         textures_path("midtile.png"),
@@ -60,15 +60,19 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("skulls1.png"),
         textures_path("skulls2.png"),
         textures_path("bg.png"),
-        textures_path("tile_example.png"),
         textures_path("box.png"),
+        textures_path("ladder.png"),
+        textures_path("tile_example.png"),
 };
 
-enum class EFFECT_ASSET_ID {
-    FINAL_PASS = 0,
-    SPRITE = 1,
-    BACKGROUND = 2,
-    EFFECT_COUNT = BACKGROUND + 1
+enum class EFFECT_ASSET_ID : u32
+{
+    FINAL_PASS,
+    SPRITE,
+    BACKGROUND,
+
+
+    EFFECT_COUNT
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
