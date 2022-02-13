@@ -98,7 +98,7 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
         const CollisionEvent colEvent = collisionsRegistry.components[i];
         Entity entity = collisionsRegistry.entities[i];
         Entity entity_other = colEvent.other;
-        if (registry.players.has(entity))
+        if (entity.GetTag() == TAG_PLAYER && entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
         {
             playerRelevantCollisions.push_back(colEvent);
 

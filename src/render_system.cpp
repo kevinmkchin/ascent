@@ -49,7 +49,7 @@ INTERNAL void countingSort(std::vector<SpriteTransformPair>& array, int size, in
 // Main function to implement radix sort
 INTERNAL void radixSort(std::vector<SpriteTransformPair>& array)
 {
-    int size = array.size();
+    int size = (int) array.size();
 
     // Get maximum element
     u32 max = array[0].renderState;
@@ -506,7 +506,7 @@ void RenderSystem::finalDrawToScreen()
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * 6, refQuadIndices, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
-        printf("Screen size changed\n");
+        printf("Screen size changed.\n");
     }
 
     // Bind our texture in Texture Unit 0

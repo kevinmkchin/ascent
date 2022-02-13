@@ -7,7 +7,7 @@
 Entity createBox(vec2 position)
 {
     // Reserve an entity
-    auto entity = Entity();
+    auto entity = Entity::CreateEntity();
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
@@ -37,7 +37,8 @@ Entity createBox(vec2 position)
 
 Entity createPlayer(vec2 position)
 {
-    auto entity = Entity();
+    auto entity = Entity::CreateEntity();
+    entity.SetTag(TAG_PLAYER);
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
@@ -59,7 +60,7 @@ Entity createPlayer(vec2 position)
         entity,
         {
             dimensions,
-            0,
+            5,
             TEXTURE_ASSET_ID::BOX
         }
     );
@@ -71,7 +72,7 @@ Entity createPlayer(vec2 position)
 
 Entity createEnemy(vec2 position)
 {
-	auto entity = Entity();
+	auto entity = Entity::CreateEntity();
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);

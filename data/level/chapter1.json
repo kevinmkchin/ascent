@@ -1,1 +1,57 @@
-{"count":5,"rooms":[{"name":"start-eg1","type":"start","data":"AAAAAAAAAAAAAAAAAAAAAA000AA0AA0000000000A00000000000000000001000000000AAA00000AAAAAAAAA0AAAAAAAAAAA","width":11,"height":9},{"name":"end-eg1","type":"end","data":"AAAAAAAAAAA000000000000000000000000000000000000000000000AA00000AA00AAA0A0AAA0AAAAAAAAAAAAAAAAAAAAAA","width":11,"height":9},{"name":"c-eg1","type":"corridor","data":"AAAAAAAAAAA0AAAA0AAA0000000000000000000000000000AAA000000000000000AA000000AA0AAAAA0AAAAAAAAAAAAAAAA","width":11,"height":9},{"name":"l-eg1","type":"landing","data":"AAA00000AAAAAA00000AAA00A00000AAA0000000000000000000000000000000000000000000000000000000AAAAAAAAAAA","width":11,"height":9},{"name":"f-eg1","type":"falling","data":"AAAAAAAAAAAAAAAAAAAAAAAAA000000AAA000000000A0000000000000000000000A000000000AAA0000000AAAAA0000AAAA","width":11,"height":9}]}
+{
+  "glyphnotes": {
+    "0": "empty",
+    "1": "startpoint",
+    "2": "endpoint",
+    "a": "regular tile",
+    "b": "wooden tile",
+    "c": "",
+    "l": "ladder",
+    "s": "loc shopitem"
+  },
+  "count": 6,
+  "rooms": [
+    {
+      "name": "start-eg1",
+      "type": "start",
+      "data": "AAAAAAAAAAAAAAAAAAAAAA000AA0AA0000000000A00000000000000000001000000000AAA00000AAAAAAAAA0AAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "end-eg1",
+      "type": "end",
+      "data": "AAAAAAAAAAA000000000000000000000000000000000000000000000AA00000AA00AAA020AAA0AAAAAAAAAAAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "c-eg1",
+      "type": "corridor",
+      "data": "AAAAAAAAAAA0AAAA0AAA0000000000000000000000000000AAA000000000000000AA000000AA0AAAAA0AAAAAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "l-eg1",
+      "type": "landing",
+      "data": "AAAL0000AAAAAAL000LAAA00AL000LAAA000L000L000000L000L000000L000L000000L000L000000L000L000AAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "f-eg1",
+      "type": "falling",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAAAA000000AAA000000000A0000000000000000000000A000000000AAA0000000AAAAA0000AAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "shop-1",
+      "type": "shop",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBAB000000000B0000S0S000000LBBBBBL0000L00000L0000L0S0S0L00ABBBBBBBBBA",
+      "width": 11,
+      "height": 9
+    }
+  ]
+}

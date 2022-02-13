@@ -47,14 +47,6 @@ enum class TEXTURE_ASSET_ID {
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-enum class EFFECT_ASSET_ID {
-    FINAL_PASS = 0,
-    SPRITE = 1,
-    BACKGROUND = 2,
-    EFFECT_COUNT = BACKGROUND + 1
-};
-const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
-
 // Make sure these paths remain in sync with the associated enumerators.
 const std::array<std::string, texture_count> texture_paths = {
         textures_path("bug.png"),
@@ -71,6 +63,14 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("tile_example.png"),
         textures_path("box.png"),
 };
+
+enum class EFFECT_ASSET_ID {
+    FINAL_PASS = 0,
+    SPRITE = 1,
+    BACKGROUND = 2,
+    EFFECT_COUNT = BACKGROUND + 1
+};
+const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 // Make sure these paths remain in sync with the associated enumerators.
 const std::array<std::string, effect_count> effect_paths = {
@@ -137,12 +137,6 @@ struct CollisionEvent
 	CollisionEvent(Entity& other) { this->other = other; };
 };
 
-struct LevelGeometryComponent
-{
-
-};
-
-
 // Data structure for toggling debug mode
 struct Debug {
 	bool in_debug_mode = 0;
@@ -159,4 +153,11 @@ struct DebugComponent
 struct HealthBar
 {
 	float health = 0;
+};
+
+enum GAMETAGS : u8
+{
+    TAG_PLAYER,
+    TAG_LADDER,
+    TAG_PLAYERBLOCKABLE,
 };
