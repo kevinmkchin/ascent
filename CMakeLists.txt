@@ -28,13 +28,23 @@ endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp")
 
 # You can switch to use the file GLOB for simplicity but at your own risk
-file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
+# file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
 
-#set(SOURCE_FILES
-#	src/main.cpp
-#	src/common.cpp
-#   ...
-#	)
+set(SOURCE_FILES
+    src/main.cpp
+    src/common.cpp
+    src/components.cpp
+    src/input.cpp
+    src/ai_system.cpp
+    src/physics_system.cpp
+    src/player_system.cpp
+    src/render_system.cpp
+    src/render_system_init.cpp
+    src/tiny_ecs.cpp
+    src/tiny_ecs_registry.cpp
+    src/world_init.cpp
+    src/world_system.cpp
+	)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
 if (IS_OS_MAC)
@@ -83,6 +93,10 @@ if (IS_OS_LINUX OR IS_OS_MAC)
     # Increase warning level
     target_compile_options(${PROJECT_NAME} PUBLIC "-Wall")
 elseif (IS_OS_WINDOWS)
+    if(MSVC)
+      add_definitions(/MP)
+    endif()
+    
 # https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
     set(SDL2_FOUND TRUE)
 
