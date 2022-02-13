@@ -29,12 +29,10 @@ INTERNAL float jumpBufferTimer = 999.f;
 INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
 INTERNAL bool bLaddered = false;
 
-INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
+INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 {
     bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
     bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
-    bool bUpKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP);
-    bool bDownKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN);
     bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
     bool bJumpKeyJustReleased = Input::HasKeyBeenReleased(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
     bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
@@ -85,6 +83,14 @@ INTERNAL void ResolveMovement(float deltaTime, MotionComponent& playerMotion)
     playerMotion.acceleration.y = playerGravity;
     playerMotion.terminalVelocity.x = playerMaxMoveSpeed;
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
+}
+
+INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion)
+{
+    bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
+    bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
+    bool bUpKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP);
+    bool bDownKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN);
 
     bool bGrounded = false;
     bool bStillLaddered = false;
@@ -245,5 +251,6 @@ void PlayerSystem::Step(float deltaTime)
 
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
 
-    ResolveMovement(deltaTime, playerMotion);
+    HandleBasicMovementInput(playerMotion);
+    ResolveComplexMovement(deltaTime, playerMotion);
 }

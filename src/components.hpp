@@ -29,7 +29,7 @@
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
-enum class TEXTURE_ASSET_ID : u32 
+enum class TEXTURE_ASSET_ID : u16 
 {
 	EAGLE,
     MONSTER,
@@ -65,7 +65,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("tile_example.png"),
 };
 
-enum class EFFECT_ASSET_ID : u32
+enum class EFFECT_ASSET_ID : u8
 {
     FINAL_PASS,
     SPRITE,
@@ -126,9 +126,10 @@ struct CollisionComponent
 
 struct SpriteComponent
 {
-    vec2 dimensions = {0.f,0.f}; // in pixels
-    u8 layer = 0; // render layer. higher layer is drawn on top of lower layers.
-    TEXTURE_ASSET_ID texId; // ID for the texture we want to use
+    vec2 dimensions = {0.f,0.f};// in pixels
+    u8 layer = 0;               // render layer. higher layer is drawn on top of lower layers.
+    TEXTURE_ASSET_ID texId;     // ID for the texture to use
+    EFFECT_ASSET_ID shaderId;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
 };
 
