@@ -246,10 +246,8 @@ INTERNAL void UpdateLevelGeometry()
     }
 }
 
-INTERNAL void GenerateNewLevel(u32 seed)
+INTERNAL void GenerateNewLevel()
 {
-    srand(seed);
-
     std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
     const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
     i32 rw = sampleRoom.width;
@@ -340,4 +338,9 @@ INTERNAL void GenerateNewLevel(u32 seed)
     currentLevelData.cameraBoundMax.y = (((NUMTILESTALL)+1) * TILE_SIZE) - halfHeight;
 
     free(tileDataArray);
+}
+
+void SetRandomizerSeed(u32 seed)
+{
+    srand(seed);
 }

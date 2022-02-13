@@ -40,7 +40,6 @@ set(SOURCE_FILES
     src/player_system.cpp
     src/render_system.cpp
     src/render_system_init.cpp
-    src/tiny_ecs.cpp
     src/tiny_ecs_registry.cpp
     src/world_init.cpp
     src/world_system.cpp

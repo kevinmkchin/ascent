@@ -2,6 +2,8 @@
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
 
+#include <SDL.h>
+
 // stlib
 #include <chrono>
 
@@ -13,7 +15,8 @@
 #include "input.hpp"
 #include "player_system.hpp"
 
-#include <SDL.h>
+#define TINY_ECS_LIB_IMPLEMENTATION
+#include "tiny_ecs.hpp"
 
 #define WINDOW_TITLE "ASCENT"
 #define WINDOW_INITIAL_WIDTH 800
