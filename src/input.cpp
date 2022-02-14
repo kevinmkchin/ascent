@@ -46,7 +46,7 @@ bool Input::GameRightIsPressed()
 
 bool Input::GameJumpHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A)
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A);
 }
 
 bool Input::GameJumpHasBeenReleased()

@@ -43,8 +43,8 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 {
     const bool bLeftKeyPressed = Input::GameLeftIsPressed();
     const bool bRightKeyPressed = Input::GameRightIsPressed();
-    const bool bJumpKeyJustPressed = Input::GameUpHasBeenPressed();
-    const bool bJumpKeyJustReleased = Input::GameUpHasBeenReleased();
+    const bool bJumpKeyJustPressed = Input::GameJumpHasBeenPressed();
+    const bool bJumpKeyJustReleased = Input::GameJumpHasBeenReleased();
     bJumpKeyHeld = Input::GameJumpIsPressed();
 
     float currentXAcceleration = 0.f;
