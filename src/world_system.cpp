@@ -23,9 +23,10 @@ WorldSystem::WorldSystem()
 	rng = std::default_random_engine(std::random_device()());
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg)
+void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg)
 {
     this->renderer = renderer_arg;
+    this->playerSystem = player_sys_arg;
 
     loadAllContent();
 
@@ -44,6 +45,9 @@ void WorldSystem::cleanUp()
 void WorldSystem::StartNewRun()
 {
     printf("Starting new run.\n");
+
+    // REINSTANTIATE SOME THINGS
+    *playerSystem = PlayerSystem();
 
     // ENTER THE GAME MODE
     SetCurrentMode(MODE_INGAME);

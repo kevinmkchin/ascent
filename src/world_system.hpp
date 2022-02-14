@@ -10,7 +10,8 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#include "render_system.hpp"
+class RenderSystem;
+class PlayerSystem;
 
 enum GAMEMODE
 {
@@ -42,7 +43,7 @@ public:
 	WorldSystem();
 
 	// starts the game
-	void init(RenderSystem* renderer);
+	void init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg);
 
     void cleanUp();
 
@@ -82,6 +83,7 @@ private:
     GAMEMODE currentGameMode;
     GAMELEVELENUM currentGameStage;
 	RenderSystem* renderer;
+	PlayerSystem* playerSystem;
 	Entity player;
 
 	// music references
