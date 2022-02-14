@@ -38,6 +38,27 @@
 
 namespace Input {
 
+//////////////////////////////////////////////////////////////////////
+// ASCENT GAME SPECIFIC FUNCTIONS
+//////////////////////////////////////////////////////////////////////
+
+    // WHETHER WE ARE PRESSING UP KEY WHATEVER THAT MAY BE
+    bool GameUpHasBeenPressed();
+    bool GameDownHasBeenPressed();
+    bool GameLeftHasBeenPressed();
+    bool GameRightHasBeenPressed();
+    bool GameUpIsPressed();
+    bool GameDownIsPressed();
+    bool GameLeftIsPressed();
+    bool GameRightIsPressed();
+    bool GameJumpHasBeenPressed();
+    bool GameJumpHasBeenReleased();
+    bool GameJumpIsPressed();
+
+//////////////////////////////////////////////////////////////////////
+// GENERIC CLASSES AND FUNCTIONS BELOW
+//////////////////////////////////////////////////////////////////////
+
     struct GamepadState {
         /* Stores the state of an Xbox 360 style controller */
         bool16 isConnected = 0;

@@ -44,6 +44,8 @@ enum class TEXTURE_ASSET_ID : u16
     LADDER,
     TILE_EXAMPLE,
 
+    MAINMENUBG,
+
 
     TEXTURE_COUNT
 };
@@ -63,6 +65,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("box.png"),
         textures_path("ladder.png"),
         textures_path("tile_example.png"),
+
+        textures_path("mainmenu.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -163,6 +167,7 @@ struct HealthBar
 enum GAMETAGS : u8
 {
     TAG_PLAYER,
+    TAG_LEVELENDPOINT,
     TAG_LADDER,
     TAG_PLAYERBLOCKABLE,
 };

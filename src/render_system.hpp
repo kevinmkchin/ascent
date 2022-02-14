@@ -40,10 +40,13 @@ public:
 
     // Call this when the display resolution (i.e. the window size) changes
     void updateBackBufferSize();
-    
+
     // Camera bounds
     vec2 cameraBoundMin;
     vec2 cameraBoundMax;
+
+    // Background texture
+    TEXTURE_ASSET_ID bgTexId = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 private:
     void initializeGlTextures();
 
