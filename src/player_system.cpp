@@ -124,7 +124,7 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
             continue;
         }
 
-        if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+        if(entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
         {
             playerRelevantCollisions.push_back(colEvent);
 
@@ -263,7 +263,7 @@ void PlayerSystem::Step(float deltaTime)
         return;
     }
     
-    const Entity playerEntity = registry.players.entities[0];
+    playerEntity = registry.players.entities[0];
 
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
 

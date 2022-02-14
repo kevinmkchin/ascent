@@ -7,7 +7,8 @@
     "b": "wooden tile",
     "c": "",
     "l": "ladder",
-    "s": "loc shopitem"
+    "s": "loc shopitem",
+    "w": "spikes"
   },
   "count": 6,
   "rooms": [
@@ -28,14 +29,14 @@
     {
       "name": "c-eg1",
       "type": "corridor",
-      "data": "AAAAAAAAAAA0AAAA0AAA0000000000000000000000000000AAA000000000000000AA000000AA0AAAAA0AAAAAAAAAAAAAAAA",
+      "data": "AAAAAAAAAAA0AAAA0AAA0000000000000000000000000000AAA000000000000000AA000000AA0AAAAAWAAAAAAAAAAAAAAAA",
       "width": 11,
       "height": 9
     },
     {
       "name": "l-eg1",
       "type": "landing",
-      "data": "AAAL0000AAAAAAL000LAAA00AL000LAAA000L000L000000L000L000000L000L000000L000L000000L000L000AAAAAAAAAAA",
+      "data": "AAAL0000AAAAAAL000LAAA00AL000LAAA000L000L000000L000L000000L000L000000L000L000000L0WWL000AAAAAAAAAAA",
       "width": 11,
       "height": 9
     },

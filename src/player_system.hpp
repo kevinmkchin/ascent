@@ -13,7 +13,9 @@ public:
 
 	void Step(float deltaTime);
 
+private:
 	u32 experiencePointsGained;
 	u32 goldGained;
 
+	Entity playerEntity;
 };
