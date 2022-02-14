@@ -12,6 +12,28 @@
 
 #include "render_system.hpp"
 
+enum GAMEMODE
+{
+	MODE_MAINMENU,
+	MODE_INGAME
+};
+
+enum GAMELEVELENUM : u8
+{
+	CHAPTER_ONE_STAGE_ONE,
+	CHAPTER_ONE_STAGE_TWO,
+	// CHAPTER_ONE_STAGE_THREE,
+	// CHAPTER_TWO_STAGE_ONE,
+	// CHAPTER_TWO_STAGE_TWO,
+	// CHAPTER_TWO_STAGE_THREE,
+	// CHAPTER_THREE_STAGE_ONE,
+	// CHAPTER_THREE_STAGE_TWO,
+	// CHAPTER_THREE_STAGE_THREE,
+	END_THE_GAME,
+
+	GAME_NOT_STARTED,
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -24,6 +46,8 @@ public:
 
     void cleanUp();
 
+    void StartNewRun();
+
 	// Steps the game ahead by deltaTime
 	bool step(float deltaTime);
 
@@ -33,8 +57,10 @@ public:
     // Handle input events
     void SDLProcessEvents();
 
-	// Should the game be over ?
+    GAMEMODE GetCurrentMode() { return currentGameMode; }
+
 	bool is_over()const;
+
     void set_is_over(bool over) { gameIsRunning = over; }
 
 private:
@@ -42,22 +68,17 @@ private:
 
     void unloadAllContent();
 
-	// restart level
-	void restart_game();
+	void StartNewStage(GAMELEVELENUM stage);
 
 	// OpenGL window handle
 	SDL_Window* window;
 
-	// Number of bug eaten by the chicken, displayed in the window title
-	unsigned int points;
-
 	// Game state
-    bool gameIsRunning = true;
+    bool gameIsRunning;
+    GAMEMODE currentGameMode;
+    GAMELEVELENUM currentGameStage;
 	RenderSystem* renderer;
-	float current_speed;
-	float next_eagle_spawn;
-	float next_bug_spawn;
-	Entity player_chicken;
+	Entity player;
 
 	// music references
 	Mix_Music* background_music;

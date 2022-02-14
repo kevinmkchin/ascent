@@ -163,6 +163,7 @@ struct HealthBar
 enum GAMETAGS : u8
 {
     TAG_PLAYER,
+    TAG_LEVELENDPOINT,
     TAG_LADDER,
     TAG_PLAYERBLOCKABLE,
 };

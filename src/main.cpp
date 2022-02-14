@@ -126,10 +126,13 @@ int main(int argc, char* argv[])
         if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
 
 		world.step(deltaTime);
-		ai.step(deltaTime);
-		physics.step(deltaTime);
-        playerSystem.Step(deltaTime);
-		world.handle_collisions();
+        if(world.GetCurrentMode() == MODE_INGAME)
+        {   
+            ai.step(deltaTime);
+            physics.step(deltaTime);
+            playerSystem.Step(deltaTime);
+            world.handle_collisions();
+        }
 
         Input::ResetControllerStates();
         Input::ResetKeyboardStates();

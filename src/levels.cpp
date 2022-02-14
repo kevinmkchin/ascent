@@ -66,6 +66,30 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
     return entity;
 }
 
+INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
+{
+    Entity entity = Entity::CreateEntity(TAG_LEVELENDPOINT);
+
+    auto& transform = registry.transforms.emplace(entity);
+
+    transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
+    transform.center = {0.f,0.f};
+
+    registry.sprites.insert(
+            entity,
+            {
+                { TILE_SIZE, TILE_SIZE },
+                0,
+                TEXTURE_ASSET_ID::EAGLE,
+                EFFECT_ASSET_ID::SPRITE
+            }
+    );
+
+    AddTileSizedCollider(entity);
+
+    return entity;
+}
+
 namespace ns
 {
     using JSON = nlohmann::json;
@@ -162,6 +186,7 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
 
                 case '2':{
                     // end point
+                    CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
                 case 'L':{
