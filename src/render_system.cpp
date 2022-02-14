@@ -159,6 +159,11 @@ void RenderSystem::drawSprite(const TransformComponent entityTransform, const Sp
 
 void RenderSystem::drawBackground()
 {
+    if(bgTexId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
+    {
+        return;
+    }
+
     const GLuint used_effect_enum = (GLuint) EFFECT_ASSET_ID::BACKGROUND;
     const GLuint program = (GLuint)effects[used_effect_enum];
 
@@ -180,10 +185,10 @@ void RenderSystem::drawBackground()
         };
         float refQuadVertices[16] = {
                 //  x   y    u    v
-                -1.f, -1.f, 0.f, 0.f,
-                1.f, -1.f, 1.f, 0.f,
-                -1.f, 1.f, 0.f, 1.f,
-                1.f, 1.f, 1.f, 1.f
+                -1.f, 1.f, 0.f, 0.f,
+                1.f, 1.f, 1.f, 0.f,
+                -1.f, -1.f, 0.f, 1.f,
+                1.f, -1.f, 1.f, 1.f
         };
 
         glGenVertexArrays(1, &bgQuadVAO);
@@ -205,7 +210,7 @@ void RenderSystem::drawBackground()
 
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::BG1];
+    GLuint texture_id = texture_gl_handles[(GLuint)bgTexId];
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
     // Draw
@@ -404,19 +409,23 @@ void RenderSystem::draw()
     // DRAW BACKGROUND
     drawBackground();
 
-    // SORTING FOR BATCH DRAWING
-    std::vector<SpriteTransformPair> sortedSpriteArray(registry.sprites.size());
-    for(u32 i = 0; i < registry.sprites.size(); ++i)
+    // DRAW SPRITES
+    if(registry.sprites.size() > 0)
     {
-        SpriteTransformPair s;
-        s.sprite = registry.sprites.components[i];
-        s.renderState = GetRenderState(s.sprite);
-        s.transform = registry.transforms.get(registry.sprites.entities[i]);
-        sortedSpriteArray[i] = s;
+        // SORTING FOR BATCH DRAWING
+        std::vector<SpriteTransformPair> sortedSpriteArray(registry.sprites.size());
+        for(u32 i = 0; i < registry.sprites.size(); ++i)
+        {
+            SpriteTransformPair s;
+            s.sprite = registry.sprites.components[i];
+            s.renderState = GetRenderState(s.sprite);
+            s.transform = registry.transforms.get(registry.sprites.entities[i]);
+            sortedSpriteArray[i] = s;
+        }
+        radixSort(sortedSpriteArray);
+        // BATCH DRAW
+        BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
-    radixSort(sortedSpriteArray);
-    // BATCH DRAW
-    BatchDrawAllSprites(sortedSpriteArray, projection_2D);
 
 	// Truely render to the screen
     finalDrawToScreen();

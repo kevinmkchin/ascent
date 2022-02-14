@@ -3,6 +3,16 @@
 #include "player_system.hpp"
 #include "physics_system.hpp"
 
+
+
+PlayerSystem::PlayerSystem()
+    : experiencePointsGained(0)
+    , goldGained(0)
+{
+
+}
+
+#pragma region PLAYER_MOVEMENT
 /* PLAYER CONTROLLER CONFIGURATION */
 INTERNAL float playerGravity = 500.f;
 INTERNAL float playerJumpSpeed = 200.f;
@@ -31,11 +41,11 @@ INTERNAL bool bLaddered = false;
 
 INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 {
-    bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
-    bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
-    bool bJumpKeyJustPressed = Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A); // @TODO controller bind
-    bool bJumpKeyJustReleased = Input::HasKeyBeenReleased(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
-    bJumpKeyHeld = Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
+    const bool bLeftKeyPressed = Input::GameLeftIsPressed();
+    const bool bRightKeyPressed = Input::GameRightIsPressed();
+    const bool bJumpKeyJustPressed = Input::GameJumpHasBeenPressed();
+    const bool bJumpKeyJustReleased = Input::GameJumpHasBeenReleased();
+    bJumpKeyHeld = Input::GameJumpIsPressed();
 
     float currentXAcceleration = 0.f;
 
@@ -87,10 +97,10 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 
 INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion)
 {
-    bool bLeftKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
-    bool bRightKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
-    bool bUpKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP);
-    bool bDownKeyPressed = Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN);
+    const bool bLeftKeyPressed = Input::GameLeftIsPressed();
+    const bool bRightKeyPressed = Input::GameRightIsPressed();
+    const bool bUpKeyPressed = Input::GameUpIsPressed();
+    const bool bDownKeyPressed = Input::GameDownIsPressed();
 
     bool bGrounded = false;
     bool bStillLaddered = false;
@@ -244,9 +254,15 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
         }
     }
 }
+#pragma endregion
 
 void PlayerSystem::Step(float deltaTime)
 {
+    if(registry.players.entities.empty())
+    {
+        return;
+    }
+    
     const Entity playerEntity = registry.players.entities[0];
 
     MotionComponent& playerMotion = registry.motions.get(playerEntity);

@@ -12,35 +12,87 @@
 
 #include "levels.cpp"
 
-// Put game configuration stuff here maybe
-INTERNAL Entity player;
-INTERNAL Entity enemy1;
-
-// Create the bug world
 WorldSystem::WorldSystem()
-	: points(0)
-	, next_eagle_spawn(0.f)
-	, next_bug_spawn(0.f) {
+	: window(nullptr)
+    , renderer(nullptr)
+    , gameIsRunning(true)
+    , currentGameMode(MODE_MAINMENU)
+    , currentGameStage(GAME_NOT_STARTED)
+{
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg)
+void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg)
 {
+    this->renderer = renderer_arg;
+    this->playerSystem = player_sys_arg;
+
     loadAllContent();
 
-	this->renderer = renderer_arg;
+    SetCurrentMode(MODE_MAINMENU);
+
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
-
-	// Set all states to default
-    restart_game();
 }
 
 void WorldSystem::cleanUp()
 {
     unloadAllContent();
+}
+
+void WorldSystem::StartNewRun()
+{
+    printf("Starting new run.\n");
+
+    // REINSTANTIATE SOME THINGS
+    *playerSystem = PlayerSystem();
+
+    // ENTER THE GAME MODE
+    SetCurrentMode(MODE_INGAME);
+
+    // Set the randomizer seed (deterministic - if two runs use the same seed, they will have exactly the same randomizations)
+    srand((u32) time(nullptr));
+    u32 seed = rand()%1000000000;
+    SetRandomizerSeed(seed);
+
+    StartNewStage(CHAPTER_ONE_STAGE_ONE);
+}
+
+void WorldSystem::StartNewStage(GAMELEVELENUM stage)
+{
+
+// CLEAR STUFF FROM LAST STAGE
+    // registry.list_all_components(); // Debugging for memory/component leaks
+    // Remove all entities that we created
+    while (registry.transforms.entities.size() > 0)
+        registry.remove_all_components_of(registry.transforms.entities.back());
+    // registry.list_all_components(); // Debugging for memory/component leaks
+    player = Entity();
+
+// CHECK IF GAME SHOULD END
+    if(stage == END_THE_GAME)
+    {
+        printf("Ending run.\n");
+        SetCurrentMode(MODE_MAINMENU);
+        return;
+    }
+
+// GENERATE NEW STAGE
+    printf("Starting new stage.\n");
+    currentGameStage = stage;
+
+    // Create random level
+    GenerateNewLevel();
+    renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
+    renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
+
+    // Create player
+    player = createPlayer(currentLevelData.playerStart);
+
+    // Create enemies
+    createEnemy(vec2(238.f, 64.f));
 }
 
 void WorldSystem::loadAllContent()
@@ -74,17 +126,38 @@ void WorldSystem::unloadAllContent()
     registry.clear_all_components();
 }
 
+void WorldSystem::SetCurrentMode(GAMEMODE mode)
+{
+    currentGameMode = mode;
+
+    switch(mode)
+    {
+        case MODE_MAINMENU:{
+            renderer->bgTexId = TEXTURE_ASSET_ID::MAINMENUBG;
+        }break;
+        case MODE_INGAME:{
+            renderer->bgTexId = TEXTURE_ASSET_ID::BG1;
+        }break;
+    }
+}
+
+void WorldSystem::UpdateMode()
+{
+    if(GetCurrentMode() == MODE_MAINMENU)
+    {
+        if(Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN))
+        {
+            StartNewRun();
+        }
+    }   
+}
+
 // Update our game world
 bool WorldSystem::step(float deltaTime) {
 
 	// Remove debug info from the last Step
 	while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
-
-    if(Input::HasKeyBeenPressed(SDL_SCANCODE_R))
-    {
-        restart_game();
-    }
 
 //  float min_counter_ms = 3000.f;
 //	for (Entity entity : registry.deathTimers.entities) {
@@ -106,45 +179,17 @@ bool WorldSystem::step(float deltaTime) {
 	return true;
 }
 
-// Reset the world state to its initial state
-void WorldSystem::restart_game() {
-	// Debugging for memory/component leaks
-	registry.list_all_components();
-	printf("Restarting\n");
-
-	// Reset the game speed
-	current_speed = 1.f;
-
-	// Remove all entities that we created
-	// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
-	while (registry.motions.entities.size() > 0)
-	    registry.remove_all_components_of(registry.motions.entities.back());
-
-	// Debugging for memory/component leaks
-	registry.list_all_components();
-
-    srand((u32) time(nullptr));
-    u32 seed = rand()%1000000000;
-    SetRandomizerSeed(seed);
-    GenerateNewLevel();
-    renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
-    renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
-
-    player = createPlayer(currentLevelData.playerStart);
-	enemy1 = createEnemy(vec2(238.f, 64.f));
-}
-
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
+
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisionEvents;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
-		// The entity and its collider
+
         const CollisionEvent colEvent = collisionsRegistry.components[i];
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
-		// For now, we are only interested in collisions that involve the chicken
 		if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
             TransformComponent& playerTransform = registry.transforms.get(entity);
@@ -184,6 +229,11 @@ void WorldSystem::handle_collisions() {
                         playerTransform.position.y += collisionCheckAgain.collision_overlap.y;
                     }
                 }
+            }
+
+            if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed())
+            {
+                StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
             }
             
 //			// Checking Player - Deadly collisions

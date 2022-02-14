@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
 	// Initialize the main systems
 	renderer.init(window);
-	world.init(&renderer);
+	world.init(&renderer, &playerSystem);
 
 	// Variable timestep loop
 	auto t = Clock::now();
@@ -123,12 +123,17 @@ int main(int argc, char* argv[])
 		float elapsed_ms = (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
         float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
+        if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
 
+        world.UpdateMode();
 		world.step(deltaTime);
-		ai.step(deltaTime);
-		physics.step(deltaTime);
-        playerSystem.Step(deltaTime);
-		world.handle_collisions();
+        if(world.GetCurrentMode() == MODE_INGAME)
+        {   
+            ai.step(deltaTime);
+            physics.step(deltaTime);
+            playerSystem.Step(deltaTime);
+            world.handle_collisions();
+        }
 
         Input::ResetControllerStates();
         Input::ResetKeyboardStates();

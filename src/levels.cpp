@@ -66,6 +66,30 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
     return entity;
 }
 
+INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
+{
+    Entity entity = Entity::CreateEntity(TAG_LEVELENDPOINT);
+
+    auto& transform = registry.transforms.emplace(entity);
+
+    transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
+    transform.center = {0.f,0.f};
+
+    registry.sprites.insert(
+            entity,
+            {
+                { TILE_SIZE, TILE_SIZE },
+                0,
+                TEXTURE_ASSET_ID::EAGLE,
+                EFFECT_ASSET_ID::SPRITE
+            }
+    );
+
+    AddTileSizedCollider(entity);
+
+    return entity;
+}
+
 namespace ns
 {
     using JSON = nlohmann::json;
@@ -130,6 +154,17 @@ INTERNAL CurrentLevelData currentLevelData;
 
 INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
 
+INTERNAL void ClearLevelTiles()
+{
+    for(int i = 0; i < NUMTILESWIDE; ++i)
+    {
+        for(int j = 0; j < NUMTILESTALL; ++j)
+        {
+            levelTiles[i][j] = Entity();
+        }
+    }
+}
+
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
     for(int i = 0; i < r.height; ++i)
@@ -151,6 +186,7 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
 
                 case '2':{
                     // end point
+                    CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
                 case 'L':{
@@ -249,6 +285,8 @@ INTERNAL void UpdateLevelGeometry()
 
 INTERNAL void GenerateNewLevel()
 {
+    ClearLevelTiles();
+
     std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
     const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
     i32 rw = sampleRoom.width;
