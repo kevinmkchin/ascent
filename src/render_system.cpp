@@ -409,19 +409,23 @@ void RenderSystem::draw()
     // DRAW BACKGROUND
     drawBackground();
 
-    // SORTING FOR BATCH DRAWING
-    std::vector<SpriteTransformPair> sortedSpriteArray(registry.sprites.size());
-    for(u32 i = 0; i < registry.sprites.size(); ++i)
+    // DRAW SPRITES
+    if(registry.sprites.size() > 0)
     {
-        SpriteTransformPair s;
-        s.sprite = registry.sprites.components[i];
-        s.renderState = GetRenderState(s.sprite);
-        s.transform = registry.transforms.get(registry.sprites.entities[i]);
-        sortedSpriteArray[i] = s;
+        // SORTING FOR BATCH DRAWING
+        std::vector<SpriteTransformPair> sortedSpriteArray(registry.sprites.size());
+        for(u32 i = 0; i < registry.sprites.size(); ++i)
+        {
+            SpriteTransformPair s;
+            s.sprite = registry.sprites.components[i];
+            s.renderState = GetRenderState(s.sprite);
+            s.transform = registry.transforms.get(registry.sprites.entities[i]);
+            sortedSpriteArray[i] = s;
+        }
+        radixSort(sortedSpriteArray);
+        // BATCH DRAW
+        BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
-    radixSort(sortedSpriteArray);
-    // BATCH DRAW
-    BatchDrawAllSprites(sortedSpriteArray, projection_2D);
 
 	// Truely render to the screen
     finalDrawToScreen();
