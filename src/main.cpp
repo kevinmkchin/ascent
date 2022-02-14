@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
 	// Initialize the main systems
 	renderer.init(window);
-	world.init(&renderer);
+	world.init(&renderer, &playerSystem);
 
 	// Variable timestep loop
 	auto t = Clock::now();
