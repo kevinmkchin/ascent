@@ -24,7 +24,6 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId
     Entity entity = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
 
     auto& transform = registry.transforms.emplace(entity);
-
     transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
     transform.center = {0.f,0.f};
 
@@ -47,7 +46,6 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
     Entity entity = Entity::CreateEntity(TAG_LADDER);
 
     auto& transform = registry.transforms.emplace(entity);
-
     transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
     transform.center = {0.f,0.f};
 
@@ -66,12 +64,39 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
     return entity;
 }
 
+INTERNAL Entity CreateSpikeTile(i32 col, i32 row)
+{
+    Entity entity = Entity::CreateEntity(TAG_SPIKE);
+
+    auto& transform = registry.transforms.emplace(entity);
+    transform.center = {1.f,8.f};
+    transform.position = vec2(col * TILE_SIZE + transform.center.x, 
+                              row * TILE_SIZE + transform.center.y);
+
+    u8 whichSpike = rand()%2;
+    TEXTURE_ASSET_ID spikeTexId = whichSpike ? TEXTURE_ASSET_ID::SPIKES1 : TEXTURE_ASSET_ID::SPIKES2;
+    registry.sprites.insert(
+            entity,
+            {
+                { TILE_SIZE, TILE_SIZE },
+                0,
+                spikeTexId,
+                EFFECT_ASSET_ID::SPRITE
+            }
+    );
+
+    auto& collider = registry.colliders.emplace(entity);
+    collider.collision_neg = {0.f,0.f};
+    collider.collision_pos = { 6.f, 8.f };
+
+    return entity;
+}
+
 INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
 {
     Entity entity = Entity::CreateEntity(TAG_LEVELENDPOINT);
 
     auto& transform = registry.transforms.emplace(entity);
-
     transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
     transform.center = {0.f,0.f};
 
@@ -192,6 +217,11 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                 case 'L':{
                     // ladder
                     CreateLadderTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                }break;
+
+                case 'W':{
+                    // spikes
+                    CreateSpikeTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
                 case 'B':{

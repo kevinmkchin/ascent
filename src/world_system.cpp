@@ -193,19 +193,28 @@ void WorldSystem::handle_collisions() {
 		if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
             TransformComponent& playerTransform = registry.transforms.get(entity);
+            MotionComponent& playerMotion = registry.motions.get(entity);
             CollisionComponent& playerCollider = registry.colliders.get(entity);
 			HealthBar& playerHealth = registry.healthBar.get(entity);
+
+            if (entity_other.GetTag() == TAG_SPIKE)
+            {
+                if (playerHealth.health > 0)
+                {
+                    playerHealth.health -= 100;
+                }
+
+                printf("Colliding with spike. Reduced health to: %f \n", playerHealth.health);
+            }
 
 			if (registry.enemy.has(entity_other)) 
             {
 				if (playerHealth.health > 0) 
                 {
                     playerHealth.health -= 20;
+                    //Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
-				else 
-                {
-					//Mix_PlayChannel(-1, chicken_dead_sound, 0);
-				}
+
 				printf("Colliding with enemy. Reduced health to: %f \n", playerHealth.health);
 			}
 
@@ -223,6 +232,7 @@ void WorldSystem::handle_collisions() {
                     if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
                     {
                         playerTransform.position.x += collisionCheckAgain.collision_overlap.x;
+                        playerMotion.velocity.x = 0.f;
                     }
                     else
                     {
