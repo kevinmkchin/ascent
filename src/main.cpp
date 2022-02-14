@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
         float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
         if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
 
+        world.UpdateMode();
 		world.step(deltaTime);
         if(world.GetCurrentMode() == MODE_INGAME)
         {   

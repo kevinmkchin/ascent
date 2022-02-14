@@ -12,11 +12,6 @@
 
 #include "levels.cpp"
 
-
-// Put game configuration stuff here maybe
-INTERNAL Entity enemy1;
-
-
 WorldSystem::WorldSystem()
 	: window(nullptr)
     , renderer(nullptr)
@@ -30,14 +25,15 @@ WorldSystem::WorldSystem()
 
 void WorldSystem::init(RenderSystem* renderer_arg)
 {
+    this->renderer = renderer_arg;
+
     loadAllContent();
 
-	this->renderer = renderer_arg;
+    SetCurrentMode(MODE_MAINMENU);
+
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
-
-    StartNewRun();
 }
 
 void WorldSystem::cleanUp()
@@ -50,9 +46,7 @@ void WorldSystem::StartNewRun()
     printf("Starting new run.\n");
 
     // ENTER THE GAME MODE
-    currentGameMode = MODE_INGAME;
-
-    renderer->bgTexId = TEXTURE_ASSET_ID::BG1;
+    SetCurrentMode(MODE_INGAME);
 
     // Set the randomizer seed (deterministic - if two runs use the same seed, they will have exactly the same randomizations)
     srand((u32) time(nullptr));
@@ -72,13 +66,12 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
         registry.remove_all_components_of(registry.transforms.entities.back());
     // registry.list_all_components(); // Debugging for memory/component leaks
     player = Entity();
-    enemy1 = Entity();
 
 // CHECK IF GAME SHOULD END
     if(stage == END_THE_GAME)
     {
         printf("Ending run.\n");
-        currentGameMode = MODE_MAINMENU;
+        SetCurrentMode(MODE_MAINMENU);
         return;
     }
 
@@ -95,7 +88,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     player = createPlayer(currentLevelData.playerStart);
 
     // Create enemies
-    enemy1 = createEnemy(vec2(238.f, 64.f));
+    createEnemy(vec2(238.f, 64.f));
 }
 
 void WorldSystem::loadAllContent()
@@ -127,6 +120,32 @@ void WorldSystem::unloadAllContent()
 
     // Destroy all created components
     registry.clear_all_components();
+}
+
+void WorldSystem::SetCurrentMode(GAMEMODE mode)
+{
+    currentGameMode = mode;
+
+    switch(mode)
+    {
+        case MODE_MAINMENU:{
+            renderer->bgTexId = TEXTURE_ASSET_ID::MAINMENUBG;
+        }break;
+        case MODE_INGAME:{
+            renderer->bgTexId = TEXTURE_ASSET_ID::BG1;
+        }break;
+    }
+}
+
+void WorldSystem::UpdateMode()
+{
+    if(GetCurrentMode() == MODE_MAINMENU)
+    {
+        if(Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN))
+        {
+            StartNewRun();
+        }
+    }   
 }
 
 // Update our game world

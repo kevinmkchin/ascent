@@ -185,10 +185,10 @@ void RenderSystem::drawBackground()
         };
         float refQuadVertices[16] = {
                 //  x   y    u    v
-                -1.f, -1.f, 0.f, 0.f,
-                1.f, -1.f, 1.f, 0.f,
-                -1.f, 1.f, 0.f, 1.f,
-                1.f, 1.f, 1.f, 1.f
+                -1.f, 1.f, 0.f, 0.f,
+                1.f, 1.f, 1.f, 0.f,
+                -1.f, -1.f, 0.f, 1.f,
+                1.f, -1.f, 1.f, 1.f
         };
 
         glGenVertexArrays(1, &bgQuadVAO);

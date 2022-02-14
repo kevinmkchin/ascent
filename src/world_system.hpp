@@ -48,6 +48,8 @@ public:
 
     void StartNewRun();
 
+    void UpdateMode();
+
 	// Steps the game ahead by deltaTime
 	bool step(float deltaTime);
 
@@ -69,6 +71,8 @@ private:
     void unloadAllContent();
 
 	void StartNewStage(GAMELEVELENUM stage);
+
+    void SetCurrentMode(GAMEMODE mode);
 
 	// OpenGL window handle
 	SDL_Window* window;
