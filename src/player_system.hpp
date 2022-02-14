@@ -9,5 +9,11 @@
 class PlayerSystem
 {
 public:
+	PlayerSystem();
+
 	void Step(float deltaTime);
+
+	u32 experiencePointsGained;
+	u32 goldGained;
+
 };

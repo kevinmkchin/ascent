@@ -1,5 +1,68 @@
 #include "input.hpp"
 
+//////////////////////////////////////////////////////////////////////
+// ASCENT GAME SPECIFIC FUNCTIONS
+//////////////////////////////////////////////////////////////////////
+
+bool Input::GameUpHasBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_UP);
+}
+
+bool Input::GameDownHasBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_DOWN);
+}
+
+bool Input::GameLeftHasBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_LEFT);
+}
+
+bool Input::GameRightHasBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_RIGHT);
+}
+
+bool Input::GameUpIsPressed()
+{
+    return Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP);
+}
+
+bool Input::GameDownIsPressed()
+{
+    return Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN);
+}
+
+bool Input::GameLeftIsPressed()
+{
+    return Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
+}
+
+bool Input::GameRightIsPressed()
+{
+    return Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
+}
+
+bool Input::GameJumpHasBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A)
+}
+
+bool Input::GameJumpHasBeenReleased()
+{
+    return Input::HasKeyBeenReleased(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
+}
+
+bool Input::GameJumpIsPressed()
+{
+    return Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
+}
+
+//////////////////////////////////////////////////////////////////////
+// GENERIC CLASSES AND FUNCTIONS BELOW
+//////////////////////////////////////////////////////////////////////
+
 /** Input States **/
 // Keyboard State - Access via SDL_Scancode https://wiki.libsdl.org/SDL_Scancode
 INTERNAL u8 gCurrentKeyState[256];
