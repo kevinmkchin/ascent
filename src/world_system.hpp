@@ -57,6 +57,9 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+	// Handle player mutations
+	void handle_mutations();
+
     // Handle input events
     void SDLProcessEvents();
 

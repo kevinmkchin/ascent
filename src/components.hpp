@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
+#include "mutations.cpp"
 #include "../ext/stb_image/stb_image.h"
 
 /**
@@ -101,6 +102,7 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
+    int attackPower = 0; // To be set to > 0 when a mutation occurs
 
 };
 
@@ -148,6 +150,11 @@ struct CollisionEvent
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	CollisionEvent(Entity& other) { this->other = other; };
+};
+
+struct MutationEvent {
+    Mutation mutationType = Mutation1;
+    MutationEvent(Mutation& mutationType) { this->mutationType = mutationType;};
 };
 
 // Data structure for toggling debug mode

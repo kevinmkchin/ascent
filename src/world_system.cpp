@@ -260,6 +260,28 @@ void WorldSystem::handle_collisions() {
 	registry.collisionEvents.clear();
 }
 
+void WorldSystem::handle_mutations() {
+    auto& mutationRegistry = registry.mutationEvent;
+    for (uint i = 0; i < mutationRegistry.components.size(); i++) {
+
+        const MutationEvent mutEvent = mutationRegistry.components[i];
+        Entity entity = mutationRegistry.entities[i];
+        int mutationType = mutEvent.mutationType;
+
+        if (registry.players.has(entity)) {
+            Player& player = registry.players.get(entity);
+            TransformComponent& playerTransform = registry.transforms.get(entity);
+            MotionComponent& playerMotion = registry.motions.get(entity);
+            CollisionComponent& playerCollider = registry.colliders.get(entity);
+            HealthBar& playerHealth = registry.healthBar.get(entity);
+
+//            playerMotion.velocity += mu;
+            printf("First mutation selected. Increased velocity to: %f \n", playerMotion.velocity);
+        }
+    }
+}
+
+
 // Should the game be over ?
 bool WorldSystem::is_over() const {
 	return !gameIsRunning;
