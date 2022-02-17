@@ -35,6 +35,13 @@ enum GAMELEVELENUM : u8
 	GAME_NOT_STARTED,
 };
 
+struct Mutation {
+    std::string name;
+    int velocityEffect;
+    int attackPowerEffect;
+    int healthEffect;
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -58,7 +65,7 @@ public:
 	void handle_collisions();
 
 	// Handle player mutations
-	void handle_mutations();
+	void handle_mutations(Mutation currentMutation);
 
     // Handle input events
     void SDLProcessEvents();
@@ -68,6 +75,14 @@ public:
 	bool is_over()const;
 
     void set_is_over(bool over) { gameIsRunning = over; }
+
+    Mutation fastFeet = Mutation{"fastFeet", 1, 3, 4};
+    Mutation powerfulHands = Mutation{"powerfulHands", 1, 3, 4};
+    Mutation heartOfSteel = Mutation{"powerfulHands", 1, 3, 4};
+    Mutation bullPower = Mutation{"powerfulHands", 1, 3, 4};
+    Mutation invisibleShield = Mutation{"powerfulHands", 1, 3, 4};
+
+    Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
 
 private:
     void loadAllContent();
