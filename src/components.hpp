@@ -102,7 +102,7 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
-    int attackPower = 0; // Used for mutations
+    int attackPower = 3; // Used for mutations
 
 };
 
