@@ -3,8 +3,8 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
-#include "mutations.cpp"
 #include "../ext/stb_image/stb_image.h"
+#include "world_system.hpp"
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -102,7 +102,7 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
-    int attackPower = 0; // To be set to > 0 when a mutation occurs
+    int attackPower = 0; // Used for mutations
 
 };
 
@@ -152,9 +152,8 @@ struct CollisionEvent
 	CollisionEvent(Entity& other) { this->other = other; };
 };
 
-struct MutationEvent {
-    Mutation mutationType = Mutation1;
-    MutationEvent(Mutation& mutationType) { this->mutationType = mutationType;};
+struct MutationComponent {
+    Mutation* currentActiveMutations [5] = {};
 };
 
 // Data structure for toggling debug mode

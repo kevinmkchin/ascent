@@ -260,13 +260,11 @@ void WorldSystem::handle_collisions() {
 	registry.collisionEvents.clear();
 }
 
-void WorldSystem::handle_mutations() {
-    auto& mutationRegistry = registry.mutationEvent;
+void WorldSystem::handle_mutations(Mutation currentMutation) {
+    auto& mutationRegistry = registry.mutationComponent;
     for (uint i = 0; i < mutationRegistry.components.size(); i++) {
-
-        const MutationEvent mutEvent = mutationRegistry.components[i];
+        const MutationComponent mutComp = mutationRegistry.components[i];
         Entity entity = mutationRegistry.entities[i];
-        int mutationType = mutEvent.mutationType;
 
         if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
@@ -275,8 +273,15 @@ void WorldSystem::handle_mutations() {
             CollisionComponent& playerCollider = registry.colliders.get(entity);
             HealthBar& playerHealth = registry.healthBar.get(entity);
 
-//            playerMotion.velocity += mu;
-            printf("First mutation selected. Increased velocity to: %f \n", playerMotion.velocity);
+            playerMotion.velocity += currentMutation.velocityEffect;
+            playerHealth.health += currentMutation.healthEffect;
+            player.attackPower += currentMutation.attackPowerEffect;
+
+            printf("Mutation selected");
+            printf("Changed player velocity by: %f. Current player velocity is: %f \n", currentMutation.velocityEffect, playerMotion.velocity);
+            printf("Changed player health by: %f. Current player health is: %f \n", currentMutation.healthEffect, playerHealth.health);
+            printf("Changed player attackPower by: %f. Current player attackPower is: %f \n", currentMutation.attackPowerEffect, player.attackPower);
+
         }
     }
 }
