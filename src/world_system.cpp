@@ -21,6 +21,14 @@ WorldSystem::WorldSystem()
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
+
+    Mutation fastFeet = Mutation{"fastFeet", 5, 0, 0, &registry.sprites.components[0]};
+    Mutation powerfulHands = Mutation{"powerfulHands", 0, 5, 0,&registry.sprites.components[0]};
+    Mutation heartOfSteel = Mutation{"heartOfSteel", 0, 0, 5,&registry.sprites.components[0]};
+    Mutation bullPower = Mutation{"rage", 3, 3, 0,&registry.sprites.components[0]};
+    Mutation invisibleShield = Mutation{"ironDefence", 3, 0, 3, &registry.sprites.components[0]};
+    Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
+
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg)

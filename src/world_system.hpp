@@ -10,6 +10,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+
 class RenderSystem;
 class PlayerSystem;
 
@@ -40,6 +41,7 @@ struct Mutation {
     int velocityEffect;
     int attackPowerEffect;
     int healthEffect;
+    struct SpriteComponent* sprite;
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -75,14 +77,6 @@ public:
 	bool is_over()const;
 
     void set_is_over(bool over) { gameIsRunning = over; }
-
-    Mutation fastFeet = Mutation{"fastFeet", 1, 3, 4};
-    Mutation powerfulHands = Mutation{"powerfulHands", 1, 3, 4};
-    Mutation heartOfSteel = Mutation{"powerfulHands", 1, 3, 4};
-    Mutation bullPower = Mutation{"powerfulHands", 1, 3, 4};
-    Mutation invisibleShield = Mutation{"powerfulHands", 1, 3, 4};
-
-    Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
 
 private:
     void loadAllContent();
