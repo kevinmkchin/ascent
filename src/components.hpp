@@ -29,7 +29,7 @@
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
-enum class TEXTURE_ASSET_ID : u16 
+enum class TEXTURE_ASSET_ID : u16
 {
 	EAGLE,
     MONSTER,
@@ -109,6 +109,18 @@ struct Enemy
 
 };
 
+struct Weapon
+{
+    float damage = 1.f;
+};
+
+struct Item
+{
+    // When player is holding an item, we don't want to have it colliding with the floor/ceiling etc
+    // When item is on the floor, we want it to be colliding with the floor
+    bool collidableWithEnvironment = true;
+};
+
 struct TransformComponent
 {
     vec2 position = { 0.f, 0.f };
@@ -139,6 +151,15 @@ struct SpriteComponent
     TEXTURE_ASSET_ID texId;     // ID for the texture to use
     EFFECT_ASSET_ID shaderId;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
+};
+
+//For entities that can hold items
+struct HolderComponent
+{
+    Entity held_weapon = Entity();
+    Entity near_weapon = Entity();
+    bool want_to_pick_up = false;
+    bool want_to_drop = false;
 };
 
 struct CollisionEvent

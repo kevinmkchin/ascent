@@ -17,6 +17,7 @@
 
 #define TINY_ECS_LIB_IMPLEMENTATION
 #include "tiny_ecs.hpp"
+#include "item_holder_system.hpp"
 
 #define WINDOW_TITLE "ASCENT"
 #define WINDOW_INITIAL_WIDTH 800
@@ -102,6 +103,7 @@ int main(int argc, char* argv[])
 	RenderSystem renderer;
 	PhysicsSystem physics;
     PlayerSystem playerSystem;
+    ItemHolderSystem itemHolderSystem;
 	AISystem ai;
 
     // Initialize SDL window and OpenGL context
@@ -132,6 +134,7 @@ int main(int argc, char* argv[])
             ai.step(deltaTime);
             physics.step(deltaTime);
             playerSystem.Step(deltaTime);
+            itemHolderSystem.Step(deltaTime);
             world.handle_collisions();
         }
 

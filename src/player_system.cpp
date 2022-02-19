@@ -254,6 +254,15 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
         }
     }
 }
+
+INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
+{
+    const bool bPickUpKeyPressed = Input::GamePickUpIsPressed();
+    const bool bDropKeyPressed = Input::GameDropIsPressed();
+
+    playerHolder.want_to_pick_up = bPickUpKeyPressed;
+    playerHolder.want_to_drop = bDropKeyPressed;
+}
 #pragma endregion
 
 void PlayerSystem::Step(float deltaTime)
@@ -265,8 +274,12 @@ void PlayerSystem::Step(float deltaTime)
     
     playerEntity = registry.players.entities[0];
 
+    Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
+    TransformComponent& playerTransform = registry.transforms.get(playerEntity);
+    HolderComponent& playerHolder = registry.holders.get(playerEntity);
 
     HandleBasicMovementInput(playerMotion);
+    HandleBasicInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion);
 }
