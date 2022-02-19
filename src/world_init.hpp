@@ -9,3 +9,5 @@ Entity createBox(vec2 position);
 Entity createPlayer(vec2 position);
 
 Entity createEnemy(vec2 position);
+
+Entity createSword(vec2 position);

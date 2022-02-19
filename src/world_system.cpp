@@ -93,6 +93,8 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
 
     // Create enemies
     createEnemy(vec2(238.f, 64.f));
+
+    createSword(currentLevelData.playerStart);
 }
 
 void WorldSystem::loadAllContent()
@@ -197,6 +199,8 @@ void WorldSystem::handle_collisions() {
             CollisionComponent& playerCollider = registry.colliders.get(entity);
 			HealthBar& playerHealth = registry.healthBar.get(entity);
 
+            CheckCollisionWithBlockable(entity, entity_other);
+
             if (entity_other.GetTag() == TAG_SPIKE)
             {
                 if (playerHealth.health > 0)
@@ -218,29 +222,6 @@ void WorldSystem::handle_collisions() {
 				printf("Colliding with enemy. Reduced health to: %f \n", playerHealth.health);
 			}
 
-            if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
-            {
-                /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
-                 *  by moving entities around, the initial collection of collision events may become outdated.
-                 *  Checking that the two entities are still colliding is not a perfect solution (if there
-                 *  even is one), but it should be good enough... We can revisit this and attempt other
-                 *  solutions down the line if needed. */
-                CollisionInfo collisionCheckAgain = CheckCollision(playerTransform, playerCollider,
-                    registry.transforms.get(entity_other), registry.colliders.get(entity_other));
-                if(collisionCheckAgain.collides)
-                {
-                    if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
-                    {
-                        playerTransform.position.x += collisionCheckAgain.collision_overlap.x;
-                        playerMotion.velocity.x = 0.f;
-                    }
-                    else
-                    {
-                        playerTransform.position.y += collisionCheckAgain.collision_overlap.y;
-                    }
-                }
-            }
-
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed())
             {
                 StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
@@ -255,9 +236,65 @@ void WorldSystem::handle_collisions() {
 //
 //			}
 		}
+
+        if(registry.holders.has(entity))
+        {
+            HolderComponent& holder = registry.holders.get(entity);
+
+            if (registry.items.has(entity_other))
+            {
+                holder.near_weapon = entity_other;
+            }
+            else
+            {
+                // Assign to fake entity
+                holder.near_weapon = Entity();
+            }
+        }
+
+        if(registry.items.has(entity))
+        {
+            if(registry.items.get(entity).collidableWithEnvironment)
+            {
+                CheckCollisionWithBlockable(entity, entity_other);
+            }
+        }
 	}
 	// Remove all collisions from this simulation Step
 	registry.collisionEvents.clear();
+}
+
+void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other)
+{
+    TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
+    CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
+    MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
+
+    TransformComponent& otherTransform = registry.transforms.get(entity_other);
+    CollisionComponent& otherCollider = registry.colliders.get(entity_other);
+
+    if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+    {
+        /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
+         *  by moving entities around, the initial collection of collision events may become outdated.
+         *  Checking that the two entities are still colliding is not a perfect solution (if there
+         *  even is one), but it should be good enough... We can revisit this and attempt other
+         *  solutions down the line if needed. */
+        CollisionInfo collisionCheckAgain = CheckCollision(resolverTransform, resolverCollider,
+                                                           otherTransform, otherCollider);
+        if(collisionCheckAgain.collides)
+        {
+            if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
+            {
+                resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
+                resolverMotion.velocity.x = 0.f;
+            }
+            else
+            {
+                resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
+            }
+        }
+    }
 }
 
 // Should the game be over ?

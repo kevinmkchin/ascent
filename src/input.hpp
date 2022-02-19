@@ -54,6 +54,8 @@ namespace Input {
     bool GameJumpHasBeenPressed();
     bool GameJumpHasBeenReleased();
     bool GameJumpIsPressed();
+    bool GamePickUpIsPressed();
+    bool GameDropIsPressed();
 
 //////////////////////////////////////////////////////////////////////
 // GENERIC CLASSES AND FUNCTIONS BELOW
