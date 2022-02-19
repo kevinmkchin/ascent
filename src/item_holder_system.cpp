@@ -1,6 +1,8 @@
 #include "item_holder_system.hpp"
 #include "components.hpp"
 
+INTERNAL float itemGravity = 500.f;
+
 ItemHolderSystem::ItemHolderSystem()
 = default;
 
@@ -18,7 +20,7 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
     if(holderComponent.want_to_drop && holderComponent.held_weapon.GetTagAndID() != 0)
     {
         registry.items.get(holderComponent.held_weapon).collidableWithEnvironment = true;
-        registry.motions.get(holderComponent.held_weapon).acceleration = vec2({0.f, 500.f});
+        registry.motions.get(holderComponent.held_weapon).acceleration.y = itemGravity;
         holderComponent.held_weapon = Entity();
     }
 }
