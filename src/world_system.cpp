@@ -266,15 +266,15 @@ void WorldSystem::handle_collisions() {
 
 void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other)
 {
-    TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
-    CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
-    MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
-
-    TransformComponent& otherTransform = registry.transforms.get(entity_other);
-    CollisionComponent& otherCollider = registry.colliders.get(entity_other);
-
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
     {
+        TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
+        CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
+        MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
+
+        TransformComponent& otherTransform = registry.transforms.get(entity_other);
+        CollisionComponent& otherCollider = registry.colliders.get(entity_other);
+
         /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
          *  by moving entities around, the initial collection of collision events may become outdated.
          *  Checking that the two entities are still colliding is not a perfect solution (if there
