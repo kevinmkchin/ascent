@@ -12,6 +12,7 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
     {
         holderComponent.held_weapon = holderComponent.near_weapon;
         registry.items.get(holderComponent.held_weapon).collidableWithEnvironment = false;
+        registry.motions.get(holderComponent.held_weapon).acceleration.y = 0.f;
     }
 }
 
