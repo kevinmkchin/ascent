@@ -52,6 +52,7 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
     if(bLeftKeyPressed)
     {
         currentXAcceleration += -(bJumping ? playerAirAcceleration : playerGroundAcceleration);
+        playerMotion.facingRight = false;
     }
     else if(playerMotion.velocity.x < -5.f)
     {
@@ -65,6 +66,7 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
     if(bRightKeyPressed)
     {
         currentXAcceleration += bJumping ? playerAirAcceleration : playerGroundAcceleration;
+        playerMotion.facingRight = true;
     }
     else if(playerMotion.velocity.x > 5.f)
     {
@@ -259,9 +261,11 @@ INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
 {
     const bool bPickUpKeyPressed = Input::GamePickUpIsPressed();
     const bool bDropKeyPressed = Input::GameDropIsPressed();
+    const bool bThrowKeyPressed = Input::GameThrowIsPressed();
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;
+    playerHolder.want_to_throw = bThrowKeyPressed;
 }
 #pragma endregion
 

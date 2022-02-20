@@ -69,6 +69,11 @@ bool Input::GameDropIsPressed()
     return Input::IsKeyPressed(SDL_SCANCODE_L) || Input::GetGamepad(0).IsPressed(GAMEPAD_X);
 }
 
+bool Input::GameThrowIsPressed()
+{
+    return Input::IsKeyPressed(SDL_SCANCODE_H) || Input::GetGamepad(0).IsPressed(GAMEPAD_Y);
+}
+
 //////////////////////////////////////////////////////////////////////
 // GENERIC CLASSES AND FUNCTIONS BELOW
 //////////////////////////////////////////////////////////////////////

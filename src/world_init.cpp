@@ -5,7 +5,6 @@
 // Entity initialization code
 
 // NOTE: Do NOT use Entity() constructor to reserve an entity. Use Entity::CreateEntity() instead.
-
 Entity createBox(vec2 position)
 {
     // Reserve an entity
@@ -90,6 +89,9 @@ Entity createEnemy(vec2 position)
     transform.center = dimensions / 2.f;
 
     motion.velocity = { 32.f, 0 };
+    float maxMoveSpeed = 64.f;
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity = {maxMoveSpeed, maxFallSpeed};
 
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
@@ -124,6 +126,9 @@ Entity createSword(vec2 position)
 
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
 
     registry.sprites.insert(
             entity,

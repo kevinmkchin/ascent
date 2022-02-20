@@ -87,31 +87,43 @@ INTERNAL void CheckAllCollisions()
 //        }
 //    }
 
-    // player check collision
-    Entity player = registry.players.entities[0];
-    TransformComponent playerTransform = registry.transforms.get(player);
-    CollisionComponent playerCollider = registry.colliders.get(player);
-    for(auto e : registry.colliders.entities)
+    // check all necessary entities
+    std::vector<Entity> entitiesToCheck;
+    entitiesToCheck.push_back(registry.players.entities[0]);
+
+    std::vector<Entity> items = registry.items.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), items.begin(), items.end());
+
+    std::vector<Entity> enemies = registry.enemy.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), enemies.begin(), enemies.end());
+
+    for(auto entity : entitiesToCheck)
     {
-        if(e == player) { continue; }
+        TransformComponent entityTransform = registry.transforms.get(entity);
+        CollisionComponent entityCollider = registry.colliders.get(entity);
 
-        TransformComponent otherTransform = registry.transforms.get(e);
-        CollisionComponent otherCollider = registry.colliders.get(e);
-
-        CollisionInfo colInfo = CheckCollision(playerTransform, playerCollider, otherTransform, otherCollider);
-        if (colInfo.collides)
+        for(auto collidable : registry.colliders.entities)
         {
-            // Create a collisions event
-            CollisionEvent colEventAgainstOther(e);
-            CollisionEvent colEventAgainstPlayer(player);
-            // Note(Kevin): colInfo.collision_overlap is relative to player, therefore
-            //              it needs to be inverted for colEventAgainstPlayer
-            colEventAgainstOther.collision_overlap = colInfo.collision_overlap;
-            colEventAgainstPlayer.collision_overlap = -colInfo.collision_overlap;
+            if(collidable == entity) { continue; }
 
-            // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-            registry.collisionEvents.insert(player, colEventAgainstOther, false);
-            registry.collisionEvents.insert(e, colEventAgainstPlayer, false);
+            TransformComponent otherTransform = registry.transforms.get(collidable);
+            CollisionComponent otherCollider = registry.colliders.get(collidable);
+
+            CollisionInfo colInfo = CheckCollision(entityTransform, entityCollider, otherTransform, otherCollider);
+            if (colInfo.collides)
+            {
+                // Create a collisions event
+                CollisionEvent colEventAgainstOther(collidable);
+                CollisionEvent colEventAgainstEntity(entity);
+                // Note(Kevin): colInfo.collision_overlap is relative to player, therefore
+                //              it needs to be inverted for colEventAgainstEntity
+                colEventAgainstOther.collision_overlap = colInfo.collision_overlap;
+                colEventAgainstEntity.collision_overlap = -colInfo.collision_overlap;
+
+                // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
+                registry.collisionEvents.insert(entity, colEventAgainstOther, false);
+                registry.collisionEvents.insert(collidable, colEventAgainstEntity, false);
+            }
         }
     }
 }

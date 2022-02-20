@@ -135,6 +135,7 @@ struct MotionComponent
     vec2 velocity = { 0.f, 0.f };               // signed
     vec2 acceleration = { 0.f, 0.f };           // signed
     vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
+    bool facingRight = true;
 };
 
 struct CollisionComponent
@@ -160,6 +161,7 @@ struct HolderComponent
     Entity near_weapon = Entity();
     bool want_to_pick_up = false;
     bool want_to_drop = false;
+    bool want_to_throw = false;
 };
 
 struct CollisionEvent
@@ -191,6 +193,7 @@ struct HealthBar
 
 enum GAMETAGS : u8
 {
+    TAG_DEFAULT,
     TAG_PLAYER,
     TAG_LEVELENDPOINT,
     TAG_LADDER,
