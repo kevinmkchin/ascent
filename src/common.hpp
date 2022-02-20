@@ -40,9 +40,9 @@ inline std::string audio_path(const std::string& name) {return data_path() + "/a
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
 inline std::string level_path(const std::string& name) {return data_path() + "/level/" + std::string(name);};
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846f
-#endif
+#define ASCENT_PI 3.14159265358979323846f
+#define HALF_PI 1.570796f
+#define QUARTER_PI 0.785398f
 
 #define DEG2RAD 0.0174532925f  // degrees * DEG2RAD = radians
 #define RAD2DEG 57.2958f       // radians * RAD2DEG = degrees
