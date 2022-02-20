@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <array>
 #include "../ext/stb_image/stb_image.h"
+#include "world_system.hpp"
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -102,6 +103,7 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
+    int attackPower = 3; // Used for mutations
 
 };
 
@@ -153,6 +155,10 @@ struct CollisionEvent
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	CollisionEvent(Entity& other) { this->other = other; };
+};
+
+struct MutationComponent {
+    Mutation* currentActiveMutations [5] = {};
 };
 
 // Data structure for toggling debug mode

@@ -10,6 +10,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+
 class RenderSystem;
 class PlayerSystem;
 
@@ -35,6 +36,14 @@ enum GAMELEVELENUM : u8
 	GAME_NOT_STARTED,
 };
 
+struct Mutation {
+    std::string name;
+    int velocityEffect;
+    int attackPowerEffect;
+    int healthEffect;
+    struct SpriteComponent* sprite;
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -56,6 +65,9 @@ public:
 
 	// Check for collisions
 	void handle_collisions();
+
+	// Handle player mutations
+	void handle_mutations(Mutation currentMutation);
 
     // Handle input events
     void SDLProcessEvents();

@@ -21,6 +21,14 @@ WorldSystem::WorldSystem()
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
+
+    Mutation fastFeet = Mutation{"fastFeet", 5, 0, 0, &registry.sprites.components[0]};
+    Mutation powerfulHands = Mutation{"powerfulHands", 0, 5, 0,&registry.sprites.components[0]};
+    Mutation heartOfSteel = Mutation{"heartOfSteel", 0, 0, 5,&registry.sprites.components[0]};
+    Mutation bullPower = Mutation{"rage", 3, 3, 0,&registry.sprites.components[0]};
+    Mutation invisibleShield = Mutation{"ironDefence", 3, 0, 3, &registry.sprites.components[0]};
+    Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
+
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg)
@@ -275,6 +283,33 @@ void WorldSystem::handle_collisions() {
 	// Remove all collisions from this simulation Step
 	registry.collisionEvents.clear();
 }
+
+void WorldSystem::handle_mutations(Mutation currentMutation) {
+    auto& mutationRegistry = registry.mutationComponent;
+    for (uint i = 0; i < mutationRegistry.components.size(); i++) {
+        const MutationComponent mutComp = mutationRegistry.components[i];
+        Entity entity = mutationRegistry.entities[i];
+
+        if (registry.players.has(entity)) {
+            Player& player = registry.players.get(entity);
+            TransformComponent& playerTransform = registry.transforms.get(entity);
+            MotionComponent& playerMotion = registry.motions.get(entity);
+            CollisionComponent& playerCollider = registry.colliders.get(entity);
+            HealthBar& playerHealth = registry.healthBar.get(entity);
+
+            playerMotion.velocity += currentMutation.velocityEffect;
+            playerHealth.health += currentMutation.healthEffect;
+            player.attackPower += currentMutation.attackPowerEffect;
+
+            printf("Mutation selected");
+            printf("Changed player velocity by: %f. Current player velocity is: %f \n", currentMutation.velocityEffect, playerMotion.velocity);
+            printf("Changed player health by: %f. Current player health is: %f \n", currentMutation.healthEffect, playerHealth.health);
+            printf("Changed player attackPower by: %f. Current player attackPower is: %f \n", currentMutation.attackPowerEffect, player.attackPower);
+
+        }
+    }
+}
+
 
 // Should the game be over ?
 bool WorldSystem::is_over() const {
