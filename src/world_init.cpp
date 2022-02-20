@@ -80,6 +80,7 @@ Entity createEnemy(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
     registry.enemy.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
@@ -103,4 +104,35 @@ Entity createEnemy(vec2 position)
 	);
 
 	return entity;
+}
+
+
+Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    motion.velocity = velocity;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+    auto& projectile = registry.enemyprojectile.emplace(entity);
+    projectile.enemy_projectile = enemy;
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                10,
+                TEXTURE_ASSET_ID::FIRE,
+                EFFECT_ASSET_ID::SPRITE
+        }
+    );
+
+    return entity;
 }

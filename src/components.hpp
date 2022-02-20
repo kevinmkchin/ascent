@@ -48,6 +48,7 @@ enum class TEXTURE_ASSET_ID : u16
     TILE_EXAMPLE,
 
     MAINMENUBG,
+    FIRE,
 
 
     TEXTURE_COUNT
@@ -70,8 +71,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("box.png"),
         textures_path("ladder.png"),
         textures_path("tile_example.png"),
-
         textures_path("mainmenu.png"),
+        textures_path("fire.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -108,7 +109,11 @@ struct Player
 
 struct Enemy
 {
+    float projectile_speed = 120.f;
+};
 
+struct Enemy_projectile {
+    Entity enemy_projectile;
 };
 
 struct TransformComponent

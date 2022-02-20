@@ -20,6 +20,7 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<HealthBar> healthBar;
 	ComponentContainer<Enemy> enemy;
+	ComponentContainer<Enemy_projectile> enemyprojectile;
 	ComponentContainer<MutationComponent> mutationComponent;
 
 	// constructor that adds all containers for looping over them
@@ -35,7 +36,8 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&healthBar);
 		registry_list.push_back(&enemy);
-        registry_list.push_back(&mutationComponent);
+		registry_list.push_back(&enemyprojectile);
+        	registry_list.push_back(&mutationComponent);
 	}
 
 	void clear_all_components() {
