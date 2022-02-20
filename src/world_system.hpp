@@ -2,6 +2,7 @@
 
 // internal
 #include "common.hpp"
+#include "components.hpp"
 
 // stlib
 #include <vector>
@@ -34,14 +35,6 @@ enum GAMELEVELENUM : u8
 	END_THE_GAME,
 
 	GAME_NOT_STARTED,
-};
-
-struct Mutation {
-    std::string name;
-    int velocityEffect;
-    int attackPowerEffect;
-    int healthEffect;
-    struct SpriteComponent* sprite;
 };
 
 // Container for all our entities and game logic. Individual rendering / update is

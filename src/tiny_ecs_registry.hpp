@@ -37,7 +37,7 @@ public:
 		registry_list.push_back(&healthBar);
 		registry_list.push_back(&enemy);
 		registry_list.push_back(&enemyprojectile);
-        	registry_list.push_back(&mutationComponent);
+        registry_list.push_back(&mutationComponent);
 	}
 
 	void clear_all_components() {

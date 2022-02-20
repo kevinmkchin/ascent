@@ -22,11 +22,11 @@ WorldSystem::WorldSystem()
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 
-    Mutation fastFeet = Mutation{"fastFeet", 5, 0, 0, &registry.sprites.components[0]};
-    Mutation powerfulHands = Mutation{"powerfulHands", 0, 5, 0,&registry.sprites.components[0]};
-    Mutation heartOfSteel = Mutation{"heartOfSteel", 0, 0, 5,&registry.sprites.components[0]};
-    Mutation bullPower = Mutation{"rage", 3, 3, 0,&registry.sprites.components[0]};
-    Mutation invisibleShield = Mutation{"ironDefence", 3, 0, 3, &registry.sprites.components[0]};
+    Mutation fastFeet = Mutation{"fastFeet", 5, 0, 0, SpriteComponent()};
+    Mutation powerfulHands = Mutation{"powerfulHands", 0, 5, 0, SpriteComponent()};
+    Mutation heartOfSteel = Mutation{"heartOfSteel", 0, 0, 5, SpriteComponent()};
+    Mutation bullPower = Mutation{"rage", 3, 3, 0, SpriteComponent()};
+    Mutation invisibleShield = Mutation{"ironDefence", 3, 0, 3, SpriteComponent()};
     Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
 
 }
@@ -297,14 +297,12 @@ void WorldSystem::handle_mutations(Mutation currentMutation) {
             CollisionComponent& playerCollider = registry.colliders.get(entity);
             HealthBar& playerHealth = registry.healthBar.get(entity);
 
-            playerMotion.velocity += currentMutation.velocityEffect;
             playerHealth.health += currentMutation.healthEffect;
             player.attackPower += currentMutation.attackPowerEffect;
 
             printf("Mutation selected");
-            printf("Changed player velocity by: %f. Current player velocity is: %f \n", currentMutation.velocityEffect, playerMotion.velocity);
-            printf("Changed player health by: %f. Current player health is: %f \n", currentMutation.healthEffect, playerHealth.health);
-            printf("Changed player attackPower by: %f. Current player attackPower is: %f \n", currentMutation.attackPowerEffect, player.attackPower);
+            printf("Changed player health by: %d. Current player health is: %f \n", currentMutation.healthEffect, playerHealth.health);
+            printf("Changed player attackPower by: %d. Current player attackPower is: %d \n", currentMutation.attackPowerEffect, player.attackPower);
 
         }
     }

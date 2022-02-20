@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <array>
 #include "../ext/stb_image/stb_image.h"
-#include "world_system.hpp"
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -143,8 +142,8 @@ struct SpriteComponent
 {
     vec2 dimensions = {0.f,0.f};// in pixels
     u8 layer = 0;               // render layer. higher layer is drawn on top of lower layers.
-    TEXTURE_ASSET_ID texId;     // ID for the texture to use
-    EFFECT_ASSET_ID shaderId;   // ID for the shader to use
+    TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
+    EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
 };
 
@@ -155,6 +154,14 @@ struct CollisionEvent
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	CollisionEvent(Entity& other) { this->other = other; };
+};
+
+struct Mutation {
+    std::string name;
+    int velocityEffect;
+    int attackPowerEffect;
+    int healthEffect;
+    SpriteComponent sprite;
 };
 
 struct MutationComponent {
