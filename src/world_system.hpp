@@ -75,6 +75,7 @@ private:
 
     void SetCurrentMode(GAMEMODE mode);
 
+
 	// OpenGL window handle
 	SDL_Window* window;
 
@@ -85,6 +86,7 @@ private:
 	RenderSystem* renderer;
 	PlayerSystem* playerSystem;
 	Entity player;
+	Entity enemy;
 
 	// music references
 	Mix_Music* background_music;
