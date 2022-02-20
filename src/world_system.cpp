@@ -100,7 +100,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     player = createPlayer(currentLevelData.playerStart);
 
     // Create enemies
-    createEnemy(vec2(238.f, 64.f));
+    enemy = createEnemy(currentLevelData.playerStart);
 }
 
 void WorldSystem::loadAllContent()
@@ -224,7 +224,23 @@ void WorldSystem::handle_collisions() {
 				}
 
 				printf("Colliding with enemy. Reduced health to: %f \n", playerHealth.health);
-			}
+			} 
+
+
+            if (registry.enemyprojectile.has(entity_other))
+            {
+                
+                if (playerHealth.health > 0)
+                {
+                        playerHealth.health -= 40;
+                }
+
+                auto& enemyprojectileRegistry = registry.enemyprojectile;
+                Entity fire_entity = enemyprojectileRegistry.entities[0];
+                registry.remove_all_components_of(fire_entity);
+                
+                printf("Colliding with fire. Reduced health to: %f \n", playerHealth.health);
+             }
 
             if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
             {
