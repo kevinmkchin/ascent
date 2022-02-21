@@ -24,7 +24,7 @@ void AISystem::Enemy_attack(Entity enemy_entity) {
 	TransformComponent& player_transform = registry.transforms.get(playerEntity);
 	TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
 	vec2 diff_distance = player_transform.position - enemy_transform.position;
-	if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > 0){
+	if (diff_distance.x < 110 && diff_distance.x > -110 && diff_distance.y > 0 && diff_distance.y < 20){
 		float angle = atan2(diff_distance.y, diff_distance.x);
 		vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
 		createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
