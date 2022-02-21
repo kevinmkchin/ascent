@@ -95,12 +95,19 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     GenerateNewLevel();
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
+    SpawnLevelEntities();
+}
 
+void WorldSystem::SpawnLevelEntities()
+{
     // Create player
     player = createPlayer(currentLevelData.playerStart);
 
     // Create enemies
-    enemy = createEnemy(currentLevelData.playerStart);
+    for(vec2 enemySpawn : currentLevelData.monsterSpawns)
+    {
+        createEnemy(enemySpawn);
+    }
 }
 
 void WorldSystem::loadAllContent()

@@ -171,9 +171,12 @@ INTERNAL void LoadAllLevelData()
 
 struct CurrentLevelData
 {
-    vec2 playerStart;
     vec2 cameraBoundMin;
     vec2 cameraBoundMax;
+
+    vec2 playerStart;
+    std::vector<vec2> monsterSpawns;
+    std::vector<vec2> treasureSpawns;
 };
 INTERNAL CurrentLevelData currentLevelData;
 
@@ -205,8 +208,18 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                 }break;
 
                 case '1':{
-                    currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f) ,
+                    currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
                                                      roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) };
+                }break;
+
+                case 'M':{
+                    currentLevelData.monsterSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
+                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
+                }break;
+
+                case 'T':{
+                    currentLevelData.treasureSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
+                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
                 }break;
 
                 case '2':{

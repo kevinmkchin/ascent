@@ -78,6 +78,8 @@ private:
 
 	void StartNewStage(GAMELEVELENUM stage);
 
+	void SpawnLevelEntities();
+
     void SetCurrentMode(GAMEMODE mode);
 
 
@@ -91,7 +93,6 @@ private:
 	RenderSystem* renderer;
 	PlayerSystem* playerSystem;
 	Entity player;
-	Entity enemy;
 
 	// music references
 	Mix_Music* background_music;
