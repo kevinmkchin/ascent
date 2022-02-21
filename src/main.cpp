@@ -14,6 +14,7 @@
 #include "world_system.hpp"
 #include "input.hpp"
 #include "player_system.hpp"
+#include "ui_system.hpp"
 
 #define TINY_ECS_LIB_IMPLEMENTATION
 #include "tiny_ecs.hpp"
@@ -103,6 +104,7 @@ int main(int argc, char* argv[])
 	PhysicsSystem physics;
     PlayerSystem playerSystem;
 	AISystem ai;
+    UISystem ui;
 
     // Initialize SDL window and OpenGL context
     if(!SDLInitialize()) return EXIT_FAILURE;
@@ -111,6 +113,7 @@ int main(int argc, char* argv[])
 	// Initialize the main systems
 	renderer.init(window);
 	world.init(&renderer, &playerSystem);
+    ui.Init(&renderer, &world, &playerSystem);
 
 	// Variable timestep loop
 	auto t = Clock::now();
@@ -134,6 +137,8 @@ int main(int argc, char* argv[])
             playerSystem.Step(deltaTime);
             world.handle_collisions();
         }
+
+        ui.Step(deltaTime);
 
         Input::ResetControllerStates();
         Input::ResetKeyboardStates();

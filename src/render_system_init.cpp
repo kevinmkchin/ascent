@@ -5,7 +5,7 @@
 #include <fstream>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../ext/stb_image/stb_image.h"
+#include <stb_image.h>
 
 // This creates circular header inclusion, that is quite bad.
 #include "tiny_ecs_registry.hpp"
@@ -22,9 +22,14 @@ bool RenderSystem::init(SDL_Window* window_arg)
     SDL_GL_GetDrawableSize(window, &backbufferWidth, &backbufferHeight);
 
 	// Create a frame buffer
-	frame_buffer = 0;
-	glGenFramebuffers(1, &frame_buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+	game_frame_buffer = 0;
+	glGenFramebuffers(1, &game_frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, game_frame_buffer);
+	gl_has_errors();
+
+	ui_frame_buffer = 0;
+	glGenFramebuffers(1, &ui_frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, ui_frame_buffer);
 	gl_has_errors();
 
 	// Hint: Ask your TA for how to setup pretty OpenGL error callbacks.
@@ -90,7 +95,7 @@ void RenderSystem::initializeGlEffects()
 // Initialize the screen texture from a standard sprite
 bool RenderSystem::initScreenTexture()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, game_frame_buffer);
 
 	glGenTextures(1, &off_screen_render_buffer_color);
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
@@ -108,12 +113,32 @@ bool RenderSystem::initScreenTexture()
 
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
+
+    glBindFramebuffer(GL_FRAMEBUFFER, ui_frame_buffer);
+
+	glGenTextures(1, &off_screen_ui_buffer_color);
+	glBindTexture(GL_TEXTURE_2D, off_screen_ui_buffer_color);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	gl_has_errors();
+
+	glGenRenderbuffers(1, &off_screen_ui_buffer_depth);
+	glBindRenderbuffer(GL_RENDERBUFFER, off_screen_ui_buffer_depth);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, off_screen_ui_buffer_color, 0);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, off_screen_ui_buffer_depth);
+	gl_has_errors();
+
+	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+
+
 	return true;
 }
 
 void RenderSystem::updateScreenTextureSize(i32 newWidth, i32 newHeight)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, game_frame_buffer);
     glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glBindRenderbuffer(GL_RENDERBUFFER, off_screen_render_buffer_depth);
@@ -132,13 +157,16 @@ void RenderSystem::cleanUp()
 	glDeleteTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 	glDeleteTextures(1, &off_screen_render_buffer_color);
 	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
+	glDeleteTextures(1, &off_screen_ui_buffer_color);
+	glDeleteRenderbuffers(1, &off_screen_ui_buffer_depth);
 	gl_has_errors();
 
     for(uint i = 0; i < effect_count; i++) {
         glDeleteProgram(effects[i]);
     }
     // delete allocated resources
-    glDeleteFramebuffers(1, &frame_buffer);
+    glDeleteFramebuffers(1, &game_frame_buffer);
+    glDeleteFramebuffers(1, &ui_frame_buffer);
     gl_has_errors();
 }
 
@@ -248,3 +276,103 @@ bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, 
 	return true;
 }
 
+void gl_create_from_bitmap(texture_t&        texture,
+                           unsigned char*    bitmap,
+                           u32               bitmap_width,
+                           u32               bitmap_height,
+                           GLenum            target_format,
+                           GLenum            source_format)
+{
+    texture.width = bitmap_width;
+    texture.height = bitmap_height;
+    texture.format = source_format;
+
+    glGenTextures(1, &texture.texture_id);                              // generate texture and grab texture id
+    glBindTexture(GL_TEXTURE_2D, texture.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);       // wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);   // filtering (e.g. GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(
+            GL_TEXTURE_2D,                                                  // texture target type
+            0,                                                              // level-of-detail number n = n-th mipmap reduction image
+            target_format,                                                  // format of data to store (target): num of color components
+            bitmap_width,                                                   // texture width
+            bitmap_height,                                                  // texture height
+            0,                                                              // must be 0 (legacy)
+            source_format,                                                  // format of data being loaded (source)
+            GL_UNSIGNED_BYTE,                                               // data type of the texture data
+            bitmap);                                                        // data
+    glGenerateMipmap(GL_TEXTURE_2D);                                    // generate mip maps automatically
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void gl_create_mesh(mesh_t& mesh,
+                    float* vertices,
+                    u32* indices,
+                    u32 vertices_array_count,
+                    u32 indices_array_count,
+                    u8 vertex_attrib_size,
+                    u8 texture_attrib_size,
+                    u8 normal_attrib_size,
+                    GLenum draw_usage)
+{
+    u8 stride = 0;
+    if(texture_attrib_size)
+    {
+        stride += vertex_attrib_size + texture_attrib_size;
+        if(normal_attrib_size)
+        {
+            stride += normal_attrib_size;
+        }
+    }
+
+    mesh.indices_count = indices_array_count;
+
+    glGenVertexArrays(1, &mesh.id_vao);
+    glBindVertexArray(mesh.id_vao);
+    glGenBuffers(1, &mesh.id_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.id_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 4 * vertices_array_count, vertices, draw_usage);
+    glVertexAttribPointer(0, vertex_attrib_size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0); // vertex pointer
+    glEnableVertexAttribArray(0);
+    if(texture_attrib_size > 0)
+    {
+        glVertexAttribPointer(1, texture_attrib_size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * vertex_attrib_size)); 
+        glEnableVertexAttribArray(1);
+        if(normal_attrib_size > 0)
+        {
+            glVertexAttribPointer(2, normal_attrib_size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * (vertex_attrib_size + texture_attrib_size)));
+            glEnableVertexAttribArray(2);
+        }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glGenBuffers(1, &mesh.id_ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.id_ibo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * indices_array_count, indices, draw_usage);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void gl_rebind_buffer_objects(mesh_t& mesh,
+							  float* vertices,
+                              u32* indices,
+                              u32 vertices_array_count,
+                              u32 indices_array_count,
+                              GLenum draw_usage)
+{
+    if(mesh.id_vbo == 0 || mesh.id_ibo == 0)
+    {
+        return;
+    }
+
+    mesh.indices_count = indices_array_count;
+    glBindVertexArray(mesh.id_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.id_vbo);
+            glBufferData(GL_ARRAY_BUFFER, 4 * vertices_array_count, vertices, draw_usage);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.id_ibo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * indices_array_count, indices, draw_usage);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}

@@ -389,7 +389,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 void RenderSystem::draw()
 {
 	// First render to the custom framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, game_frame_buffer);
 	gl_has_errors();
 	// Clearing backbuffer
 	glViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
@@ -426,6 +426,39 @@ void RenderSystem::draw()
         // BATCH DRAW
         BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
+
+
+    // DRAW UI
+    glBindFramebuffer(GL_FRAMEBUFFER, ui_frame_buffer);
+    gl_has_errors();
+    // Clearing backbuffer
+    glViewport(0, 0, UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+    glDepthRange(0.00001f, 10.f);
+    glClearColor(0.674f, 0.847f, 1.0f, 0.0f);
+    glClearDepth(10.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    gl_has_errors();
+
+    glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::TEXT]);
+
+    glBindTexture(GL_TEXTURE_2D, font_atlas.texture_id);
+    glActiveTexture(GL_TEXTURE0);
+
+    GLint currProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+    GLuint textColour_loc = glGetUniformLocation(currProgram, "textColour");
+    glUniform3f(textColour_loc, 1.f, 1.f, 1.f);
+
+    glBindVertexArray(console_inputtext_vao.id_vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, console_inputtext_vao.id_ibo);
+            glDrawElements(GL_TRIANGLES, console_inputtext_vao.indices_count, GL_UNSIGNED_INT, nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glUseProgram(0);
+
 
 	// Truely render to the screen
     finalDrawToScreen();
@@ -524,16 +557,28 @@ void RenderSystem::finalDrawToScreen()
         printf("Screen size changed.\n");
     }
 
-    // Bind our texture in Texture Unit 0
+    // Bind game frame texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 
-    // Draw
+    // Draw game frame
     glBindVertexArray(finalQuadVAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalQuadIBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    // Bind UI frame texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, off_screen_ui_buffer_color);
+
+    // Draw UI frame
+    glBindVertexArray(finalQuadVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalQuadIBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     gl_has_errors();
 }
 
