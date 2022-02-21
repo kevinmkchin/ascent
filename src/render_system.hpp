@@ -14,7 +14,7 @@ struct SpriteTransformPair
     TransformComponent transform;
 };
 
-struct texture_t
+struct TextureHandle
 {
     GLuint  texture_id  = 0;        // ID for the texture in GPU memory
     i32     width       = 0;        // Width of the texture
@@ -22,7 +22,7 @@ struct texture_t
     GLenum  format      = GL_NONE;  // format / bitdepth of texture (GL_RGB would be 3 byte bit depth)
 };
 
-struct mesh_t
+struct MeshHandle
 {
     u32  id_vao          = 0;
     u32  id_vbo          = 0;
@@ -63,10 +63,18 @@ public:
 
     // Background texture
     TEXTURE_ASSET_ID bgTexId = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+
+    // UI
+    TextureHandle   textLayer1FontAtlas;
+    vec3            textLayer1Colour = vec3(1.f,1.f,1.f);
+    MeshHandle      textLayer1VAO;
+
 private:
     void initializeGlTextures();
 
     void initializeGlEffects();
+
+    void InitializeUIStuff();
 
     // Initialize the screen texture used as intermediate render target
     // The draw loop first renders to this texture
@@ -102,37 +110,30 @@ private:
     GLuint off_screen_ui_buffer_color;
     GLuint off_screen_ui_buffer_depth;
 
-public:
-    // UI
-    texture_t   font_atlas;
-    mesh_t      console_inputtext_vao;
-
-private:
-
 };
 
 bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
 
-void gl_create_from_bitmap(texture_t&        texture,
-                           unsigned char*    bitmap,
-                           u32               bitmap_width,
-                           u32               bitmap_height,
-                           GLenum            target_format,
-                           GLenum            source_format);
+void CreateTextureFromBitmap(TextureHandle&    texture,
+                             unsigned char*    bitmap,
+                             u32               bitmap_width,
+                             u32               bitmap_height,
+                             GLenum            target_format,
+                             GLenum            source_format);
 
-void gl_create_mesh(mesh_t& mesh,
-                    float* vertices,
-                    u32* indices,
-                    u32 vertices_array_count,
-                    u32 indices_array_count,
-                    u8 vertex_attrib_size = 3,
-                    u8 texture_attrib_size = 2,
-                    u8 normal_attrib_size = 3,
-                    GLenum draw_usage = GL_DYNAMIC_DRAW);
+void CreateMeshVertexArray(MeshHandle& mesh,
+                           float* vertices,
+                           u32* indices,
+                           u32 vertices_array_count,
+                           u32 indices_array_count,
+                           u8 vertex_attrib_size = 3,
+                           u8 texture_attrib_size = 2,
+                           u8 normal_attrib_size = 3,
+                           GLenum draw_usage = GL_DYNAMIC_DRAW);
 
-void gl_rebind_buffer_objects(mesh_t& mesh,
-                              float* vertices,
-                              u32* indices,
-                              u32 vertices_array_count,
-                              u32 indices_array_count,
-                              GLenum draw_usage = GL_DYNAMIC_DRAW);
+void RebindMeshBufferObjects(MeshHandle& mesh,
+                             float* vertices,
+                             u32* indices,
+                             u32 vertices_array_count,
+                             u32 indices_array_count,
+                             GLenum draw_usage = GL_DYNAMIC_DRAW);

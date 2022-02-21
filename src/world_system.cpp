@@ -211,8 +211,6 @@ void WorldSystem::handle_collisions() {
                 {
                     playerHealth.health -= 100;
                 }
-
-                printf("Colliding with spike. Reduced health to: %f \n", playerHealth.health);
             }
 
 			if (registry.enemy.has(entity_other)) 
@@ -222,10 +220,7 @@ void WorldSystem::handle_collisions() {
                     playerHealth.health -= 20;
                     //Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
-
-				printf("Colliding with enemy. Reduced health to: %f \n", playerHealth.health);
 			} 
-
 
             if (registry.enemyprojectile.has(entity_other))
             {
@@ -238,8 +233,6 @@ void WorldSystem::handle_collisions() {
                 auto& enemyprojectileRegistry = registry.enemyprojectile;
                 Entity fire_entity = enemyprojectileRegistry.entities[0];
                 registry.remove_all_components_of(fire_entity);
-                
-                printf("Colliding with fire. Reduced health to: %f \n", playerHealth.health);
              }
 
             if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
