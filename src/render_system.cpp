@@ -443,18 +443,15 @@ void RenderSystem::draw()
     gl_has_errors();
 
     glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::TEXT]);
-
-    glBindTexture(GL_TEXTURE_2D, font_atlas.texture_id);
+    glBindTexture(GL_TEXTURE_2D, textLayer1FontAtlas.texture_id);
     glActiveTexture(GL_TEXTURE0);
-
     GLint currProgram;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     GLuint textColour_loc = glGetUniformLocation(currProgram, "textColour");
-    glUniform3f(textColour_loc, 1.f, 1.f, 1.f);
-
-    glBindVertexArray(console_inputtext_vao.id_vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, console_inputtext_vao.id_ibo);
-            glDrawElements(GL_TRIANGLES, console_inputtext_vao.indices_count, GL_UNSIGNED_INT, nullptr);
+    glUniform3f(textColour_loc, textLayer1Colour.x, textLayer1Colour.y, textLayer1Colour.z);
+    glBindVertexArray(textLayer1VAO.id_vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer1VAO.id_ibo);
+            glDrawElements(GL_TRIANGLES, textLayer1VAO.indices_count, GL_UNSIGNED_INT, nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glUseProgram(0);

@@ -48,8 +48,14 @@ bool RenderSystem::init(SDL_Window* window_arg)
 	initScreenTexture();
     initializeGlTextures();
 	initializeGlEffects();
+	InitializeUIStuff();
 
 	return true;
+}
+
+void RenderSystem::InitializeUIStuff()
+{
+    CreateMeshVertexArray(textLayer1VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
 }
 
 void RenderSystem::initializeGlTextures()
@@ -276,12 +282,12 @@ bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, 
 	return true;
 }
 
-void gl_create_from_bitmap(texture_t&        texture,
-                           unsigned char*    bitmap,
-                           u32               bitmap_width,
-                           u32               bitmap_height,
-                           GLenum            target_format,
-                           GLenum            source_format)
+void CreateTextureFromBitmap(TextureHandle&    texture,
+                             unsigned char*    bitmap,
+                             u32               bitmap_width,
+                             u32               bitmap_height,
+                             GLenum            target_format,
+                             GLenum            source_format)
 {
     texture.width = bitmap_width;
     texture.height = bitmap_height;
@@ -289,33 +295,32 @@ void gl_create_from_bitmap(texture_t&        texture,
 
     glGenTextures(1, &texture.texture_id);                              // generate texture and grab texture id
     glBindTexture(GL_TEXTURE_2D, texture.texture_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);       // wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);    	// wrapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);   // filtering (e.g. GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // filtering (e.g. GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(
-            GL_TEXTURE_2D,                                                  // texture target type
-            0,                                                              // level-of-detail number n = n-th mipmap reduction image
-            target_format,                                                  // format of data to store (target): num of color components
-            bitmap_width,                                                   // texture width
-            bitmap_height,                                                  // texture height
-            0,                                                              // must be 0 (legacy)
-            source_format,                                                  // format of data being loaded (source)
-            GL_UNSIGNED_BYTE,                                               // data type of the texture data
-            bitmap);                                                        // data
-    glGenerateMipmap(GL_TEXTURE_2D);                                    // generate mip maps automatically
+            GL_TEXTURE_2D,            // texture target type
+            0,                        // level-of-detail number n = n-th mipmap reduction image
+            target_format,            // format of data to store (target): num of color components
+            bitmap_width,             // texture width
+            bitmap_height,            // texture height
+            0,                        // must be 0 (legacy)
+            source_format,            // format of data being loaded (source)
+            GL_UNSIGNED_BYTE,         // data type of the texture data
+            bitmap);                  // data
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void gl_create_mesh(mesh_t& mesh,
-                    float* vertices,
-                    u32* indices,
-                    u32 vertices_array_count,
-                    u32 indices_array_count,
-                    u8 vertex_attrib_size,
-                    u8 texture_attrib_size,
-                    u8 normal_attrib_size,
-                    GLenum draw_usage)
+void CreateMeshVertexArray(MeshHandle& mesh,
+                    	   float* vertices,
+                    	   u32* indices,
+                    	   u32 vertices_array_count,
+                    	   u32 indices_array_count,
+                    	   u8 vertex_attrib_size,
+                    	   u8 texture_attrib_size,
+                    	   u8 normal_attrib_size,
+                    	   GLenum draw_usage)
 {
     u8 stride = 0;
     if(texture_attrib_size)
@@ -355,12 +360,12 @@ void gl_create_mesh(mesh_t& mesh,
     glBindVertexArray(0);
 }
 
-void gl_rebind_buffer_objects(mesh_t& mesh,
-							  float* vertices,
-                              u32* indices,
-                              u32 vertices_array_count,
-                              u32 indices_array_count,
-                              GLenum draw_usage)
+void RebindMeshBufferObjects(MeshHandle& mesh,
+						     float* vertices,
+                             u32* indices,
+                             u32 vertices_array_count,
+                             u32 indices_array_count,
+                             GLenum draw_usage)
 {
     if(mesh.id_vbo == 0 || mesh.id_ibo == 0)
     {
