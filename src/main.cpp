@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 		world.step(deltaTime);
         if(world.GetCurrentMode() == MODE_INGAME)
         {   
-            ai.step(deltaTime);
+            ai.Step(deltaTime);
             physics.step(deltaTime);
             playerSystem.Step(deltaTime);
             world.handle_collisions();

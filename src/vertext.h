@@ -462,7 +462,7 @@ vtxt_init_font(vtxt_font* font_handle, unsigned char* font_buffer, int font_heig
     // Font metrics
     stbtt_fontinfo stb_font_info;
     stbtt_InitFont(&stb_font_info, font_buffer, 0);
-    float stb_scale = stbtt_ScaleForPixelHeight(&stb_font_info, (float)font_height_in_pixels);
+    float stb_scale = stbtt_ScaleForMappingEmToPixels(&stb_font_info, (float)font_height_in_pixels);
     int stb_ascender;
     int stb_descender;
     int stb_linegap;

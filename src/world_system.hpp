@@ -66,6 +66,7 @@ public:
     void SDLProcessEvents();
 
     GAMEMODE GetCurrentMode() { return currentGameMode; }
+    GAMELEVELENUM GetCurrentStage() { return currentGameStage; }
 
 	bool is_over()const;
 

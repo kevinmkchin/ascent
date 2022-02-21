@@ -1,21 +1,3 @@
-Gameplay
-    Combat
-     - Fight monsters with melee or ranged attacks.
-     - Simple combat mechanics which are modified by the mutations.
-     - Mutations will increase stats like ATTACK DAMAGE or HEALTH. Mutations can also change the way you fight (e.g. a mutation might give you a ranged attack).
-    Exploration
-     - Each level is randomly generated. The player must explore the level to find treasures, fight monsters for EXP, and buy mutations at shops. 
-     - The player will WANT to fully explore the level before progressing to the next level because their character becomes stronger the more EXP and mutations they gain.
-    Progression
-     - Player character gains EXP from killing monsters
-     - Player character picks a mutation from 3 randomly chosen mutations when they level up
-     - Player finds gold from treasure chests or by killing monsters. Gold can be spent at shops.
-    Bossfight
-     - At the end of each chapter (aiming for 2 for now), there is a boss fight. 
-     - Bosses are scripted events.
-    Content
-     - The game is divided up into biomes (chapters) and stages. There are three stages/levels in each chapter. At the end of each chapter, there is a boss fight. For the playable game, we should aim for 2 biomes. This is 6 levels to complete in a run. For the final game, we may aim for 3 biomes/chapters.
-
 Ideas for Gameplay
  - 427 class will have short attention span
      - Show the cool parts of our game right away
@@ -25,7 +7,6 @@ Ideas for Gameplay
  - Health is a currency -> I can lose X health to gain something
  - Some player mutations or abilities should be those of enemies
  - Jumping on enemy just bounces off -> doesn't kill enemy like in Super Mario Bros
- - Main menu could look like this: https://youtu.be/HQ6YQWw6Ufo
  - Maybe beating the game unlocks more difficult runs
  - collect ingredients while playing - bring ingredients to an alchemist - if u have the right ingredients for a given mutation you can craft it and gain the mutation - archaic ingredient names like oil of vitriol, wolfsbane, water essence
 
@@ -44,3 +25,25 @@ Ideas for Mutations
  - every 5th attack freezes the enemy
  - Attack 10x faster but do 10x less damage
  - homing missiles do 3x dmg to frozen or burning enemies
+
+
+
+
+
+Gameplay
+    Combat
+     - Fight monsters with melee or ranged attacks.
+     - Simple combat mechanics which are modified by the mutations.
+     - Mutations will increase stats like ATTACK DAMAGE or HEALTH. Mutations can also change the way you fight (e.g. a mutation might give you a ranged attack).
+    Exploration
+     - Each level is randomly generated. The player must explore the level to find treasures, fight monsters for EXP, and buy mutations at shops. 
+     - The player will WANT to fully explore the level before progressing to the next level because their character becomes stronger the more EXP and mutations they gain.
+    Progression
+     - Player character gains EXP from killing monsters
+     - Player character picks a mutation from 3 randomly chosen mutations when they level up
+     - Player finds gold from treasure chests or by killing monsters. Gold can be spent at shops.
+    Bossfight
+     - At the end of each chapter (aiming for 2 for now), there is a boss fight. 
+     - Bosses are scripted events.
+    Content
+     - The game is divided up into biomes (chapters) and stages. There are three stages/levels in each chapter. At the end of each chapter, there is a boss fight. For the playable game, we should aim for 2 biomes. This is 6 levels to complete in a run. For the final game, we may aim for 3 biomes/chapters.

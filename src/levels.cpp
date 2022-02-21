@@ -182,6 +182,13 @@ INTERNAL CurrentLevelData currentLevelData;
 
 INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
 
+INTERNAL void ClearCurrentLevelData()
+{
+    currentLevelData.playerStart = vec2(0.f,0.f);
+    currentLevelData.monsterSpawns.clear();
+    currentLevelData.treasureSpawns.clear();
+}
+
 INTERNAL void ClearLevelTiles()
 {
     for(int i = 0; i < NUMTILESWIDE; ++i)
@@ -329,6 +336,7 @@ INTERNAL void UpdateLevelGeometry()
 INTERNAL void GenerateNewLevel()
 {
     ClearLevelTiles();
+    ClearCurrentLevelData();
 
     std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
     const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
