@@ -5,7 +5,7 @@
 #include <fstream>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../ext/stb_image/stb_image.h"
+#include <stb_image.h>
 
 // This creates circular header inclusion, that is quite bad.
 #include "tiny_ecs_registry.hpp"
@@ -15,16 +15,21 @@
 #include <sstream>
 
 // World initialization
-bool RenderSystem::init(SDL_Window* window_arg)
+bool RenderSystem::Init(SDL_Window* window)
 {
-	this->window = window_arg;
+	this->window = window;
 
     SDL_GL_GetDrawableSize(window, &backbufferWidth, &backbufferHeight);
 
 	// Create a frame buffer
-	frame_buffer = 0;
-	glGenFramebuffers(1, &frame_buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+	gameFrameBuffer = 0;
+	glGenFramebuffers(1, &gameFrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gameFrameBuffer);
+	gl_has_errors();
+
+    uiFrameBuffer = 0;
+	glGenFramebuffers(1, &uiFrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, uiFrameBuffer);
 	gl_has_errors();
 
 	// Hint: Ask your TA for how to setup pretty OpenGL error callbacks.
@@ -40,14 +45,20 @@ bool RenderSystem::init(SDL_Window* window_arg)
 	glBindVertexArray(vao);
 	gl_has_errors();
 
-	initScreenTexture();
-    initializeGlTextures();
-	initializeGlEffects();
+    InitScreenTexture();
+    InitializeGlTextures();
+    InitializeGlEffects();
+	InitializeUIStuff();
 
 	return true;
 }
 
-void RenderSystem::initializeGlTextures()
+void RenderSystem::InitializeUIStuff()
+{
+    CreateMeshVertexArray(textLayer1VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
+}
+
+void RenderSystem::InitializeGlTextures()
 {
     glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 
@@ -75,48 +86,68 @@ void RenderSystem::initializeGlTextures()
 	gl_has_errors();
 }
 
-void RenderSystem::initializeGlEffects()
+void RenderSystem::InitializeGlEffects()
 {
 	for(uint i = 0; i < effect_paths.size(); i++)
 	{
 		const std::string vertex_shader_name = effect_paths[i] + ".vert";
 		const std::string fragment_shader_name = effect_paths[i] + ".frag";
 
-		bool is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
+		bool is_valid = LoadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
 		assert(is_valid && (GLuint)effects[i] != 0);
 	}
 }
 
 // Initialize the screen texture from a standard sprite
-bool RenderSystem::initScreenTexture()
+bool RenderSystem::InitScreenTexture()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, gameFrameBuffer);
 
-	glGenTextures(1, &off_screen_render_buffer_color);
-	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
+	glGenTextures(1, &offScreenRenderBufferColor);
+	glBindTexture(GL_TEXTURE_2D, offScreenRenderBufferColor);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	gl_has_errors();
 
-	glGenRenderbuffers(1, &off_screen_render_buffer_depth);
-	glBindRenderbuffer(GL_RENDERBUFFER, off_screen_render_buffer_depth);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, off_screen_render_buffer_color, 0);
+	glGenRenderbuffers(1, &offScreenRenderBufferDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, offScreenRenderBufferDepth);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, offScreenRenderBufferColor, 0);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, off_screen_render_buffer_depth);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, offScreenRenderBufferDepth);
 	gl_has_errors();
 
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
+
+    glBindFramebuffer(GL_FRAMEBUFFER, uiFrameBuffer);
+
+	glGenTextures(1, &offScreenUiBufferColor);
+	glBindTexture(GL_TEXTURE_2D, offScreenUiBufferColor);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	gl_has_errors();
+
+	glGenRenderbuffers(1, &offScreenUiBufferDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, offScreenUiBufferDepth);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, offScreenUiBufferColor, 0);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, offScreenUiBufferDepth);
+	gl_has_errors();
+
+	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+
+
 	return true;
 }
 
-void RenderSystem::updateScreenTextureSize(i32 newWidth, i32 newHeight)
+void RenderSystem::UpdateScreenTextureSize(i32 newWidth, i32 newHeight)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-    glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
+    glBindFramebuffer(GL_FRAMEBUFFER, gameFrameBuffer);
+    glBindTexture(GL_TEXTURE_2D, offScreenRenderBufferColor);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glBindRenderbuffer(GL_RENDERBUFFER, off_screen_render_buffer_depth);
+    glBindRenderbuffer(GL_RENDERBUFFER, offScreenRenderBufferDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, newWidth, newHeight);
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -125,24 +156,27 @@ void RenderSystem::updateScreenTextureSize(i32 newWidth, i32 newHeight)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderSystem::cleanUp()
+void RenderSystem::CleanUp()
 {
     // Don't need to free gl resources since they last for as long as the program,
     // but it's polite to clean after yourself.
 	glDeleteTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
-	glDeleteTextures(1, &off_screen_render_buffer_color);
-	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
+	glDeleteTextures(1, &offScreenRenderBufferColor);
+	glDeleteRenderbuffers(1, &offScreenRenderBufferDepth);
+	glDeleteTextures(1, &offScreenUiBufferColor);
+	glDeleteRenderbuffers(1, &offScreenUiBufferDepth);
 	gl_has_errors();
 
     for(uint i = 0; i < effect_count; i++) {
         glDeleteProgram(effects[i]);
     }
     // delete allocated resources
-    glDeleteFramebuffers(1, &frame_buffer);
+    glDeleteFramebuffers(1, &gameFrameBuffer);
+    glDeleteFramebuffers(1, &uiFrameBuffer);
     gl_has_errors();
 }
 
-void RenderSystem::updateBackBufferSize()
+void RenderSystem::UpdateBackBufferSize()
 {
     SDL_GL_GetDrawableSize(window, &backbufferWidth, &backbufferHeight);
 }
@@ -170,7 +204,7 @@ bool gl_compile_shader(GLuint shader)
 	return true;
 }
 
-bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program)
+bool LoadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program)
 {
 	// Opening files
 	std::ifstream vs_is(vs_path);
@@ -248,3 +282,102 @@ bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, 
 	return true;
 }
 
+void CreateTextureFromBitmap(TextureHandle&    texture,
+                             unsigned char*    bitmap,
+                             u32               bitmap_width,
+                             u32               bitmap_height,
+                             GLenum            target_format,
+                             GLenum            source_format)
+{
+    texture.width = bitmap_width;
+    texture.height = bitmap_height;
+    texture.format = source_format;
+
+    glGenTextures(1, &texture.textureId);                              // generate texture and grab texture id
+    glBindTexture(GL_TEXTURE_2D, texture.textureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);    	// wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // filtering (e.g. GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(
+            GL_TEXTURE_2D,            // texture target type
+            0,                        // level-of-detail number n = n-th mipmap reduction image
+            target_format,            // format of data to store (target): num of color components
+            bitmap_width,             // texture width
+            bitmap_height,            // texture height
+            0,                        // must be 0 (legacy)
+            source_format,            // format of data being loaded (source)
+            GL_UNSIGNED_BYTE,         // data type of the texture data
+            bitmap);                  // data
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void CreateMeshVertexArray(MeshHandle& mesh,
+                    	   float* vertices,
+                    	   u32* indices,
+                    	   u32 vertices_array_count,
+                    	   u32 indices_array_count,
+                    	   u8 vertex_attrib_size,
+                    	   u8 texture_attrib_size,
+                    	   u8 normal_attrib_size,
+                    	   GLenum draw_usage)
+{
+    u8 stride = 0;
+    if(texture_attrib_size)
+    {
+        stride += vertex_attrib_size + texture_attrib_size;
+        if(normal_attrib_size)
+        {
+            stride += normal_attrib_size;
+        }
+    }
+
+    mesh.indicesCount = indices_array_count;
+
+    glGenVertexArrays(1, &mesh.idVAO);
+    glBindVertexArray(mesh.idVAO);
+    glGenBuffers(1, &mesh.idVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.idVBO);
+    glBufferData(GL_ARRAY_BUFFER, 4 * vertices_array_count, vertices, draw_usage);
+    glVertexAttribPointer(0, vertex_attrib_size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0); // vertex pointer
+    glEnableVertexAttribArray(0);
+    if(texture_attrib_size > 0)
+    {
+        glVertexAttribPointer(1, texture_attrib_size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * vertex_attrib_size)); 
+        glEnableVertexAttribArray(1);
+        if(normal_attrib_size > 0)
+        {
+            glVertexAttribPointer(2, normal_attrib_size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * (vertex_attrib_size + texture_attrib_size)));
+            glEnableVertexAttribArray(2);
+        }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glGenBuffers(1, &mesh.idIBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.idIBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * indices_array_count, indices, draw_usage);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void RebindMeshBufferObjects(MeshHandle& mesh,
+						     float* vertices,
+                             u32* indices,
+                             u32 vertices_array_count,
+                             u32 indices_array_count,
+                             GLenum draw_usage)
+{
+    if(mesh.idVBO == 0 || mesh.idIBO == 0)
+    {
+        return;
+    }
+
+    mesh.indicesCount = indices_array_count;
+    glBindVertexArray(mesh.idVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.idVBO);
+            glBufferData(GL_ARRAY_BUFFER, 4 * vertices_array_count, vertices, draw_usage);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.idIBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * indices_array_count, indices, draw_usage);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
