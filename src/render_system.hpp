@@ -16,7 +16,7 @@ struct SpriteTransformPair
 
 struct TextureHandle
 {
-    GLuint  texture_id  = 0;        // ID for the texture in GPU memory
+    GLuint  textureId  = 0;        // ID for the texture in GPU memory
     i32     width       = 0;        // Width of the texture
     i32     height      = 0;        // Height of the texture
     GLenum  format      = GL_NONE;  // format / bitdepth of texture (GL_RGB would be 3 byte bit depth)
@@ -24,10 +24,10 @@ struct TextureHandle
 
 struct MeshHandle
 {
-    u32  id_vao          = 0;
-    u32  id_vbo          = 0;
-    u32  id_ibo          = 0;
-    u32  indices_count   = 0;
+    u32  idVAO          = 0;
+    u32  idVBO          = 0;
+    u32  idIBO          = 0;
+    u32  indicesCount   = 0;
 };
 
 // System responsible for setting up OpenGL and for rendering all the
@@ -46,16 +46,16 @@ class RenderSystem {
 
 public:
 	// Initialize the window
-	bool init(SDL_Window* window);
+	bool Init(SDL_Window* window);
 
     // Destroy resources associated to one or all entities created by the system
-    void cleanUp();
+    void CleanUp();
 
 	// Draw all entities
-	void draw();
+	void Draw();
 
     // Call this when the display resolution (i.e. the window size) changes
-    void updateBackBufferSize();
+    void UpdateBackBufferSize();
 
     // Camera bounds
     vec2 cameraBoundMin;
@@ -70,29 +70,29 @@ public:
     MeshHandle      textLayer1VAO;
 
 private:
-    void initializeGlTextures();
+    void InitializeGlTextures();
 
-    void initializeGlEffects();
+    void InitializeGlEffects();
 
     void InitializeUIStuff();
 
     // Initialize the screen texture used as intermediate render target
     // The draw loop first renders to this texture
-    bool initScreenTexture();
+    bool InitScreenTexture();
 
-    void updateScreenTextureSize(i32 newWidth, i32 newHeight);
+    void UpdateScreenTextureSize(i32 newWidth, i32 newHeight);
 
 	// Internal drawing functions for each entity type
-    void drawSprite(TransformComponent entityTransform, SpriteComponent sprite, const mat3 &projection);
+    void DrawSprite(TransformComponent entityTransform, SpriteComponent sprite, const mat3& projection);
 
     // BATCH DRAWING
-    void BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3 &projection);
+    void BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3& projection);
 
-    void drawBackground();
+    void DrawBackground();
 
-	void finalDrawToScreen();
+	void FinalDrawToScreen();
 
-    mat3 createProjectionMatrix();
+    mat3 CreateGameProjectionMatrix();
 
 	// Window handle
     SDL_Window* window;
@@ -102,17 +102,17 @@ private:
     const i32 FRAMEBUFFER_HEIGHT = GAME_RESOLUTION_HEIGHT * FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
 
 	// Screen texture handles
-	GLuint game_frame_buffer;
-	GLuint off_screen_render_buffer_color;
-	GLuint off_screen_render_buffer_depth;
+	GLuint gameFrameBuffer;
+	GLuint offScreenRenderBufferColor;
+	GLuint offScreenRenderBufferDepth;
 
-    GLuint ui_frame_buffer;
-    GLuint off_screen_ui_buffer_color;
-    GLuint off_screen_ui_buffer_depth;
+    GLuint uiFrameBuffer;
+    GLuint offScreenUiBufferColor;
+    GLuint offScreenUiBufferDepth;
 
 };
 
-bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
+bool LoadEffectFromFile(const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
 
 void CreateTextureFromBitmap(TextureHandle&    texture,
                              unsigned char*    bitmap,

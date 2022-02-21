@@ -12,7 +12,7 @@
  *
  * So, instead of referring to a game asset directly, the game logic just
  * uses these enumerators and the RenderRequest struct to inform the renderer
- * how to structure the next draw command.
+ * how to structure the next Draw command.
  *
  * There are 2 reasons for this:
  *

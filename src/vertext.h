@@ -371,7 +371,7 @@ VTXT_DEF void vtxt_new_line(int          x,
                             vtxt_font*  font);
 
 /** Assemble quads for a line of text and append to vertex buffer.
-    line_of_text is the text you want to draw e.g. "some text I want to draw".
+    line_of_text is the text you want to draw e.g. "some text I want to Draw".
     font is the vtxt_font font handle that contains the font you want to use.
     font_size is the font height in pixels.
 */

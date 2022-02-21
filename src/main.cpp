@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     if(!OpenGLInitialize()) return EXIT_FAILURE;
 
 	// Initialize the main systems
-	renderer.init(window);
+    renderer.Init(window);
 	world.init(&renderer, &playerSystem);
     ui.Init(&renderer, &world, &playerSystem);
 
@@ -143,13 +143,13 @@ int main(int argc, char* argv[])
         Input::ResetControllerStates();
         Input::ResetKeyboardStates();
 
-		renderer.draw();
+        renderer.Draw();
         SDL_GL_SwapWindow(window);
 	}
 
     // Clean up
     world.cleanUp();
-    renderer.cleanUp();
+    renderer.CleanUp();
 
     SDL_DestroyWindow(window);
     SDL_GL_DeleteContext(openglContext);
