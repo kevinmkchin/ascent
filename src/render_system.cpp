@@ -6,7 +6,7 @@
 INTERNAL u32 GetRenderState(const SpriteComponent& sprite)
 {
     u32 state = 0;
-    state |= sprite.layer;
+    state |= (u8) (sprite.layer + 128);
     state <<= 16;
     state |= (u16) sprite.texId;
     state <<= 8;

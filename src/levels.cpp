@@ -7,10 +7,12 @@
 #include "tiny_ecs_registry.hpp"
 
 #define TILE_SIZE 16
+#define ROOM_DIMENSION_X 11
+#define ROOM_DIMENSION_Y 9
 #define NUMROOMSWIDE 5
 #define NUMFLOORS 5
-#define NUMTILESWIDE NUMROOMSWIDE * 11
-#define NUMTILESTALL NUMFLOORS * 9
+#define NUMTILESWIDE NUMROOMSWIDE * ROOM_DIMENSION_X
+#define NUMTILESTALL NUMFLOORS * ROOM_DIMENSION_Y
 
 INTERNAL void AddTileSizedCollider(Entity tileEntity)
 {
@@ -115,6 +117,27 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
     return entity;
 }
 
+INTERNAL Entity CreateShopBackground(i32 col, i32 row)
+{
+    Entity entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
+    transform.center = {0.f,0.f};
+
+    registry.sprites.insert(
+            entity,
+            {
+                { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
+                -128,
+                TEXTURE_ASSET_ID::SHOPBG,
+                EFFECT_ASSET_ID::SPRITE
+            }
+    );
+
+    return entity;
+}
+
 namespace ns
 {
     using JSON = nlohmann::json;
@@ -202,6 +225,13 @@ INTERNAL void ClearLevelTiles()
 
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
+    // Check room type
+    if(r.type == "shop")
+    {
+        CreateShopBackground(roomXIndex * r.width, roomYIndex * r.height);
+    }
+
+    // Check individual tiles
     for(int i = 0; i < r.height; ++i)
     {
         for(int j = 0; j < r.width; ++j)
@@ -244,8 +274,14 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                     CreateSpikeTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
+                case 'S':{
+                    // shop items
+                    CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::SPIKES1);
+                }break;
+
                 case 'B':{
-                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::SKULLS1);
+                    // wooden tiles
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::WOODTILE);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
 
@@ -333,7 +369,7 @@ INTERNAL void UpdateLevelGeometry()
     }
 }
 
-INTERNAL void GenerateNewLevel()
+INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
 {
     ClearLevelTiles();
     ClearCurrentLevelData();
@@ -377,6 +413,17 @@ INTERNAL void GenerateNewLevel()
     }
     u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
     roomDataArray[NUMFLOORS-1][start] = chapterOneRooms["start"][startRoomIndex];
+
+    // SHOP ROOM
+    u32 shopCol = rand() % NUMROOMSWIDE;
+    u32 shopRow = 1 + rand() % (NUMFLOORS - 2);
+    while(!roomDataArray[shopCol][shopRow].data.empty())
+    {
+        shopCol = rand() % NUMROOMSWIDE;
+        shopRow = 1 + rand() % (NUMFLOORS - 2);
+    }
+    u32 shopRoomIndex = rand() % chapterOneRooms["shop"].size();
+    roomDataArray[shopCol][shopRow] = chapterOneRooms["shop"][shopRoomIndex];
 
     // CORRIDORS
     for(int i = 0; i < NUMFLOORS; ++i)

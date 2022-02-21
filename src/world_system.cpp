@@ -92,7 +92,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     currentGameStage = stage;
 
     // Create random level
-    GenerateNewLevel();
+    GenerateNewLevel(stage);
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
     SpawnLevelEntities();

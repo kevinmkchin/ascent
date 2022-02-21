@@ -44,8 +44,9 @@ enum class TEXTURE_ASSET_ID : u16
     BG1,
     BOX,
     LADDER,
+    WOODTILE,
     TILE_EXAMPLE,
-
+    SHOPBG,
     MAINMENUBG,
     FIRE,
 
@@ -69,7 +70,9 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bg.png"),
         textures_path("box.png"),
         textures_path("ladder.png"),
+        textures_path("woodtile.png"),
         textures_path("tile_example.png"),
+        textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
 };
@@ -142,7 +145,7 @@ struct CollisionComponent
 struct SpriteComponent
 {
     vec2 dimensions = {0.f,0.f};// in pixels
-    u8 layer = 0;               // render layer. higher layer is drawn on top of lower layers.
+    i8 layer = 0;               // render layer. higher layer is drawn on top of lower layers. -128 to 127
     TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
     EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
