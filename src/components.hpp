@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
-#include "../ext/stb_image/stb_image.h"
+#include <stb_image.h>
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -79,7 +79,7 @@ enum class EFFECT_ASSET_ID : u8
     FINAL_PASS,
     SPRITE,
     BACKGROUND,
-
+    TEXT,
 
     EFFECT_COUNT
 };
@@ -90,6 +90,7 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("finalpass"),
         shader_path("sprite"),
         shader_path("background"),
+        shader_path("text_ui"),
 };
 
 
