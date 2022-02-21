@@ -7,10 +7,12 @@
     "b": "wooden tile",
     "c": "",
     "l": "ladder",
+    "m": "monster",
     "s": "loc shopitem",
+    "t": "treasure",
     "w": "spikes"
   },
-  "count": 6,
+  "count": 10,
   "rooms": [
     {
       "name": "start-eg1",
@@ -22,28 +24,28 @@
     {
       "name": "end-eg1",
       "type": "end",
-      "data": "AAAAAAAAAAA000000000000000000000000000000000000000000000AA00000AA00AAA020AAA0AAAAAAAAAAAAAAAAAAAAAA",
+      "data": "AAAAAAAAAAA00000000000000000000000000000000000M000000000AA00000AA00AAA020AAA0AAAAAAAAAAAAAAAAAAAAAA",
       "width": 11,
       "height": 9
     },
     {
       "name": "c-eg1",
       "type": "corridor",
-      "data": "AAAAAAAAAAA0AAAA0AAA0000000000000000000000000000AAA000000000000000AA000000AA0AAAAAWAAAAAAAAAAAAAAAA",
+      "data": "AAAAAAAAAAA0AAAA0AAA000000000000000000M000000000AAA0000000000000M0AA0M0000AA0AAAAAWAAAAAAAAAAAAAAAA",
       "width": 11,
       "height": 9
     },
     {
       "name": "l-eg1",
       "type": "landing",
-      "data": "AAAL0000AAAAAAL000LAAA00AL000LAAA000L000L000000L000L000000L000L000000L000L000000L0WWL000AAAAAAAAAAA",
+      "data": "AAALAAALAAAAAALAAALAAA000LAAALAAA000LAAAL000000L000L000000L000L000000L000L0000M0L0WWL000AAAAAAAAAAA",
       "width": 11,
       "height": 9
     },
     {
       "name": "f-eg1",
       "type": "falling",
-      "data": "AAAAAAAAAAAAAAAAAAAAAAAAA000000AAA000000000A0000000000000000000000A000000000AAA0000000AAAAA00000AAA",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0000000000000000M00000000AAAAA00000000000000AA0000000AAAAA00000AAA",
       "width": 11,
       "height": 9
     },
@@ -51,6 +53,34 @@
       "name": "shop-1",
       "type": "shop",
       "data": "AAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBAB000000000B0000S0S000000LBBBBBL0000L00000L0000L0S0S0L00ABBBBBBBBBA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "c-eg2",
+      "type": "corridor",
+      "data": "AAA0AAAAAAAAAA0AT0LTAAAA00AAALAA00000AAALA000000AA00000AA00AA00M00AA000000AA0AAA0M00AAAAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "c-eg3",
+      "type": "corridor",
+      "data": "AAAAAAAAAAA00000000000000000000000000AAA00000M000000000AAA00AAAA0000000000000000AA00M00WAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "f-eg2",
+      "type": "falling",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0AAAAAAAAA00AAAAAAAAA00AAAAAAAAA0000AAAAA000A000AAAA000AA000000000",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "l-eg2",
+      "type": "landing",
+      "data": "00000000000000AAAAALA0AA0AAAAALA0A00AAAAALA000AAAAAALA000AAAAAAL000AAAAAAAL0000000000000A0000000A00",
       "width": 11,
       "height": 9
     }
