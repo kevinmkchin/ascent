@@ -88,7 +88,7 @@ Entity createEnemy(vec2 position)
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
-    motion.velocity = { 32.f, 0 };
+    motion.velocity = { 0.f, 0 };
 
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
