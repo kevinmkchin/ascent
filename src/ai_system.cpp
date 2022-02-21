@@ -3,20 +3,20 @@
 
 static float elapsedTime = 0.0f;
 
-void AISystem::step(float deltaTime)
+void AISystem::Step(float deltaTime)
 {
 	elapsedTime += deltaTime * 1000.0f;
 	if (elapsedTime >= 2000.0f) {
 		for (Entity& enemy : registry.enemy.entities) {
 			// MotionComponent& enemyMotion = registry.motions.get(enemy);
 			// enemyMotion.velocity.x *= -1.f;
-			Enemy_attack(enemy);
+			EnemyAttack(enemy);
 		}
 		elapsedTime = 0.0f;
 	}
 }
 
-void AISystem::Enemy_attack(Entity enemy_entity) {
+void AISystem::EnemyAttack(Entity enemy_entity) {
 	Enemy& enemy = registry.enemy.get(enemy_entity);
 	MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
 	Entity playerEntity = registry.players.entities.front();

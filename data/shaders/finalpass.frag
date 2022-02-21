@@ -9,7 +9,7 @@ out vec4 color;
 void main()
 {
     vec4 in_color = texture(screen_texture, texcoord);
-    if(in_color.w < 0.5)
+    if(in_color.w < 0.001)
     {
     	discard;
     }

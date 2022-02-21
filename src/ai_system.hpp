@@ -9,7 +9,7 @@
 class AISystem
 {
 public:
-	void step(float deltaTime);
-	void Enemy_attack(Entity enemy_entity);
+	void Step(float deltaTime);
+	void EnemyAttack(Entity enemy_entity);
 };
 

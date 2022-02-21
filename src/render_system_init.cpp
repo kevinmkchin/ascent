@@ -56,6 +56,7 @@ bool RenderSystem::Init(SDL_Window* window)
 void RenderSystem::InitializeUIStuff()
 {
     CreateMeshVertexArray(textLayer1VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
+    CreateMeshVertexArray(textLayer2VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
 }
 
 void RenderSystem::InitializeGlTextures()
@@ -287,7 +288,8 @@ void CreateTextureFromBitmap(TextureHandle&    texture,
                              u32               bitmap_width,
                              u32               bitmap_height,
                              GLenum            target_format,
-                             GLenum            source_format)
+                             GLenum            source_format,
+                             GLenum 		   filter_mode)
 {
     texture.width = bitmap_width;
     texture.height = bitmap_height;
@@ -297,8 +299,8 @@ void CreateTextureFromBitmap(TextureHandle&    texture,
     glBindTexture(GL_TEXTURE_2D, texture.textureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);    	// wrapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  // filtering (e.g. GL_NEAREST)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter_mode);  // filtering (e.g. GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter_mode);
     glTexImage2D(
             GL_TEXTURE_2D,            // texture target type
             0,                        // level-of-detail number n = n-th mipmap reduction image

@@ -443,15 +443,23 @@ void RenderSystem::Draw()
     gl_has_errors();
 
     glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::TEXT]);
-    glBindTexture(GL_TEXTURE_2D, textLayer1FontAtlas.textureId);
-    glActiveTexture(GL_TEXTURE0);
     GLint currProgram;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     GLuint textColour_loc = glGetUniformLocation(currProgram, "textColour");
-    glUniform3f(textColour_loc, textLayer1Colour.x, textLayer1Colour.y, textLayer1Colour.z);
+    glBindTexture(GL_TEXTURE_2D, textLayer1FontAtlas.textureId);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform4f(textColour_loc, textLayer1Colour.x, textLayer1Colour.y, textLayer1Colour.z, textLayer1Colour.w);
     glBindVertexArray(textLayer1VAO.idVAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer1VAO.idIBO);
             glDrawElements(GL_TRIANGLES, textLayer1VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, textLayer2FontAtlas.textureId);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform4f(textColour_loc, textLayer2Colour.x, textLayer2Colour.y, textLayer2Colour.z, textLayer2Colour.w);
+    glBindVertexArray(textLayer2VAO.idVAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer2VAO.idIBO);
+            glDrawElements(GL_TRIANGLES, textLayer2VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glUseProgram(0);
@@ -475,8 +483,8 @@ void RenderSystem::FinalDrawToScreen()
     glClearDepth(1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Enabling alpha channel for textures
-    glDisable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
     LOCAL_PERSIST u32 finalQuadVAO;

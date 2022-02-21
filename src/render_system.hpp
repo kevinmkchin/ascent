@@ -16,7 +16,7 @@ struct SpriteTransformPair
 
 struct TextureHandle
 {
-    GLuint  textureId  = 0;        // ID for the texture in GPU memory
+    GLuint  textureId   = 0;        // ID for the texture in GPU memory
     i32     width       = 0;        // Width of the texture
     i32     height      = 0;        // Height of the texture
     GLenum  format      = GL_NONE;  // format / bitdepth of texture (GL_RGB would be 3 byte bit depth)
@@ -66,8 +66,11 @@ public:
 
     // UI
     TextureHandle   textLayer1FontAtlas;
-    vec3            textLayer1Colour = vec3(1.f,1.f,1.f);
+    vec4            textLayer1Colour = vec4(1.f,1.f,1.f,1.f);
     MeshHandle      textLayer1VAO;
+    TextureHandle   textLayer2FontAtlas;
+    vec4            textLayer2Colour = vec4(1.f,1.f,1.f,1.f);
+    MeshHandle      textLayer2VAO;
 
 private:
     void InitializeGlTextures();
@@ -119,7 +122,8 @@ void CreateTextureFromBitmap(TextureHandle&    texture,
                              u32               bitmap_width,
                              u32               bitmap_height,
                              GLenum            target_format,
-                             GLenum            source_format);
+                             GLenum            source_format,
+                             GLenum            filter_mode = GL_LINEAR);
 
 void CreateMeshVertexArray(MeshHandle& mesh,
                            float* vertices,
