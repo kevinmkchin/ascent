@@ -16,11 +16,11 @@ INTERNAL TextureHandle texture_VGA437;
 
 INTERNAL void LoadFont(vtxt_font* font_handle, TextureHandle* font_atlas, const char* font_path, u8 font_size)
 {
-    binary_file_handle_t fontfile;
-    read_file_binary(fontfile, font_path);
+    BinaryFileHandle fontfile;
+    ReadFileBinary(fontfile, font_path);
     assert(fontfile.memory);
     vtxt_init_font(font_handle, (u8*) fontfile.memory, font_size);
-    free_file_binary(fontfile);
+    FreeFileBinary(fontfile);
     CreateTextureFromBitmap(*font_atlas, font_handle->font_atlas.pixels, font_handle->font_atlas.width, 
         font_handle->font_atlas.height, GL_RED, GL_RED);
     free(font_handle->font_atlas.pixels);

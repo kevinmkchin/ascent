@@ -342,7 +342,7 @@ void WorldSystem::SDLProcessEvents()
                 {
                     case SDL_WINDOWEVENT_RESIZED:
                     case SDL_WINDOWEVENT_SIZE_CHANGED:{
-                        renderer->updateBackBufferSize();
+                        renderer->UpdateBackBufferSize();
                     }break;
                 }
             }break;
