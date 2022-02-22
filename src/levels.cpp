@@ -465,6 +465,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
         auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
         AddTileSizedCollider(_a);
         AddTileSizedCollider(_b);
+        ChangeSpritesBasedOnTopBottom(_a, i, -1);
+        ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
     }
     for(int i = -1; i < ((NUMTILESTALL)+1); ++i)
     {
