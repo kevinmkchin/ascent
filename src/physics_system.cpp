@@ -56,36 +56,6 @@ INTERNAL void MoveEntities(float deltaTime)
 
 INTERNAL void CheckAllCollisions()
 {
-//    // Check for collisions between all moving entities
-//    ComponentContainer<MotionComponent> &motion_container = registry.motions;
-//    for(uint i = 0; i<motion_container.components.size(); i++)
-//    {
-//        Motion& motion_i = motion_container.components[i];
-//        Entity entity_i = motion_container.entities[i];
-//
-//        // note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-//        for(uint j = i+1; j<motion_container.components.size(); j++)
-//        {
-//            Motion& motion_j = motion_container.components[j];
-//            Entity entity_j = motion_container.entities[j];
-//
-//            CollisionInfo colInfo = CheckCollision(motion_i, motion_j);
-//            if (colInfo.collides)
-//            {
-//                // Create a collisions event
-//                CollisionEvent colEventAgainstJ(entity_j);
-//                CollisionEvent colEventAgainstI(entity_i);
-//                // Note(Kevin): colInfo.collision_overlap is relative to entity_i, therefore
-//                //              it needs to be inverted for colEventAgainstI
-//                colEventAgainstJ.collision_overlap = colInfo.collision_overlap;
-//                colEventAgainstI.collision_overlap = -colInfo.collision_overlap;
-//
-//                // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-//                registry.collisionEvents.insert(entity_i, colEventAgainstJ, false);
-//                registry.collisionEvents.insert(entity_j, colEventAgainstI, false);
-//            }
-//        }
-//    }
 
     // check all necessary entities
     std::vector<Entity> entitiesToCheck;
@@ -108,6 +78,11 @@ INTERNAL void CheckAllCollisions()
 
             TransformComponent otherTransform = registry.transforms.get(collidable);
             CollisionComponent otherCollider = registry.colliders.get(collidable);
+
+            if(length(entityTransform.position - otherTransform.position) > 48.f) // if distance b/w is big then don't check
+            {
+                continue;
+            }
 
             CollisionInfo colInfo = CheckCollision(entityTransform, entityCollider, otherTransform, otherCollider);
             if (colInfo.collides)
