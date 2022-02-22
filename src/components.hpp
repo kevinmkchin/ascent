@@ -49,7 +49,7 @@ enum class TEXTURE_ASSET_ID : u16
     SHOPBG,
     MAINMENUBG,
     FIRE,
-
+    EXITTILE,
 
     TEXTURE_COUNT
 };
@@ -75,6 +75,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
+        textures_path("exit.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
