@@ -426,7 +426,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     u32 shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
     u32 shopRow = 1 + rand() % (NUMFLOORS - 2);
     u32 loop = 0;
-    while(!roomDataArray[shopCol][shopRow].data.empty())
+    while(!roomDataArray[shopRow][shopCol].data.empty())
     {
         if(loop > 10)
         {
