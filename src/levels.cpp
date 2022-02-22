@@ -243,6 +243,14 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                     Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
+                case 'C':{
+                    u8 roll = rand()%2;
+                    if(roll == 0)
+                    {
+                        Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                        levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+                    }
+                }break;
 
                 case '1':{
                     currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
