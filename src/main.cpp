@@ -15,6 +15,7 @@
 #include "input.hpp"
 #include "player_system.hpp"
 #include "ui_system.hpp"
+#include "timer.h"
 
 #define TINY_ECS_LIB_IMPLEMENTATION
 #include "tiny_ecs.hpp"
@@ -89,7 +90,7 @@ INTERNAL bool OpenGLInitialize()
     }
     printf("gl3w initialized.\n");
 
-    SDL_GL_SetSwapInterval(1); // vsync
+    SDL_GL_SetSwapInterval(0); // vsync
 
     return true;
 }
@@ -120,6 +121,8 @@ int main(int argc, char* argv[])
 	// Variable timestep loop
 	auto t = Clock::now();
 	while (!world.is_over()) {
+        printf("swap window: %f seconds\n", timer::timestamp());
+        printf("\n");
 		// Process system messages
         world.SDLProcessEvents();
 
@@ -132,13 +135,19 @@ int main(int argc, char* argv[])
 
         world.UpdateMode();
 		world.step(deltaTime);
+        printf("world.Step: %f seconds\n", timer::timestamp());
         if(world.GetCurrentMode() == MODE_INGAME)
         {   
             ai.Step(deltaTime);
+            printf("ai.Step: %f seconds\n", timer::timestamp());
             physics.step(deltaTime);
+            printf("physics.Step: %f seconds\n", timer::timestamp());
             playerSystem.Step(deltaTime);
+            printf("playerSystem.Step: %f seconds\n", timer::timestamp());
             itemHolderSystem.Step(deltaTime);
+            printf("itemHolderSystem.Step: %f seconds\n", timer::timestamp());
             world.handle_collisions();
+            printf("handle_collisions: %f seconds\n", timer::timestamp());
         }
 
         ui.Step(deltaTime);
@@ -147,6 +156,8 @@ int main(int argc, char* argv[])
         Input::ResetKeyboardStates();
 
         renderer.Draw();
+        printf("Draw: %f seconds\n", timer::timestamp());
+
         SDL_GL_SwapWindow(window);
 	}
 
