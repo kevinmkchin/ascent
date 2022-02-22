@@ -1,5 +1,6 @@
 // internal
 #include "render_system.hpp"
+#include "world_system.hpp"
 
 #include "tiny_ecs_registry.hpp"
 
@@ -427,8 +428,13 @@ void RenderSystem::Draw()
         BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
 
+    DrawUI();
 
-    // DRAW UI
+    FinalDrawToScreen(); // Truely render to the screen
+}
+
+void RenderSystem::DrawUI()
+{
     glBindFramebuffer(GL_FRAMEBUFFER, uiFrameBuffer);
     gl_has_errors();
     // Clearing backbuffer
@@ -441,9 +447,24 @@ void RenderSystem::Draw()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     gl_has_errors();
+    GLint currProgram;
+
+    if(world->GetCurrentMode() == MODE_INGAME)
+    {   
+        glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::EXP_UI]);
+
+        glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+        GLuint expProgress_loc = glGetUniformLocation(currProgram, "expProgress");
+        glUniform1f(expProgress_loc, expProgressNormalized);
+        glBindVertexArray(expProgressBar.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, expProgressBar.idIBO);
+                glDrawElements(GL_TRIANGLES, expProgressBar.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
 
     glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::TEXT]);
-    GLint currProgram;
+
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     GLuint textColour_loc = glGetUniformLocation(currProgram, "textColour");
     glBindTexture(GL_TEXTURE_2D, textLayer1FontAtlas.textureId);
@@ -453,7 +474,7 @@ void RenderSystem::Draw()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer1VAO.idIBO);
             glDrawElements(GL_TRIANGLES, textLayer1VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+
     glBindTexture(GL_TEXTURE_2D, textLayer2FontAtlas.textureId);
     glActiveTexture(GL_TEXTURE0);
     glUniform4f(textColour_loc, textLayer2Colour.x, textLayer2Colour.y, textLayer2Colour.z, textLayer2Colour.w);
@@ -462,11 +483,8 @@ void RenderSystem::Draw()
             glDrawElements(GL_TRIANGLES, textLayer2VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
     glUseProgram(0);
-
-
-	// Truely render to the screen
-    FinalDrawToScreen();
 }
 
 // draw the intermediate texture to the screen

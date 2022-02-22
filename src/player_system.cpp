@@ -6,8 +6,6 @@
 
 
 PlayerSystem::PlayerSystem()
-    : experiencePointsGained(0)
-    , goldGained(0)
 {
 
 }
@@ -256,16 +254,28 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
 }
 #pragma endregion
 
+void PlayerSystem::CheckIfLevelUp()
+{
+    Player& playerComponent = registry.players.get(playerEntity);
+    if(playerComponent.experience > PLAYER_EXP_THRESHOLDS_ARRAY[playerComponent.level])
+    {
+        ++playerComponent.level;
+        printf("LEVEL UP!\n");
+    }
+
+    if(Input::IsKeyPressed(SDL_SCANCODE_T))
+    {
+        playerComponent.experience += 1.f;
+    }
+}
+
 void PlayerSystem::Step(float deltaTime)
 {
-    if(registry.players.entities.empty())
-    {
-        return;
-    }
-    
+    if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
-
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
+
+    CheckIfLevelUp();
 
     HandleBasicMovementInput(playerMotion);
     ResolveComplexMovement(deltaTime, playerMotion);

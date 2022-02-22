@@ -47,9 +47,34 @@ void UISystem::Init(RenderSystem* render_sys_arg, WorldSystem* world_sys_arg, Pl
     LoadFont(&font_medusa_gothic, &texture_medusa_gothic, font_path("medusa-gothic.otf").c_str(), TEXT_SIZE);
 }
 
+void UISystem::UpdateExpUI(float dt)
+{
+    if(registry.players.size() > 0)
+    {
+        Player playerComponent = registry.players.components[0];
+
+        float currentExp = playerComponent.experience;
+        float lowerBound = 0.f;
+        float upperBound = 9999.f;
+        for(int i = 1; i < ARRAY_COUNT(PLAYER_EXP_THRESHOLDS_ARRAY); ++i)
+        {
+            float il = PLAYER_EXP_THRESHOLDS_ARRAY[i-1];
+            float iu = PLAYER_EXP_THRESHOLDS_ARRAY[i];
+            if(currentExp < iu)
+            {
+                lowerBound = il;
+                upperBound = iu;
+                break;
+            }
+        }
+
+        renderer->expProgressNormalized = ((currentExp - lowerBound) / (upperBound - lowerBound));
+    }
+}
+
 #pragma warning(push)
 #pragma warning(disable : 4996)
-void UISystem::Step(float deltaTime)
+void UISystem::UpdateTextUI(float dt)
 {
     vtxt_clear_buffer();
 
@@ -71,12 +96,23 @@ void UISystem::Step(float deltaTime)
             HealthBar& playerHealth = registry.healthBar.get(playerEntity);
 
             char textBuffer[128];
+
             sprintf(textBuffer, "Health: %d", (int) playerHealth.health);
             vtxt_move_cursor(20, 60);
             vtxt_append_line(textBuffer, &font_c64, 40);
+
             sprintf(textBuffer, "Gold: %d", (int) 99);
             vtxt_move_cursor(20, 112);
             vtxt_append_line(textBuffer, &font_c64, 40);
+
+            sprintf(textBuffer, "Lvl %d", (int) 1);
+            if(registry.players.size() > 0)
+            {      
+                Player playerComponent = registry.players.components[0];
+                sprintf(textBuffer, "Lvl %d", playerComponent.level);
+            }
+            vtxt_move_cursor(662, UI_LAYER_RESOLUTION_HEIGHT - 8);
+            vtxt_append_line(textBuffer, &font_c64, 24);
         }break;
     }
 
@@ -97,7 +133,7 @@ void UISystem::Step(float deltaTime)
     }
     if(showChapterText)
     {
-        chapterTextAlpha -= 0.5f * deltaTime;
+        chapterTextAlpha -= 0.5f * dt;
         if(chapterTextAlpha < 0.f)
         {
             showChapterText = false;
@@ -144,3 +180,9 @@ void UISystem::Step(float deltaTime)
     }
 }
 #pragma warning(pop)
+
+void UISystem::Step(float deltaTime)
+{
+    UpdateExpUI(deltaTime);
+    UpdateTextUI(deltaTime);
+}
