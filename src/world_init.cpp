@@ -137,7 +137,7 @@ Entity createSword(vec2 position)
             {
                     dimensions,
                     0,
-                    TEXTURE_ASSET_ID::MONSTER,
+                    TEXTURE_ASSET_ID::SWORD,
                     EFFECT_ASSET_ID::SPRITE
             }
     );

@@ -50,7 +50,7 @@ enum class TEXTURE_ASSET_ID : u16
     MAINMENUBG,
     FIRE,
     EXITTILE,
-
+    SWORD,
     TEXTURE_COUNT
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -76,6 +76,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
         textures_path("exit.png"),
+        textures_path("sword.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
