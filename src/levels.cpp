@@ -7,10 +7,12 @@
 #include "tiny_ecs_registry.hpp"
 
 #define TILE_SIZE 16
+#define ROOM_DIMENSION_X 11
+#define ROOM_DIMENSION_Y 9
 #define NUMROOMSWIDE 5
 #define NUMFLOORS 5
-#define NUMTILESWIDE NUMROOMSWIDE * 11
-#define NUMTILESTALL NUMFLOORS * 9
+#define NUMTILESWIDE NUMROOMSWIDE * ROOM_DIMENSION_X
+#define NUMTILESTALL NUMFLOORS * ROOM_DIMENSION_Y
 
 INTERNAL void AddTileSizedCollider(Entity tileEntity)
 {
@@ -105,12 +107,33 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                TEXTURE_ASSET_ID::EAGLE,
+                TEXTURE_ASSET_ID::EXITTILE,
                 EFFECT_ASSET_ID::SPRITE
             }
     );
 
     AddTileSizedCollider(entity);
+
+    return entity;
+}
+
+INTERNAL Entity CreateShopBackground(i32 col, i32 row)
+{
+    Entity entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
+    transform.center = {0.f,0.f};
+
+    registry.sprites.insert(
+            entity,
+            {
+                { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
+                -128,
+                TEXTURE_ASSET_ID::SHOPBG,
+                EFFECT_ASSET_ID::SPRITE
+            }
+    );
 
     return entity;
 }
@@ -171,13 +194,23 @@ INTERNAL void LoadAllLevelData()
 
 struct CurrentLevelData
 {
-    vec2 playerStart;
     vec2 cameraBoundMin;
     vec2 cameraBoundMax;
+
+    vec2 playerStart;
+    std::vector<vec2> monsterSpawns;
+    std::vector<vec2> treasureSpawns;
 };
 INTERNAL CurrentLevelData currentLevelData;
 
 INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
+
+INTERNAL void ClearCurrentLevelData()
+{
+    currentLevelData.playerStart = vec2(0.f,0.f);
+    currentLevelData.monsterSpawns.clear();
+    currentLevelData.treasureSpawns.clear();
+}
 
 INTERNAL void ClearLevelTiles()
 {
@@ -192,6 +225,13 @@ INTERNAL void ClearLevelTiles()
 
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
+    // Check room type
+    if(r.type == "shop")
+    {
+        CreateShopBackground(roomXIndex * r.width, roomYIndex * r.height);
+    }
+
+    // Check individual tiles
     for(int i = 0; i < r.height; ++i)
     {
         for(int j = 0; j < r.width; ++j)
@@ -203,10 +243,28 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                     Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
+                case 'C':{
+                    u8 roll = rand()%2;
+                    if(roll == 0)
+                    {
+                        Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                        levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+                    }
+                }break;
 
                 case '1':{
-                    currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f) ,
+                    currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
                                                      roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) };
+                }break;
+
+                case 'M':{
+                    currentLevelData.monsterSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
+                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
+                }break;
+
+                case 'T':{
+                    currentLevelData.treasureSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
+                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
                 }break;
 
                 case '2':{
@@ -224,8 +282,14 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                     CreateSpikeTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
+                case 'S':{
+                    // shop items
+                    CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::SPIKES1);
+                }break;
+
                 case 'B':{
-                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::SKULLS1);
+                    // wooden tiles
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::WOODTILE);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
 
@@ -313,9 +377,10 @@ INTERNAL void UpdateLevelGeometry()
     }
 }
 
-INTERNAL void GenerateNewLevel()
+INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
 {
     ClearLevelTiles();
+    ClearCurrentLevelData();
 
     std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
     const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
@@ -357,6 +422,27 @@ INTERNAL void GenerateNewLevel()
     u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
     roomDataArray[NUMFLOORS-1][start] = chapterOneRooms["start"][startRoomIndex];
 
+    // SHOP ROOM
+    u32 shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
+    u32 shopRow = 1 + rand() % (NUMFLOORS - 2);
+    u32 loop = 0;
+    while(!roomDataArray[shopRow][shopCol].data.empty())
+    {
+        if(loop > 10)
+        {
+            shopCol = rand() % NUMROOMSWIDE;
+            shopRow = 1 + rand() % (NUMFLOORS - 2);
+        }
+        else
+        {
+            shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
+            shopRow = 1 + rand() % (NUMFLOORS - 2);
+        }
+        ++loop;
+    }
+    u32 shopRoomIndex = rand() % chapterOneRooms["shop"].size();
+    roomDataArray[shopRow][shopCol] = chapterOneRooms["shop"][shopRoomIndex];
+
     // CORRIDORS
     for(int i = 0; i < NUMFLOORS; ++i)
     {
@@ -389,6 +475,8 @@ INTERNAL void GenerateNewLevel()
         auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
         AddTileSizedCollider(_a);
         AddTileSizedCollider(_b);
+        ChangeSpritesBasedOnTopBottom(_a, i, -1);
+        ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
     }
     for(int i = -1; i < ((NUMTILESTALL)+1); ++i)
     {

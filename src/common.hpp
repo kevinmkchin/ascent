@@ -28,6 +28,8 @@ using namespace glm;
 #define GAME_RESOLUTION_WIDTH 240
 #define GAME_RESOLUTION_HEIGHT 180
 #define FRAMEBUFFER_PIXELS_PER_GAME_PIXEL 1
+#define UI_LAYER_RESOLUTION_WIDTH (GAME_RESOLUTION_WIDTH * 6)
+#define UI_LAYER_RESOLUTION_HEIGHT (GAME_RESOLUTION_HEIGHT * 6)
 
 // Simple utility functions to avoid mistyping directory name
 // audio_path("audio.ogg") -> data/audio/audio.ogg
@@ -39,14 +41,17 @@ inline std::string textures_path(const std::string& name) {return data_path() + 
 inline std::string audio_path(const std::string& name) {return data_path() + "/audio/" + std::string(name);};
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
 inline std::string level_path(const std::string& name) {return data_path() + "/level/" + std::string(name);};
+inline std::string font_path(const std::string& name) {return data_path() + "/fonts/" + std::string(name);};
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846f
-#endif
+#define ASCENT_PI 3.14159265358979323846f
+#define HALF_PI 1.570796f
+#define QUARTER_PI 0.785398f
 
 #define DEG2RAD 0.0174532925f  // degrees * DEG2RAD = radians
 #define RAD2DEG 57.2958f       // radians * RAD2DEG = degrees
 #define ASCENT_abs(a) ((a) < 0.f ? (-(a)) : (a))
+
+#define ARRAY_COUNT(a) (sizeof(a) / (sizeof(a[0])))
 
 #define INTERNAL static
 #define LOCAL_PERSIST static

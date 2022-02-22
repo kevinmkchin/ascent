@@ -6,8 +6,6 @@
 
 
 PlayerSystem::PlayerSystem()
-    : experiencePointsGained(0)
-    , goldGained(0)
 {
 
 }
@@ -51,8 +49,8 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 
     if(bLeftKeyPressed)
     {
-        currentXAcceleration += -(bJumping ? playerAirAcceleration : playerGroundAcceleration);
         playerMotion.facingRight = false;
+        currentXAcceleration += -(bJumping ? playerAirAcceleration : playerGroundAcceleration);
     }
     else if(playerMotion.velocity.x < -5.f)
     {
@@ -65,8 +63,8 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 
     if(bRightKeyPressed)
     {
-        currentXAcceleration += bJumping ? playerAirAcceleration : playerGroundAcceleration;
         playerMotion.facingRight = true;
+        currentXAcceleration += bJumping ? playerAirAcceleration : playerGroundAcceleration;
     }
     else if(playerMotion.velocity.x > 5.f)
     {
@@ -269,19 +267,32 @@ INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
 }
 #pragma endregion
 
+void PlayerSystem::CheckIfLevelUp()
+{
+    Player& playerComponent = registry.players.get(playerEntity);
+    if(playerComponent.experience > PLAYER_EXP_THRESHOLDS_ARRAY[playerComponent.level])
+    {
+        ++playerComponent.level;
+        printf("LEVEL UP!\n");
+    }
+
+    if(Input::IsKeyPressed(SDL_SCANCODE_T))
+    {
+        playerComponent.experience += 1.f;
+    }
+}
+
 void PlayerSystem::Step(float deltaTime)
 {
-    if(registry.players.entities.empty())
-    {
-        return;
-    }
-    
+    if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
 
     Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
     TransformComponent& playerTransform = registry.transforms.get(playerEntity);
     HolderComponent& playerHolder = registry.holders.get(playerEntity);
+
+    CheckIfLevelUp();
 
     HandleBasicMovementInput(playerMotion);
     HandleBasicInteractionInput(playerHolder);

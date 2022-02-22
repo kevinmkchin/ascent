@@ -20,6 +20,8 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<HealthBar> healthBar;
 	ComponentContainer<Enemy> enemy;
+	ComponentContainer<Enemy_projectile> enemyprojectile;
+	ComponentContainer<MutationComponent> mutationComponent;
     ComponentContainer<Weapon> weapons;
     ComponentContainer<HolderComponent> holders;
     ComponentContainer<Item> items;
@@ -37,6 +39,8 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&healthBar);
 		registry_list.push_back(&enemy);
+		registry_list.push_back(&enemyprojectile);
+        registry_list.push_back(&mutationComponent);
         registry_list.push_back(&weapons);
         registry_list.push_back(&holders);
         registry_list.push_back(&items);

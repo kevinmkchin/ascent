@@ -21,6 +21,14 @@ WorldSystem::WorldSystem()
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
+
+    Mutation fastFeet = Mutation{"fastFeet", 5, 0, 0, SpriteComponent()};
+    Mutation powerfulHands = Mutation{"powerfulHands", 0, 5, 0, SpriteComponent()};
+    Mutation heartOfSteel = Mutation{"heartOfSteel", 0, 0, 5, SpriteComponent()};
+    Mutation bullPower = Mutation{"rage", 3, 3, 0, SpriteComponent()};
+    Mutation invisibleShield = Mutation{"ironDefence", 3, 0, 3, SpriteComponent()};
+    Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
+
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg)
@@ -84,16 +92,22 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     currentGameStage = stage;
 
     // Create random level
-    GenerateNewLevel();
+    GenerateNewLevel(stage);
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
+    SpawnLevelEntities();
+}
 
+void WorldSystem::SpawnLevelEntities()
+{
     // Create player
     player = createPlayer(currentLevelData.playerStart);
 
     // Create enemies
-    createEnemy(vec2(238.f, 64.f));
-
+    for(vec2 enemySpawn : currentLevelData.monsterSpawns)
+    {
+        createEnemy(enemySpawn);
+    }
     createSword(currentLevelData.playerStart);
 }
 
@@ -207,8 +221,6 @@ void WorldSystem::handle_collisions() {
                 {
                     playerHealth.health -= 100;
                 }
-
-                printf("Colliding with spike. Reduced health to: %f \n", playerHealth.health);
             }
 
 			if (registry.enemy.has(entity_other)) 
@@ -218,15 +230,26 @@ void WorldSystem::handle_collisions() {
                     playerHealth.health -= 20;
                     //Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
-
-				printf("Colliding with enemy. Reduced health to: %f \n", playerHealth.health);
 			}
+
+            if (registry.enemyprojectile.has(entity_other))
+            {
+
+                if (playerHealth.health > 0)
+                {
+                        playerHealth.health -= 40;
+                }
+
+                auto& enemyprojectileRegistry = registry.enemyprojectile;
+                Entity fire_entity = enemyprojectileRegistry.entities[0];
+                registry.remove_all_components_of(fire_entity);
+             }
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed())
             {
                 StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
             }
-            
+
 //			// Checking Player - Deadly collisions
 //			if (registry.deadlys.has(entity_other)) {
 //
@@ -297,6 +320,31 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
     }
 }
 
+void WorldSystem::handle_mutations(Mutation currentMutation) {
+    auto& mutationRegistry = registry.mutationComponent;
+    for (uint i = 0; i < mutationRegistry.components.size(); i++) {
+        const MutationComponent mutComp = mutationRegistry.components[i];
+        Entity entity = mutationRegistry.entities[i];
+
+        if (registry.players.has(entity)) {
+            Player& player = registry.players.get(entity);
+            TransformComponent& playerTransform = registry.transforms.get(entity);
+            MotionComponent& playerMotion = registry.motions.get(entity);
+            CollisionComponent& playerCollider = registry.colliders.get(entity);
+            HealthBar& playerHealth = registry.healthBar.get(entity);
+
+            playerHealth.health += currentMutation.healthEffect;
+            player.attackPower += currentMutation.attackPowerEffect;
+
+            printf("Mutation selected");
+            printf("Changed player health by: %d. Current player health is: %f \n", currentMutation.healthEffect, playerHealth.health);
+            printf("Changed player attackPower by: %d. Current player attackPower is: %d \n", currentMutation.attackPowerEffect, player.attackPower);
+
+        }
+    }
+}
+
+
 // Should the game be over ?
 bool WorldSystem::is_over() const {
 	return !gameIsRunning;
@@ -337,7 +385,7 @@ void WorldSystem::SDLProcessEvents()
                 {
                     case SDL_WINDOWEVENT_RESIZED:
                     case SDL_WINDOWEVENT_SIZE_CHANGED:{
-                        renderer->updateBackBufferSize();
+                        renderer->UpdateBackBufferSize();
                     }break;
                 }
             }break;

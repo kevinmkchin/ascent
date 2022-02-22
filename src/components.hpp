@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
-#include "../ext/stb_image/stb_image.h"
+#include <stb_image.h>
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -12,7 +12,7 @@
  *
  * So, instead of referring to a game asset directly, the game logic just
  * uses these enumerators and the RenderRequest struct to inform the renderer
- * how to structure the next draw command.
+ * how to structure the next Draw command.
  *
  * There are 2 reasons for this:
  *
@@ -44,10 +44,12 @@ enum class TEXTURE_ASSET_ID : u16
     BG1,
     BOX,
     LADDER,
+    WOODTILE,
     TILE_EXAMPLE,
-
+    SHOPBG,
     MAINMENUBG,
-
+    FIRE,
+    EXITTILE,
 
     TEXTURE_COUNT
 };
@@ -68,9 +70,12 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bg.png"),
         textures_path("box.png"),
         textures_path("ladder.png"),
+        textures_path("woodtile.png"),
         textures_path("tile_example.png"),
-
+        textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
+        textures_path("fire.png"),
+        textures_path("exit.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -78,7 +83,8 @@ enum class EFFECT_ASSET_ID : u8
     FINAL_PASS,
     SPRITE,
     BACKGROUND,
-
+    TEXT,
+    EXP_UI,
 
     EFFECT_COUNT
 };
@@ -89,6 +95,8 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("finalpass"),
         shader_path("sprite"),
         shader_path("background"),
+        shader_path("text_ui"),
+        shader_path("exp_ui"),
 };
 
 
@@ -101,12 +109,19 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
-
+    i32 attackPower = 3;
+    u8  level = 1;
+    float experience = 0.f;
 };
+const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
 
 struct Enemy
 {
+    float projectile_speed = 120.f;
+};
 
+struct Enemy_projectile {
+    Entity enemy_projectile;
 };
 
 struct Weapon
@@ -148,9 +163,9 @@ struct CollisionComponent
 struct SpriteComponent
 {
     vec2 dimensions = {0.f,0.f};// in pixels
-    u8 layer = 0;               // render layer. higher layer is drawn on top of lower layers.
-    TEXTURE_ASSET_ID texId;     // ID for the texture to use
-    EFFECT_ASSET_ID shaderId;   // ID for the shader to use
+    i8 layer = 0;               // render layer. higher layer is drawn on top of lower layers. -128 to 127
+    TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
+    EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
 };
 
@@ -171,6 +186,18 @@ struct CollisionEvent
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	CollisionEvent(Entity& other) { this->other = other; };
+};
+
+struct Mutation {
+    std::string name;
+    int velocityEffect;
+    int attackPowerEffect;
+    int healthEffect;
+    SpriteComponent sprite;
+};
+
+struct MutationComponent {
+    Mutation* currentActiveMutations [5] = {};
 };
 
 // Data structure for toggling debug mode

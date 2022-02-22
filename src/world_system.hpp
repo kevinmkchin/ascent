@@ -2,6 +2,7 @@
 
 // internal
 #include "common.hpp"
+#include "components.hpp"
 
 // stlib
 #include <vector>
@@ -9,6 +10,7 @@
 
 #include <SDL.h>
 #include <SDL_mixer.h>
+
 
 class RenderSystem;
 class PlayerSystem;
@@ -57,10 +59,14 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+	// Handle player mutations
+	void handle_mutations(Mutation currentMutation);
+
     // Handle input events
     void SDLProcessEvents();
 
     GAMEMODE GetCurrentMode() { return currentGameMode; }
+    GAMELEVELENUM GetCurrentStage() { return currentGameStage; }
 
 	bool is_over()const;
 
@@ -72,6 +78,8 @@ private:
     void unloadAllContent();
 
 	void StartNewStage(GAMELEVELENUM stage);
+
+	void SpawnLevelEntities();
 
     void SetCurrentMode(GAMEMODE mode);
 

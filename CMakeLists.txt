@@ -43,6 +43,8 @@ set(SOURCE_FILES
     src/tiny_ecs_registry.cpp
     src/world_init.cpp
     src/world_system.cpp
+    src/ui_system.cpp
+    src/file_system.cpp
         src/item_holder_system.cpp src/item_holder_system.hpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
@@ -58,7 +60,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC src/)
 set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 0)
 
 # External header-only libraries in the ext/
-target_include_directories(${PROJECT_NAME} PUBLIC ext/stb_image/)
+target_include_directories(${PROJECT_NAME} PUBLIC ext/stb/)
 target_include_directories(${PROJECT_NAME} PUBLIC ext/gl3w)
 target_include_directories(${PROJECT_NAME} PUBLIC ext/nlohmannjson)
 
@@ -79,8 +81,14 @@ if (IS_OS_LINUX OR IS_OS_MAC)
     # Since we're on OSX or Linux, we can just use pkgconfig.
     find_package(PkgConfig REQUIRED)
 
-    pkg_search_module(SDL2 REQUIRED sdl)
-    pkg_search_module(SDL2MIXER REQUIRED SDL_mixer)
+    if(IS_OS_LINUX)
+        # https://piazza.com/class/kwe7kqx0oj2sb?cid=94_f1
+        pkg_search_module(SDL2 REQUIRED sdl2)
+        pkg_search_module(SDL2MIXER REQUIRED SDL2_mixer)
+    else()
+        pkg_search_module(SDL2 REQUIRED sdl)
+        pkg_search_module(SDL2MIXER REQUIRED SDL_mixer)
+    endif()
 
     # Link Frameworks on OSX
     if (IS_OS_MAC)

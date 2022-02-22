@@ -1,12 +1,13 @@
 // internal
 #include "render_system.hpp"
+#include "world_system.hpp"
 
 #include "tiny_ecs_registry.hpp"
 
 INTERNAL u32 GetRenderState(const SpriteComponent& sprite)
 {
     u32 state = 0;
-    state |= sprite.layer;
+    state |= (u8) (sprite.layer + 128);
     state <<= 16;
     state |= (u16) sprite.texId;
     state <<= 8;
@@ -68,7 +69,7 @@ INTERNAL void radixSort(std::vector<SpriteTransformPair>& array)
         countingSort(array, size, place);
 }
 
-void RenderSystem::drawSprite(const TransformComponent entityTransform, const SpriteComponent sprite, const mat3 &projection)
+void RenderSystem::DrawSprite(TransformComponent entityTransform, SpriteComponent sprite, const mat3 &projection)
 {
 	Transform transform;
     vec2 scaledPosition = entityTransform.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
@@ -157,7 +158,7 @@ void RenderSystem::drawSprite(const TransformComponent entityTransform, const Sp
 	gl_has_errors();
 }
 
-void RenderSystem::drawBackground()
+void RenderSystem::DrawBackground()
 {
     if(bgTexId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
     {
@@ -386,10 +387,10 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw()
+void RenderSystem::Draw()
 {
 	// First render to the custom framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gameFrameBuffer);
 	gl_has_errors();
 	// Clearing backbuffer
 	glViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
@@ -404,10 +405,10 @@ void RenderSystem::draw()
 							  // and alpha blending, one would have to sort
 							  // sprites back to front
 	gl_has_errors();
-	mat3 projection_2D = createProjectionMatrix();
+	mat3 projection_2D = CreateGameProjectionMatrix();
 
     // DRAW BACKGROUND
-    drawBackground();
+    DrawBackground();
 
     // DRAW SPRITES
     if(registry.sprites.size() > 0)
@@ -427,12 +428,67 @@ void RenderSystem::draw()
         BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
 
-	// Truely render to the screen
-    finalDrawToScreen();
+    DrawUI();
+
+    FinalDrawToScreen(); // Truely render to the screen
+}
+
+void RenderSystem::DrawUI()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, uiFrameBuffer);
+    gl_has_errors();
+    // Clearing backbuffer
+    glViewport(0, 0, UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+    glDepthRange(0.00001f, 10.f);
+    glClearColor(0.674f, 0.847f, 1.0f, 0.0f);
+    glClearDepth(10.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    gl_has_errors();
+    GLint currProgram;
+
+    if(world->GetCurrentMode() == MODE_INGAME)
+    {   
+        glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::EXP_UI]);
+
+        glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+        GLuint expProgress_loc = glGetUniformLocation(currProgram, "expProgress");
+        glUniform1f(expProgress_loc, expProgressNormalized);
+        glBindVertexArray(expProgressBar.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, expProgressBar.idIBO);
+                glDrawElements(GL_TRIANGLES, expProgressBar.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::TEXT]);
+
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+    GLuint textColour_loc = glGetUniformLocation(currProgram, "textColour");
+    glBindTexture(GL_TEXTURE_2D, textLayer1FontAtlas.textureId);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform4f(textColour_loc, textLayer1Colour.x, textLayer1Colour.y, textLayer1Colour.z, textLayer1Colour.w);
+    glBindVertexArray(textLayer1VAO.idVAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer1VAO.idIBO);
+            glDrawElements(GL_TRIANGLES, textLayer1VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glBindTexture(GL_TEXTURE_2D, textLayer2FontAtlas.textureId);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform4f(textColour_loc, textLayer2Colour.x, textLayer2Colour.y, textLayer2Colour.z, textLayer2Colour.w);
+    glBindVertexArray(textLayer2VAO.idVAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer2VAO.idIBO);
+            glDrawElements(GL_TRIANGLES, textLayer2VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glUseProgram(0);
 }
 
 // draw the intermediate texture to the screen
-void RenderSystem::finalDrawToScreen()
+void RenderSystem::FinalDrawToScreen()
 {
     // Setting shaders
     // get the wind texture, sprite mesh, and program
@@ -445,8 +501,8 @@ void RenderSystem::finalDrawToScreen()
     glClearDepth(1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Enabling alpha channel for textures
-    glDisable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
     LOCAL_PERSIST u32 finalQuadVAO;
@@ -524,20 +580,32 @@ void RenderSystem::finalDrawToScreen()
         printf("Screen size changed.\n");
     }
 
-    // Bind our texture in Texture Unit 0
+    // Bind game frame texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
+    glBindTexture(GL_TEXTURE_2D, offScreenRenderBufferColor);
 
-    // Draw
+    // Draw game frame
     glBindVertexArray(finalQuadVAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalQuadIBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    // Bind UI frame texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, offScreenUiBufferColor);
+
+    // Draw UI frame
+    glBindVertexArray(finalQuadVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalQuadIBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     gl_has_errors();
 }
 
-mat3 RenderSystem::createProjectionMatrix()
+mat3 RenderSystem::CreateGameProjectionMatrix()
 {
 	// Fake projection matrix, scales with respect to window coordinates
 	float left = 0.f;
