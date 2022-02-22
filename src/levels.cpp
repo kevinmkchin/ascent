@@ -423,15 +423,25 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     roomDataArray[NUMFLOORS-1][start] = chapterOneRooms["start"][startRoomIndex];
 
     // SHOP ROOM
-    u32 shopCol = rand() % NUMROOMSWIDE;
+    u32 shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
     u32 shopRow = 1 + rand() % (NUMFLOORS - 2);
+    u32 loop = 0;
     while(!roomDataArray[shopCol][shopRow].data.empty())
     {
-        shopCol = rand() % NUMROOMSWIDE;
-        shopRow = 1 + rand() % (NUMFLOORS - 2);
+        if(loop > 10)
+        {
+            shopCol = rand() % NUMROOMSWIDE;
+            shopRow = 1 + rand() % (NUMFLOORS - 2);
+        }
+        else
+        {
+            shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
+            shopRow = 1 + rand() % (NUMFLOORS - 2);
+        }
+        ++loop;
     }
     u32 shopRoomIndex = rand() % chapterOneRooms["shop"].size();
-    roomDataArray[shopCol][shopRow] = chapterOneRooms["shop"][shopRoomIndex];
+    roomDataArray[shopRow][shopCol] = chapterOneRooms["shop"][shopRoomIndex];
 
     // CORRIDORS
     for(int i = 0; i < NUMFLOORS; ++i)

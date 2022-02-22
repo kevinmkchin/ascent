@@ -51,6 +51,8 @@ inline std::string font_path(const std::string& name) {return data_path() + "/fo
 #define RAD2DEG 57.2958f       // radians * RAD2DEG = degrees
 #define ASCENT_abs(a) ((a) < 0.f ? (-(a)) : (a))
 
+#define ARRAY_COUNT(a) (sizeof(a) / (sizeof(a[0])))
+
 #define INTERNAL static
 #define LOCAL_PERSIST static
 

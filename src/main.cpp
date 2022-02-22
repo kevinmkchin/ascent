@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     if(!OpenGLInitialize()) return EXIT_FAILURE;
 
 	// Initialize the main systems
-    renderer.Init(window);
+    renderer.Init(window, &world);
 	world.init(&renderer, &playerSystem);
     ui.Init(&renderer, &world, &playerSystem);
 

@@ -1,5 +1,6 @@
 // internal
 #include "render_system.hpp"
+#include "world_system.hpp"
 
 #include <array>
 #include <fstream>
@@ -15,9 +16,10 @@
 #include <sstream>
 
 // World initialization
-bool RenderSystem::Init(SDL_Window* window)
+bool RenderSystem::Init(SDL_Window* window, WorldSystem* world_sys_arg)
 {
 	this->window = window;
+	this->world = world_sys_arg;
 
     SDL_GL_GetDrawableSize(window, &backbufferWidth, &backbufferHeight);
 
@@ -57,6 +59,19 @@ void RenderSystem::InitializeUIStuff()
 {
     CreateMeshVertexArray(textLayer1VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
     CreateMeshVertexArray(textLayer2VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
+
+    u32 expProgressBarIndices[6] = {
+        0, 1, 3,
+        0, 3, 2
+    };
+    float expProgressBarVertices[16] = {
+        //  x   y    u    v
+        -1.f,  -0.935f, 0.f, 0.f,
+         1.f,  -0.935f, 1.f, 0.f,
+        -1.f, -1.f, 0.f, 1.f,
+         1.f, -1.f, 1.f, 1.f
+    };
+    CreateMeshVertexArray(expProgressBar, expProgressBarVertices, expProgressBarIndices, 16, 6, 2, 2, 0, GL_STATIC_DRAW);
 }
 
 void RenderSystem::InitializeGlTextures()

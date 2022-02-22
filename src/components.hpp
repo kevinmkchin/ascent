@@ -83,6 +83,7 @@ enum class EFFECT_ASSET_ID : u8
     SPRITE,
     BACKGROUND,
     TEXT,
+    EXP_UI,
 
     EFFECT_COUNT
 };
@@ -94,6 +95,7 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("sprite"),
         shader_path("background"),
         shader_path("text_ui"),
+        shader_path("exp_ui"),
 };
 
 
@@ -106,9 +108,11 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
-    int attackPower = 3; // Used for mutations
-
+    i32 attackPower = 3;
+    u8  level = 1;
+    float experience = 0.f;
 };
+const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
 
 struct Enemy
 {

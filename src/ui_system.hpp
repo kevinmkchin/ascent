@@ -14,6 +14,11 @@ public:
     void Step(float deltaTime);
 
 private:
+
+    void UpdateExpUI(float dt);
+
+    void UpdateTextUI(float dt);
+
     RenderSystem* renderer;
     WorldSystem* world;
     PlayerSystem* playerSystem;

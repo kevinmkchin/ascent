@@ -7,6 +7,8 @@
 #include "components.hpp"
 #include "tiny_ecs.hpp"
 
+class WorldSystem;
+
 struct SpriteTransformPair
 {
     u32 renderState;
@@ -46,7 +48,7 @@ class RenderSystem {
 
 public:
 	// Initialize the window
-	bool Init(SDL_Window* window);
+	bool Init(SDL_Window* window, WorldSystem* world_sys_arg);
 
     // Destroy resources associated to one or all entities created by the system
     void CleanUp();
@@ -72,6 +74,9 @@ public:
     vec4            textLayer2Colour = vec4(1.f,1.f,1.f,1.f);
     MeshHandle      textLayer2VAO;
 
+    MeshHandle      expProgressBar;
+    float           expProgressNormalized = 0.f; // range 0 to 1
+
 private:
     void InitializeGlTextures();
 
@@ -93,9 +98,14 @@ private:
 
     void DrawBackground();
 
+    void DrawUI();
+
 	void FinalDrawToScreen();
 
     mat3 CreateGameProjectionMatrix();
+
+    // World handle
+    WorldSystem* world;
 
 	// Window handle
     SDL_Window* window;
