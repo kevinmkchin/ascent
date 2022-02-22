@@ -473,8 +473,6 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     {
         auto _a = CreateBasicLevelTile(i, -1);
         auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
-        AddTileSizedCollider(_a);
-        AddTileSizedCollider(_b);
         ChangeSpritesBasedOnTopBottom(_a, i, -1);
         ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
     }
@@ -482,9 +480,35 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     {
         auto _a = CreateBasicLevelTile(-1, i);
         auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
-        AddTileSizedCollider(_a);
-        AddTileSizedCollider(_b);
     }
+
+    auto upBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
+    auto& upBoundETransform = registry.transforms.emplace(upBoundE);
+    upBoundETransform.position = { 0.f, -TILE_SIZE };
+    auto& upBoundECollider = registry.colliders.emplace(upBoundE);
+    upBoundECollider.collision_neg = {0.f,0.f};
+    upBoundECollider.collision_pos = { TILE_SIZE * NUMTILESWIDE , TILE_SIZE };
+
+    auto lowBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
+    auto& lowBoundETransform = registry.transforms.emplace(lowBoundE);
+    lowBoundETransform.position = { 0.f, TILE_SIZE*NUMTILESTALL };
+    auto& lowBoundECollider = registry.colliders.emplace(lowBoundE);
+    lowBoundECollider.collision_neg = {0.f,0.f};
+    lowBoundECollider.collision_pos = { TILE_SIZE * NUMTILESWIDE , TILE_SIZE };
+
+    auto leftBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
+    auto& leftBoundETransform = registry.transforms.emplace(leftBoundE);
+    leftBoundETransform.position = { -TILE_SIZE, 0.f };
+    auto& leftBoundECollider = registry.colliders.emplace(leftBoundE);
+    leftBoundECollider.collision_neg = {0.f,0.f};
+    leftBoundECollider.collision_pos = { TILE_SIZE, TILE_SIZE*NUMTILESTALL };
+
+    auto rightBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
+    auto& rightBoundETransform = registry.transforms.emplace(rightBoundE);
+    rightBoundETransform.position = { TILE_SIZE*NUMTILESWIDE, 0.f };
+    auto& rightBoundECollider = registry.colliders.emplace(rightBoundE);
+    rightBoundECollider.collision_neg = {0.f,0.f};
+    rightBoundECollider.collision_pos = { TILE_SIZE, TILE_SIZE*NUMTILESTALL };
 
     float halfWidth = (float) GAME_RESOLUTION_WIDTH / 2.f;
     float halfHeight = (float) GAME_RESOLUTION_HEIGHT / 2.f;
