@@ -63,7 +63,7 @@ void WorldSystem::StartNewRun()
     // Set the randomizer seed (deterministic - if two runs use the same seed, they will have exactly the same randomizations)
     srand((u32) time(nullptr));
     u32 seed = rand()%1000000000;
-    SetRandomizerSeed(seed);
+    SetRandomizerSeed(1);
 
     StartNewStage(CHAPTER_ONE_STAGE_ONE);
 }

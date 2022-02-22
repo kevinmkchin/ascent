@@ -45,7 +45,8 @@ set(SOURCE_FILES
     src/world_system.cpp
     src/ui_system.cpp
     src/file_system.cpp
-        src/item_holder_system.cpp src/item_holder_system.hpp)
+    src/item_holder_system.cpp
+    src/timer.cpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
 if (IS_OS_MAC)
