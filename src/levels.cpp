@@ -107,7 +107,7 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                TEXTURE_ASSET_ID::EAGLE,
+                TEXTURE_ASSET_ID::EXITTILE,
                 EFFECT_ASSET_ID::SPRITE
             }
     );
