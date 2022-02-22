@@ -10,4 +10,6 @@ Entity createPlayer(vec2 position);
 
 Entity createEnemy(vec2 position);
 
+Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy);
+
 Entity createSword(vec2 position);

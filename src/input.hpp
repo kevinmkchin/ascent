@@ -80,6 +80,10 @@ namespace Input {
         bool HasBeenPressed(u16 button) const;
 
         bool HasBeenReleased(u16 button) const;
+
+        bool LeftThumbStickUp() const;
+
+        bool LeftThumbStickDown() const;
     };
 
     struct GamepadStatesWrapper {

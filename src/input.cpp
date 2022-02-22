@@ -1,4 +1,5 @@
 #include "input.hpp"
+#include "common.hpp"
 
 //////////////////////////////////////////////////////////////////////
 // ASCENT GAME SPECIFIC FUNCTIONS
@@ -6,12 +7,14 @@
 
 bool Input::GameUpHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_UP);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_W) 
+    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_UP);
 }
 
 bool Input::GameDownHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_DOWN);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_S) 
+    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_DOWN);
 }
 
 bool Input::GameLeftHasBeenPressed()
@@ -26,22 +29,34 @@ bool Input::GameRightHasBeenPressed()
 
 bool Input::GameUpIsPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_W) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP);
+    return Input::IsKeyPressed(SDL_SCANCODE_W) 
+    || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_UP)
+    || Input::GetGamepad(0).leftThumbStickDir.y < -0.5f;
+    // || dot(Input::GetGamepad(0).leftThumbStickDir, {0.f, 1.f}) < QUARTER_PI;
 }
 
 bool Input::GameDownIsPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_S) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN);
+    return Input::IsKeyPressed(SDL_SCANCODE_S) 
+    || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_DOWN)
+    || Input::GetGamepad(0).leftThumbStickDir.y > 0.5f;
+    // || dot(Input::GetGamepad(0).leftThumbStickDir, {0.f, -1.f}) < QUARTER_PI;
 }
 
 bool Input::GameLeftIsPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT);
+    return Input::IsKeyPressed(SDL_SCANCODE_A) 
+    || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_LEFT)
+    || Input::GetGamepad(0).leftThumbStickDir.x < -0.5f;
+    // || dot(Input::GetGamepad(0).leftThumbStickDir, {1.f, 0.f}) < QUARTER_PI;
 }
 
 bool Input::GameRightIsPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT);
+    return Input::IsKeyPressed(SDL_SCANCODE_D) 
+    || Input::GetGamepad(0).IsPressed(GAMEPAD_DPAD_RIGHT)
+    || Input::GetGamepad(0).leftThumbStickDir.x > 0.5f;
+    // || dot(Input::GetGamepad(0).leftThumbStickDir, {-1.f, 0.f}) < QUARTER_PI;
 }
 
 bool Input::GameJumpHasBeenPressed()
