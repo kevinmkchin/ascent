@@ -73,6 +73,27 @@ typedef int_fast32_t  i32f;
 typedef i16           bool16;
 typedef i32           bool32;
 
+struct shortvec2
+{
+    i16 x;
+    i16 y;
+
+    shortvec2()
+        : x(0)
+        , y(0)
+    {}
+
+    shortvec2(i16 inx, i16 iny)
+        : x(inx)
+        , y(iny)
+    {}
+
+    shortvec2(glm::vec2 glmvec)
+    	: x((i16) glmvec.x)
+    	, y((i16) glmvec.y)
+    {}
+};
+
 // The 'Transform' component handles transformations passed to the Vertex shader
 // (similar to the gl Immediate mode equivalent, e.g., glTranslate()...)
 // We recomment making all components non-copyable by derving from ComponentNonCopyable

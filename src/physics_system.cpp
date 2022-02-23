@@ -2,14 +2,21 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
-CollisionInfo CheckCollision(TransformComponent& transform1, CollisionComponent& collider1,
-                             TransformComponent& transform2, CollisionComponent& collider2)
+CollisionInfo CheckCollision(CollisionComponent& collider1, CollisionComponent& collider2)
 {
-	vec2 max1 = transform1.position + (collider1.collision_pos) * abs(transform1.scale);
-	vec2 min1 = transform1.position + (-collider1.collision_neg) * abs(transform1.scale);
+	vec2 max1;
+    max1.x = collider1.collider_position.x + ((float) collider1.collision_pos.x);
+    max1.y = collider1.collider_position.y + ((float) collider1.collision_pos.y);
+	vec2 min1;
+    min1.x = collider1.collider_position.x + ((float) -collider1.collision_neg.x);
+    min1.y = collider1.collider_position.y + ((float) -collider1.collision_neg.y);
 
-	vec2 max2 = transform2.position + (collider2.collision_pos) * abs(transform2.scale);
-	vec2 min2 = transform2.position + (-collider2.collision_neg) * abs(transform2.scale);
+    vec2 max2;
+    max2.x = collider2.collider_position.x + ((float) collider2.collision_pos.x);
+    max2.y = collider2.collider_position.y + ((float) collider2.collision_pos.y);
+    vec2 min2;
+    min2.x = collider2.collider_position.x + ((float) -collider2.collision_neg.x);
+    min2.y = collider2.collider_position.y + ((float) -collider2.collision_neg.y);
 
     CollisionInfo cinfo;
 
@@ -50,13 +57,17 @@ INTERNAL void MoveEntities(float deltaTime)
                 : -min(abs(motion.velocity.x), motion.terminalVelocity.x);
         motion.velocity.y = motion.velocity.y >= 0.f ? min(abs(motion.velocity.y), motion.terminalVelocity.y)
                 : -min(abs(motion.velocity.y), motion.terminalVelocity.y);
-        registry.transforms.get(motion_registry.entities[i]).position += motion.velocity * deltaTime;
+        Entity e = motion_registry.entities[i];
+        registry.transforms.get(e).position += motion.velocity * deltaTime;
+        if(registry.colliders.has(e))
+        {
+            registry.colliders.get(e).collider_position = registry.transforms.get(e).position;
+        }
     }
 }
 
 INTERNAL void CheckAllCollisions()
 {
-
     // check all necessary entities
     std::vector<Entity> entitiesToCheck;
     entitiesToCheck.push_back(registry.players.entities[0]);
@@ -69,35 +80,30 @@ INTERNAL void CheckAllCollisions()
 
     for(auto entity : entitiesToCheck)
     {
-        TransformComponent entityTransform = registry.transforms.get(entity);
         CollisionComponent entityCollider = registry.colliders.get(entity);
 
-        for(auto collidable : registry.colliders.entities)
+        for(int i = 0; i < registry.colliders.size(); ++i)
         {
-            if(collidable == entity) { continue; }
+            auto e = registry.colliders.entities[i];
+            if(e == entity) { continue; }
+            CollisionComponent otherCollider = registry.colliders.components[i];
 
-            TransformComponent otherTransform = registry.transforms.get(collidable);
-            CollisionComponent otherCollider = registry.colliders.get(collidable);
-
-            if(length(entityTransform.position - otherTransform.position) > 48.f) // if distance b/w is big then don't check
+            if(length(entityCollider.collider_position - otherCollider.collider_position) > 48.f) 
             {
-                continue;
+                continue; // if distance b/w is big then don't check
             }
 
-            CollisionInfo colInfo = CheckCollision(entityTransform, entityCollider, otherTransform, otherCollider);
+            CollisionInfo colInfo = CheckCollision(entityCollider, otherCollider);
             if (colInfo.collides)
             {
-                // Create a collisions event
-                CollisionEvent colEventAgainstOther(collidable);
+                CollisionEvent colEventAgainstOther(e);
                 CollisionEvent colEventAgainstEntity(entity);
-                // Note(Kevin): colInfo.collision_overlap is relative to player, therefore
-                //              it needs to be inverted for colEventAgainstEntity
+
                 colEventAgainstOther.collision_overlap = colInfo.collision_overlap;
                 colEventAgainstEntity.collision_overlap = -colInfo.collision_overlap;
 
-                // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
                 registry.collisionEvents.insert(entity, colEventAgainstOther, false);
-                registry.collisionEvents.insert(collidable, colEventAgainstEntity, false);
+                registry.collisionEvents.insert(e, colEventAgainstEntity, false);
             }
         }
     }

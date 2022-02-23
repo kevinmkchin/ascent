@@ -100,7 +100,6 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("exp_ui"),
 };
 
-
 /**
  *
  * Components
@@ -140,7 +139,7 @@ struct Item
 struct TransformComponent
 {
     vec2 position = { 0.f, 0.f };
-    vec2 scale = { 1.f, 1.f };
+    //vec2 scale = { 1.f, 1.f };
     vec2 center = { 0.f, 0.f }; // offset from "top-left". If a sprite has dimensions 16x16, then center of 8x8 points to center of sprite
     float rotation = 0.f;
 };
@@ -156,9 +155,10 @@ struct MotionComponent
 
 struct CollisionComponent
 {
+    vec2 collider_position = { 0.f, 0.f };
     // Collision
-    vec2 collision_pos = { 0.f, 0.f }; // Collision box x,y size in the positive direction from the center
-    vec2 collision_neg = { 0.f, 0.f }; // Collision box x,y size in the negative direction from the center
+    shortvec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
+    shortvec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
 };
 
 struct SpriteComponent
