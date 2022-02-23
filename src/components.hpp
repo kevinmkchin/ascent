@@ -149,6 +149,13 @@ struct CollisionComponent
     vec2 collision_neg = { 0.f, 0.f }; // Collision box x,y size in the negative direction from the center
 };
 
+struct Animation
+{
+    size_t num_frames = 1;
+    size_t start_frame = 0;
+    float animation_duration = 0.f;
+};
+
 struct SpriteComponent
 {
     vec2 dimensions = {0.f,0.f};// in pixels
@@ -156,13 +163,17 @@ struct SpriteComponent
     TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
     EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
-    bool animated = false;
+    bool sprite_sheet = false;
     bool reverse = false;
-    float rows = 0.f;
-    float cols = 0.f;
-    float posX = 0.f;
-    float posY = 0.f;
-    float frame_count = 0.f;
+
+    size_t sheetSizeX = 1;
+    size_t sheetSizeY = 1;
+
+    std::vector<Animation> animations = {};
+
+    size_t selected_animation = 0;
+    size_t current_frame = 0;
+    float elapsed_time = 0.f;
 };
 
 struct CollisionEvent
