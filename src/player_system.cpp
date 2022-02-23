@@ -37,6 +37,10 @@ INTERNAL float jumpBufferTimer = 999.f;
 INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
 INTERNAL bool bLaddered = false;
 
+INTERNAL bool bFaceRight = false; // facing right previously
+INTERNAL float time_in_animation = 0.f;
+INTERNAL int player_animation_state = 6;
+
 INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 {
     const bool bLeftKeyPressed = Input::GameLeftIsPressed();
@@ -269,14 +273,101 @@ void PlayerSystem::CheckIfLevelUp()
     }
 }
 
+INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMotion, SpriteComponent& playerSprite) {
+
+    /* NOTES:
+    Row 1: Death animation
+    Row 2: Run animation
+    Row 3: Pushing
+    Row 4/5: Attack animation
+    Row 6: Idle animation
+    Row 7: Jump down
+    Row 8: Jump up
+    .
+    .
+    .
+    etc... more animations
+    .
+    .
+    .
+    States:
+    1 - Run Left
+    2 - Run Right
+    3 - Idle Left
+    4 - Idle Right
+    5 - Jump Down Left
+    6 - Jump Down Right
+    7 - Jump Up Left
+    8 - Jump Up Right
+
+    */
+
+    float animation_time = 100.f; // arbitrary value
+    time_in_animation += deltaTime * 1000.f;
+
+    // handle animation update
+
+    if (time_in_animation >= animation_time) {
+        time_in_animation = 0.f;
+        playerSprite.posX = (playerSprite.posX + 1.f) < playerSprite.frame_count ? playerSprite.posX + 1.f : 0.f;
+    }
+
+    float x_velocity = playerMotion.velocity.x;
+    float y_velocity = playerMotion.velocity.y;
+
+    if (x_velocity > 0.f) {
+        bFaceRight = true;
+    }
+    else if (x_velocity < 0.f) {
+        bFaceRight = false;
+    }
+
+    int state;
+    if (y_velocity != 0.f) {
+        playerSprite.frame_count = 3.f;
+        if (y_velocity > 0.f) {
+            // jump up
+            playerSprite.posY = 8.f;
+            state = bFaceRight ? 8 : 7;
+            //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+        }
+        else {
+            // jump down
+            playerSprite.posY = 7.f;
+            state = bFaceRight ? 6 : 5;
+            //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+        }
+    }
+    else if (x_velocity != 0.f) {
+        // run
+        playerSprite.frame_count = 6.f;
+        playerSprite.posY = 2.f;
+        state = bFaceRight ? 2 : 1;
+        //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+    }
+    else {
+        // idle
+        playerSprite.frame_count = 4.f;
+        playerSprite.posY = 6.f;
+        state = bFaceRight ? 4 : 3;
+        //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+    }
+
+    playerSprite.reverse = bFaceRight ? false : true;
+    player_animation_state = state;
+}
+
 void PlayerSystem::Step(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
+    SpriteComponent& playerSprite = registry.sprites.get(playerEntity);
 
     CheckIfLevelUp();
 
     HandleBasicMovementInput(playerMotion);
     ResolveComplexMovement(deltaTime, playerMotion);
+    HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
+
 }
