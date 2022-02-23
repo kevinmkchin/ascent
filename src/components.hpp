@@ -50,6 +50,7 @@ enum class TEXTURE_ASSET_ID : u16
     MAINMENUBG,
     FIRE,
     EXITTILE,
+    PLAYER,
 
     TEXTURE_COUNT
 };
@@ -76,6 +77,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
         textures_path("exit.png"),
+        textures_path("player.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -154,6 +156,13 @@ struct SpriteComponent
     TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
     EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
+    bool animated = false;
+    bool reverse = false;
+    float rows = 0.f;
+    float cols = 0.f;
+    float posX = 0.f;
+    float posY = 0.f;
+    float frame_count = 0.f;
 };
 
 struct CollisionEvent
