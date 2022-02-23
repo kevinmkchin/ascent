@@ -302,16 +302,6 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
 
     */
 
-    float animation_time = 100.f; // arbitrary value
-    time_in_animation += deltaTime * 1000.f;
-
-    // handle animation update
-
-    if (time_in_animation >= animation_time) {
-        time_in_animation = 0.f;
-        playerSprite.posX = (playerSprite.posX + 1.f) < playerSprite.frame_count ? playerSprite.posX + 1.f : 0.f;
-    }
-
     float x_velocity = playerMotion.velocity.x;
     float y_velocity = playerMotion.velocity.y;
 
@@ -324,33 +314,30 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
 
     int state;
     if (y_velocity != 0.f) {
-        playerSprite.frame_count = 3.f;
         if (y_velocity > 0.f) {
             // jump up
-            playerSprite.posY = 8.f;
+            playerSprite.selected_animation = 3;
             state = bFaceRight ? 8 : 7;
-            playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+            playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
         }
         else {
             // jump down
-            playerSprite.posY = 7.f;
+            playerSprite.selected_animation = 2;
             state = bFaceRight ? 6 : 5;
-            playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+            playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
         }
     }
     else if (x_velocity != 0.f) {
         // run
-        playerSprite.frame_count = 6.f;
-        playerSprite.posY = 2.f;
+        playerSprite.selected_animation = 1;
         state = bFaceRight ? 2 : 1;
-        playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+        playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
     }
     else {
         // idle
-        playerSprite.frame_count = 4.f;
-        playerSprite.posY = 6.f;
+        playerSprite.selected_animation = 0;
         state = bFaceRight ? 4 : 3;
-        playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+        playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
     }
 
     playerSprite.reverse = bFaceRight ? false : true;
