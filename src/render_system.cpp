@@ -137,8 +137,10 @@ void RenderSystem::DrawBackground()
 
 void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3 &projection)
 {
+    SpriteComponent flushAtEndSprite;
+    flushAtEndSprite.texId = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     SpriteTransformPair flushAtEnd;
-    flushAtEnd.sprite.texId = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+    flushAtEnd.spritePtr = &flushAtEndSprite;
     sortedSprites.push_back(flushAtEnd); // adding an invalid SpriteTransformPair to the end to flush everything at end
 
     LOCAL_PERSIST u32 spriteBatchVAO;
@@ -235,9 +237,11 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             renderState = sortedSprite.renderState;
         }
 
+        const SpriteComponent& sortedSpriteSprite = *(sortedSprite.spritePtr);
+
         vec2 scaledPosition = sortedSprite.transform.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
         vec2 topLeftCorner = scaledPosition - sortedSprite.transform.center * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-        vec2 scaledDimensions = sortedSprite.sprite.dimensions * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+        vec2 scaledDimensions = sortedSpriteSprite.dimensions * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
 
         vertices[verticesCount + 0] = topLeftCorner.x;
         vertices[verticesCount + 1] = topLeftCorner.y - 0.1f;
@@ -256,21 +260,21 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
         vertices[verticesCount + 14] = 1.f; // U
         vertices[verticesCount + 15] = 1.f; // V
 
-        if (sortedSprite.sprite.sprite_sheet) {
+        if (sortedSpriteSprite.sprite_sheet) {
 
-            size_t frame = sortedSprite.sprite.animations[sortedSprite.sprite.selected_animation].start_frame
-                + sortedSprite.sprite.current_frame;
+            size_t frame = sortedSpriteSprite.animations[sortedSpriteSprite.selected_animation].start_frame
+                + sortedSpriteSprite.current_frame;
 
-            size_t sheetX = sortedSprite.sprite.sheetSizeX;
-            size_t sheetY = sortedSprite.sprite.sheetSizeY;
+            size_t sheetX = sortedSpriteSprite.sheetSizeX;
+            size_t sheetY = sortedSpriteSprite.sheetSizeY;
 
             float offset_per_x = (1.f / sheetX);
             float offset_per_y = (1.f / sheetY);
 
-            float offset_x = frame % sheetX;
-            float offset_y = frame / sheetX;
+            float offset_x = (float)(frame % sheetX);
+            float offset_y = (float)(frame / sheetX);
 
-            if (sortedSprite.sprite.reverse) {
+            if (sortedSpriteSprite.reverse) {
                 vertices[verticesCount + 6] = offset_x * offset_per_x; // U
                 vertices[verticesCount + 7] = offset_y * offset_per_y; // V
 
@@ -305,7 +309,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             mat3 R = { { c, s, 0.f },{ -s, c, 0.f },{ 0.f, 0.f, 1.f } };
 
             vec2 tl = -sortedSprite.transform.center * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-            vec2 br = sortedSprite.sprite.dimensions * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL + tl;
+            vec2 br = sortedSpriteSprite.dimensions * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL + tl;
             vec2 tr = vec2(br.x, tl.y);
             vec2 bl = vec2(tl.x, br.y);
 
@@ -371,8 +375,8 @@ void RenderSystem::Draw()
         for(u32 i = 0; i < registry.sprites.size(); ++i)
         {
             SpriteTransformPair s;
-            s.sprite = registry.sprites.components[i];
-            s.renderState = GetRenderState(s.sprite);
+            s.spritePtr = &registry.sprites.components[i];
+            s.renderState = GetRenderState(registry.sprites.components[i]);
             s.transform = registry.transforms.get(registry.sprites.entities[i]);
             sortedSpriteArray[i] = s;
         }
