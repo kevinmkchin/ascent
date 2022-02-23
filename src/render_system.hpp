@@ -89,10 +89,7 @@ private:
     bool InitScreenTexture();
 
     void UpdateScreenTextureSize(i32 newWidth, i32 newHeight);
-
-	// Internal drawing functions for each entity type
-    void DrawSprite(TransformComponent entityTransform, SpriteComponent sprite, const mat3& projection);
-
+    
     // BATCH DRAWING
     void BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3& projection);
 
