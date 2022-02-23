@@ -63,7 +63,7 @@ void WorldSystem::StartNewRun()
     // Set the randomizer seed (deterministic - if two runs use the same seed, they will have exactly the same randomizations)
     srand((u32) time(nullptr));
     u32 seed = rand()%1000000000;
-    SetRandomizerSeed(1);
+    SetRandomizerSeed(seed);
 
     StartNewStage(CHAPTER_ONE_STAGE_ONE);
 }
@@ -291,11 +291,7 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
 {
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
     {
-        TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
         CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
-        MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
-
-        TransformComponent& otherTransform = registry.transforms.get(entity_other);
         CollisionComponent& otherCollider = registry.colliders.get(entity_other);
 
         /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
@@ -303,18 +299,21 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
          *  Checking that the two entities are still colliding is not a perfect solution (if there
          *  even is one), but it should be good enough... We can revisit this and attempt other
          *  solutions down the line if needed. */
-        CollisionInfo collisionCheckAgain = CheckCollision(resolverTransform, resolverCollider,
-                                                           otherTransform, otherCollider);
+        CollisionInfo collisionCheckAgain = CheckCollision(resolverCollider, otherCollider);
         if(collisionCheckAgain.collides)
         {
+            TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
             if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
             {
+                MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
                 resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
+                resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
                 resolverMotion.velocity.x = 0.f;
             }
             else
             {
                 resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
+                resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
             }
         }
     }

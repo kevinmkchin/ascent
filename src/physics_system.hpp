@@ -11,8 +11,7 @@ struct CollisionInfo
     bool collides = false;
 };
 
-CollisionInfo CheckCollision(TransformComponent& transform1, CollisionComponent& collider1,
-                             TransformComponent& transform2, CollisionComponent& collider2);
+CollisionInfo CheckCollision(CollisionComponent& collider1, CollisionComponent& collider2);
 
 // A simple physics system that moves rigid bodies and checks for collision
 class PhysicsSystem

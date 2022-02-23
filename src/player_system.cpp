@@ -129,12 +129,10 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
             playerRelevantCollisions.push_back(colEvent);
 
             Player& player = registry.players.get(entity);
-            TransformComponent& playerTransform = registry.transforms.get(entity);
             CollisionComponent& playerCollider = registry.colliders.get(entity);
 
             // Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
-            CollisionInfo collisionCheck = CheckCollision(playerTransform, playerCollider,
-                registry.transforms.get(entity_other), registry.colliders.get(entity_other));
+            CollisionInfo collisionCheck = CheckCollision(playerCollider, registry.colliders.get(entity_other));
             if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
             {
                 if(collisionCheck.collision_overlap.y <= 0.f
