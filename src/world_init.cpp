@@ -49,27 +49,27 @@ Entity createPlayer(vec2 position)
     auto& hb = registry.healthBar.emplace(entity);
     registry.holders.emplace(entity);
 
-    vec2 dimensions = { 12, 14 };
+    vec2 dimensions = { 16, 16 };
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
     motion.velocity = { 0, 0 };
 
-    collider.collision_pos = dimensions / 2.f;
-    collider.collision_neg = dimensions / 2.f;
+    collider.collision_pos = { 4, 5 };
+    collider.collision_neg = { 4, 7 };
 
     registry.sprites.insert(
         entity,
         {
             dimensions,
-            0,
+            5,
             EFFECT_ASSET_ID::SPRITE,
             TEXTURE_ASSET_ID::PLAYER,
             true,
             false,
-            8,
-            15,
+            128,
+            240,
             0,
             0,
             0.f,

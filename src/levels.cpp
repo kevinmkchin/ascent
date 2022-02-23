@@ -23,7 +23,7 @@ INTERNAL void AddTileSizedCollider(Entity tileEntity)
     collider.collider_position = transform.position;
 }
 
-INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::MIDTILE1)
+INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
 {
     Entity entity = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
 
@@ -37,7 +37,18 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId
                 { TILE_SIZE, TILE_SIZE },
                 10,
                 EFFECT_ASSET_ID::SPRITE,
-                texId
+                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+                true, false, 256, 256,
+                0,
+                0,
+                0.f,
+                {
+                    {
+                        1,
+                        spriteFrame,
+                        0.f
+                    }
+                }
             }
     );
 
@@ -58,7 +69,18 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
                 { TILE_SIZE, TILE_SIZE },
                 0,
                 EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::LADDER
+                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+                true, false, 256, 256,
+                0,
+                0,
+                0.f,
+                {
+                    {
+                        1,
+                        10,
+                        0.f
+                    }
+                }
             }
     );
 
@@ -77,14 +99,25 @@ INTERNAL Entity CreateSpikeTile(i32 col, i32 row)
                               row * TILE_SIZE + transform.center.y);
 
     u8 whichSpike = rand()%2;
-    TEXTURE_ASSET_ID spikeTexId = whichSpike ? TEXTURE_ASSET_ID::SPIKES1 : TEXTURE_ASSET_ID::SPIKES2;
+    u16 spikeTexFrame = whichSpike ? 7 : 8;
     registry.sprites.insert(
             entity,
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
                 EFFECT_ASSET_ID::SPRITE,
-                spikeTexId
+                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+                true, false, 256, 256,
+                0,
+                0,
+                0.f,
+                {
+                    {
+                        1,
+                        spikeTexFrame,
+                        0.f
+                    }
+                }
             }
     );
 
@@ -110,7 +143,18 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
                 { TILE_SIZE, TILE_SIZE },
                 0,
                 EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::EXITTILE
+                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+                true, false, 256, 256,
+                0,
+                0,
+                0.f,
+                {
+                    {
+                        1,
+                        9,
+                        0.f
+                    }
+                }
             }
     );
 
@@ -286,12 +330,11 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
 
                 case 'S':{
                     // shop items
-                    CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::SPIKES1);
                 }break;
 
                 case 'B':{
                     // wooden tiles
-                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, TEXTURE_ASSET_ID::WOODTILE);
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 5);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
 
@@ -305,7 +348,7 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
 INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
 {
     auto& spr = registry.sprites.get(e);
-    if(spr.texId != TEXTURE_ASSET_ID::MIDTILE1)
+    if(spr.GetStartFrame() != 0)
     {
         return; 
     }
@@ -314,18 +357,18 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
     bool botClear = row + 1 < NUMTILESTALL && levelTiles[col][row + 1] == 0;
     if (topClear && botClear)
     {
-        spr.texId = TEXTURE_ASSET_ID::TOPBOTTILE1;
+        spr.SetStartFrame(3);
         spr.dimensions.y += 3;
         registry.transforms.get(e).center.y += 2;
     }
     else if(botClear)
     {
-        spr.texId = TEXTURE_ASSET_ID::BOTTILE1;
+        spr.SetStartFrame(1);
         spr.dimensions.y = spr.dimensions.y + 1;
     }
     else if(topClear)
     {
-        spr.texId = TEXTURE_ASSET_ID::TOPTILE1;
+        spr.SetStartFrame(2);
         spr.dimensions.y += 2;
         registry.transforms.get(e).center.y += 2;
     }
@@ -336,10 +379,10 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
         switch(which)
         {
             case 0:{
-                spr.texId = TEXTURE_ASSET_ID::SKULLS1;
+                spr.SetStartFrame(4);
             }break;
             case 1:{
-                spr.texId = TEXTURE_ASSET_ID::SKULLS2;
+                spr.SetStartFrame(5);
             }break;
             default:{
             }break;
