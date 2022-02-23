@@ -12,7 +12,7 @@ class WorldSystem;
 struct SpriteTransformPair
 {
     u32 renderState;
-    SpriteComponent sprite;
+    SpriteComponent* spritePtr;
     TransformComponent transform;
 };
 
