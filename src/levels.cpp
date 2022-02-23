@@ -475,6 +475,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     {
         auto _a = CreateBasicLevelTile(i, -1);
         auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
+        AddTileSizedCollider(_a);
+        AddTileSizedCollider(_b);
         ChangeSpritesBasedOnTopBottom(_a, i, -1);
         ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
     }
@@ -482,6 +484,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     {
         auto _a = CreateBasicLevelTile(-1, i);
         auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
+        AddTileSizedCollider(_a);
+        AddTileSizedCollider(_b);
     }
 
     // auto upBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
