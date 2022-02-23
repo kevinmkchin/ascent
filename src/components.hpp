@@ -31,25 +31,13 @@
 
 enum class TEXTURE_ASSET_ID : u16
 {
-	EAGLE,
+    ASCENT_LEVELTILES_SHEET,
     MONSTER,
-    TOPTILE1,
-    MIDTILE1,
-    BOTTILE1,
-    TOPBOTTILE1,
-    SKULLS1,
-    SKULLS2,
-    SPIKES1,
-    SPIKES2,
     BG1,
     BOX,
-    LADDER,
-    WOODTILE,
-    TILE_EXAMPLE,
     SHOPBG,
     MAINMENUBG,
     FIRE,
-    EXITTILE,
     PLAYER,
     SWORD,
 
@@ -59,25 +47,13 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 // Make sure these paths remain in sync with the associated enumerators.
 const std::array<std::string, texture_count> texture_paths = {
-        textures_path("eagle.png"),
+        textures_path("ascent_leveltiles_spritesheet.png"),
         textures_path("monster.png"),
-        textures_path("toptile.png"),
-        textures_path("midtile.png"),
-        textures_path("bottile.png"),
-        textures_path("topbottile.png"),
-        textures_path("skulls1.png"),
-        textures_path("skulls2.png"),
-        textures_path("spikes1.png"),
-        textures_path("spikes2.png"),
         textures_path("bg.png"),
         textures_path("box.png"),
-        textures_path("ladder.png"),
-        textures_path("woodtile.png"),
-        textures_path("tile_example.png"),
         textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
-        textures_path("exit.png"),
         textures_path("player.png"),
         textures_path("sword.png")
 };
@@ -177,20 +153,30 @@ struct SpriteComponent
     shortvec2           dimensions  = { 0, 0 }; // in pixels
     i8                  layer       = 0;        // render layer. higher layer is drawn on top of lower layers. -128 to 127
     EFFECT_ASSET_ID     shaderId    = EFFECT_ASSET_ID::SPRITE; // ID for the shader to use
-    TEXTURE_ASSET_ID    texId       = TEXTURE_ASSET_ID::EAGLE; // ID for the texture to use
+    TEXTURE_ASSET_ID    texId       = TEXTURE_ASSET_ID::BOX; // ID for the texture to use
 
     // SPRITESHEET / ANIMATION DATA
     bool sprite_sheet = false;
     bool reverse = false;
 
-    u16 sheetSizeX = 1;
-    u16 sheetSizeY = 1;
+    u16 sheetSizeX = 16;
+    u16 sheetSizeY = 16;
 
     u8 selected_animation = 0;
     u8 current_frame = 0;
     float elapsed_time = 0.f;
 
     std::vector<Animation> animations = {};
+
+    void SetStartFrame(u16 frame)
+    {
+        animations[selected_animation].start_frame = frame;
+    }
+
+    u16 GetStartFrame() const
+    {
+        return animations[selected_animation].start_frame;
+    }
 };
 
 //For entities that can hold items

@@ -265,8 +265,8 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             size_t frame = sortedSpriteSprite.animations[sortedSpriteSprite.selected_animation].start_frame
                 + sortedSpriteSprite.current_frame;
 
-            size_t sheetX = sortedSpriteSprite.sheetSizeX;
-            size_t sheetY = sortedSpriteSprite.sheetSizeY;
+            size_t sheetX = sortedSpriteSprite.sheetSizeX / sortedSpriteSprite.dimensions.x;
+            size_t sheetY = sortedSpriteSprite.sheetSizeY / sortedSpriteSprite.dimensions.y ;
 
             float offset_per_x = (1.f / sheetX);
             float offset_per_y = (1.f / sheetY);
