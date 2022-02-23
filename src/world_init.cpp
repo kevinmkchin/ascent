@@ -30,8 +30,8 @@ Entity createBox(vec2 position)
         {
                 dimensions,
                 0,
-                TEXTURE_ASSET_ID::BOX,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::BOX
         }
     );
 
@@ -64,12 +64,15 @@ Entity createPlayer(vec2 position)
         {
             dimensions,
             0,
-            TEXTURE_ASSET_ID::PLAYER,
             EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::PLAYER,
             true,
             false,
             8,
             15,
+            0,
+            0,
+            0.f,
             {
                 { // idle
                     4,
@@ -92,9 +95,6 @@ Entity createPlayer(vec2 position)
                     100.f * 3.f
                 }
             },
-            0,
-            0,
-            0.f
         }
     );
 
@@ -132,8 +132,8 @@ Entity createEnemy(vec2 position)
 		{
 				dimensions,
                 0,
-				TEXTURE_ASSET_ID::MONSTER,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+				TEXTURE_ASSET_ID::MONSTER
 		}
 	);
 
@@ -166,8 +166,8 @@ Entity createSword(vec2 position)
             {
                     dimensions,
                     0,
-                    TEXTURE_ASSET_ID::SWORD,
-                    EFFECT_ASSET_ID::SPRITE
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::SWORD
             }
     );
 
@@ -197,8 +197,8 @@ Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
         {
                 dimensions,
                 10,
-                TEXTURE_ASSET_ID::FIRE,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::FIRE
         }
     );
 
