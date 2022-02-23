@@ -62,9 +62,16 @@ Entity createPlayer(vec2 position)
         entity,
         {
             dimensions,
-            5,
-            TEXTURE_ASSET_ID::BOX,
-            EFFECT_ASSET_ID::SPRITE
+            0,
+            TEXTURE_ASSET_ID::PLAYER,
+            EFFECT_ASSET_ID::SPRITE,
+            true,
+            false,
+            15.f,
+            8.f,
+            0.f,
+            6.f,
+            3.f
         }
     );
 
