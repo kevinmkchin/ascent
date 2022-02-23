@@ -345,6 +345,42 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
         vertices[verticesCount + 14] = 1.f; // U
         vertices[verticesCount + 15] = 1.f; // V
 
+        if (sortedSprite.sprite.animated) {
+
+
+            float offset_per_x = (1.f / sortedSprite.sprite.cols);
+            float offset_per_y = (1.f / sortedSprite.sprite.rows);
+            float offset_x = sortedSprite.sprite.posX;
+            float offset_y = sortedSprite.sprite.posY;
+
+            if (sortedSprite.sprite.reverse) {
+                vertices[verticesCount + 6] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 7] = (offset_y - 1.0f) * offset_per_y; // V
+
+                vertices[verticesCount + 2] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 3] = (offset_y - 1.0f) * offset_per_y; // V
+
+                vertices[verticesCount + 14] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 15] = offset_y * offset_per_y; // V
+
+                vertices[verticesCount + 10] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 11] = offset_y * offset_per_y; // V
+            }
+            else {
+                vertices[verticesCount + 2] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 3] = (offset_y - 1.0f) * offset_per_y; // V
+
+                vertices[verticesCount + 6] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 7] = (offset_y - 1.0f) * offset_per_y; // V
+
+                vertices[verticesCount + 10] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 11] = offset_y * offset_per_y; // V
+
+                vertices[verticesCount + 14] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 15] = offset_y * offset_per_y; // V
+            }
+        }
+
         if(sortedSprite.transform.rotation)
         {
             float c = cosf(sortedSprite.transform.rotation);
