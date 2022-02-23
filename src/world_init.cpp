@@ -67,11 +67,33 @@ Entity createPlayer(vec2 position)
             EFFECT_ASSET_ID::SPRITE,
             true,
             false,
-            15.f,
-            8.f,
-            0.f,
-            6.f,
-            3.f
+            8,
+            15,
+            {
+                { // idle
+                    4,
+                    40,
+                    100.f * 4.f
+                },
+                { // run
+                    6,
+                    8,
+                    100.f * 6.f
+                },
+                { // jump down
+                    3,
+                    48,
+                    100.f * 3.f
+                },
+                { // jump up
+                    3,
+                    56,
+                    100.f * 3.f
+                }
+            },
+            0,
+            0,
+            0.f
         }
     );
 
