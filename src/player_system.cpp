@@ -329,13 +329,13 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
             // jump up
             playerSprite.posY = 8.f;
             state = bFaceRight ? 8 : 7;
-            //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+            playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
         }
         else {
             // jump down
             playerSprite.posY = 7.f;
             state = bFaceRight ? 6 : 5;
-            //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+            playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
         }
     }
     else if (x_velocity != 0.f) {
@@ -343,14 +343,14 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
         playerSprite.frame_count = 6.f;
         playerSprite.posY = 2.f;
         state = bFaceRight ? 2 : 1;
-        //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+        playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
     }
     else {
         // idle
         playerSprite.frame_count = 4.f;
         playerSprite.posY = 6.f;
         state = bFaceRight ? 4 : 3;
-        //playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
+        playerSprite.posX = (player_animation_state == state) ? playerSprite.posX : 0.f;
     }
 
     playerSprite.reverse = bFaceRight ? false : true;
