@@ -92,6 +92,8 @@ struct shortvec2
     	: x((i16) glmvec.x)
     	, y((i16) glmvec.y)
     {}
+
+    operator glm::vec2() const { return glm::vec2((float)x, (float)y); }
 };
 
 // The 'Transform' component handles transformations passed to the Vertex shader

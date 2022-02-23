@@ -164,31 +164,33 @@ struct CollisionComponent
     shortvec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
 };
 
-struct Animation
+struct Animation // NOT A COMPONENT
 {
-    size_t num_frames = 1;
-    size_t start_frame = 0;
+    u16 num_frames = 1;
+    u16 start_frame = 0;
     float animation_duration = 0.f;
 };
 
 struct SpriteComponent
 {
-    vec2 dimensions = {0.f,0.f};// in pixels
-    i8 layer = 0;               // render layer. higher layer is drawn on top of lower layers. -128 to 127
-    TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
-    EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
-    // TODO(Kevin): Info about which region of the texture to use as sprite
+    // Don't change the order please - it's ordered to reduce struct padding
+    shortvec2           dimensions  = { 0, 0 }; // in pixels
+    i8                  layer       = 0;        // render layer. higher layer is drawn on top of lower layers. -128 to 127
+    EFFECT_ASSET_ID     shaderId    = EFFECT_ASSET_ID::SPRITE; // ID for the shader to use
+    TEXTURE_ASSET_ID    texId       = TEXTURE_ASSET_ID::EAGLE; // ID for the texture to use
+
+    // SPRITESHEET / ANIMATION DATA
     bool sprite_sheet = false;
     bool reverse = false;
 
-    size_t sheetSizeX = 1;
-    size_t sheetSizeY = 1;
+    u16 sheetSizeX = 1;
+    u16 sheetSizeY = 1;
+
+    u8 selected_animation = 0;
+    u8 current_frame = 0;
+    float elapsed_time = 0.f;
 
     std::vector<Animation> animations = {};
-
-    size_t selected_animation = 0;
-    size_t current_frame = 0;
-    float elapsed_time = 0.f;
 };
 
 //For entities that can hold items

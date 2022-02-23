@@ -36,8 +36,8 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, TEXTURE_ASSET_ID texId
             {
                 { TILE_SIZE, TILE_SIZE },
                 10,
-                texId,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                texId
             }
     );
 
@@ -57,8 +57,8 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                TEXTURE_ASSET_ID::LADDER,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::LADDER
             }
     );
 
@@ -83,8 +83,8 @@ INTERNAL Entity CreateSpikeTile(i32 col, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                spikeTexId,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                spikeTexId
             }
     );
 
@@ -109,8 +109,8 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
             {
                 { TILE_SIZE, TILE_SIZE },
                 0,
-                TEXTURE_ASSET_ID::EXITTILE,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::EXITTILE
             }
     );
 
@@ -132,8 +132,8 @@ INTERNAL Entity CreateShopBackground(i32 col, i32 row)
             {
                 { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
                 -128,
-                TEXTURE_ASSET_ID::SHOPBG,
-                EFFECT_ASSET_ID::SPRITE
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::SHOPBG
             }
     );
 
