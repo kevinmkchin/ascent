@@ -83,6 +83,7 @@ private:
 
     void SetCurrentMode(GAMEMODE mode);
 
+    void CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other);
 
 	// OpenGL window handle
 	SDL_Window* window;

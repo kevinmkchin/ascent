@@ -53,6 +53,7 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 
     if(bLeftKeyPressed)
     {
+        playerMotion.facingRight = false;
         currentXAcceleration += -(bJumping ? playerAirAcceleration : playerGroundAcceleration);
     }
     else if(playerMotion.velocity.x < -5.f)
@@ -66,6 +67,7 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 
     if(bRightKeyPressed)
     {
+        playerMotion.facingRight = true;
         currentXAcceleration += bJumping ? playerAirAcceleration : playerGroundAcceleration;
     }
     else if(playerMotion.velocity.x > 5.f)
@@ -131,12 +133,10 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
             playerRelevantCollisions.push_back(colEvent);
 
             Player& player = registry.players.get(entity);
-            TransformComponent& playerTransform = registry.transforms.get(entity);
             CollisionComponent& playerCollider = registry.colliders.get(entity);
 
             // Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
-            CollisionInfo collisionCheck = CheckCollision(playerTransform, playerCollider,
-                registry.transforms.get(entity_other), registry.colliders.get(entity_other));
+            CollisionInfo collisionCheck = CheckCollision(playerCollider, registry.colliders.get(entity_other));
             if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
             {
                 if(collisionCheck.collision_overlap.y <= 0.f
@@ -256,6 +256,17 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
         }
     }
 }
+
+INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
+{
+    const bool bPickUpKeyPressed = Input::GamePickUpIsPressed();
+    const bool bDropKeyPressed = Input::GameDropIsPressed();
+    const bool bThrowKeyPressed = Input::GameThrowIsPressed();
+
+    playerHolder.want_to_pick_up = bPickUpKeyPressed;
+    playerHolder.want_to_drop = bDropKeyPressed;
+    playerHolder.want_to_throw = bThrowKeyPressed;
+}
 #pragma endregion
 
 void PlayerSystem::CheckIfLevelUp()
@@ -348,12 +359,17 @@ void PlayerSystem::Step(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
+
+    Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
     SpriteComponent& playerSprite = registry.sprites.get(playerEntity);
+    TransformComponent& playerTransform = registry.transforms.get(playerEntity);
+    HolderComponent& playerHolder = registry.holders.get(playerEntity);
 
     CheckIfLevelUp();
 
     HandleBasicMovementInput(playerMotion);
+    HandleBasicInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion);
     HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
 

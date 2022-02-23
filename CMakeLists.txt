@@ -27,9 +27,6 @@ endif()
 # Generate the shader folder location to the header
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp")
 
-# You can switch to use the file GLOB for simplicity but at your own risk
-# file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
-
 set(SOURCE_FILES
     src/main.cpp
     src/common.cpp
@@ -46,7 +43,7 @@ set(SOURCE_FILES
     src/world_system.cpp
     src/ui_system.cpp
     src/file_system.cpp
-        )
+    src/item_holder_system.cpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
 if (IS_OS_MAC)

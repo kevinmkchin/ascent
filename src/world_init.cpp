@@ -47,6 +47,7 @@ Entity createPlayer(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.players.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
+    registry.holders.emplace(entity);
 
     vec2 dimensions = { 12, 14 };
     transform.position = position;
@@ -111,6 +112,7 @@ Entity createEnemy(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
     registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
     transform.position = position;
@@ -118,6 +120,9 @@ Entity createEnemy(vec2 position)
     transform.center = dimensions / 2.f;
 
     motion.velocity = { 0.f, 0 };
+    float maxMoveSpeed = 64.f;
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity = {maxMoveSpeed, maxFallSpeed};
 
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
@@ -133,6 +138,40 @@ Entity createEnemy(vec2 position)
 	);
 
 	return entity;
+}
+
+Entity createSword(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.weapons.emplace(entity);
+    registry.items.emplace(entity);
+
+    vec2 dimensions = { 15, 20 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    0,
+                    TEXTURE_ASSET_ID::SWORD,
+                    EFFECT_ASSET_ID::SPRITE
+            }
+    );
+
+    return entity;
 }
 
 
