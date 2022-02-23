@@ -37,6 +37,10 @@ INTERNAL float jumpBufferTimer = 999.f;
 INTERNAL float coyoteTimer = coyoteTimeDefaultSeconds;
 INTERNAL bool bLaddered = false;
 
+INTERNAL bool bFaceRight = false; // facing right previously
+INTERNAL float time_in_animation = 0.f;
+INTERNAL int player_animation_state = 6;
+
 INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
 {
     const bool bLeftKeyPressed = Input::GameLeftIsPressed();
@@ -280,6 +284,77 @@ void PlayerSystem::CheckIfLevelUp()
     }
 }
 
+INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMotion, SpriteComponent& playerSprite) {
+
+    /* NOTES:
+    Row 1: Death animation
+    Row 2: Run animation
+    Row 3: Pushing
+    Row 4/5: Attack animation
+    Row 6: Idle animation
+    Row 7: Jump down
+    Row 8: Jump up
+    .
+    .
+    .
+    etc... more animations
+    .
+    .
+    .
+    States:
+    1 - Run Left
+    2 - Run Right
+    3 - Idle Left
+    4 - Idle Right
+    5 - Jump Down Left
+    6 - Jump Down Right
+    7 - Jump Up Left
+    8 - Jump Up Right
+
+    */
+
+    float x_velocity = playerMotion.velocity.x;
+    float y_velocity = playerMotion.velocity.y;
+
+    if (x_velocity > 0.f) {
+        bFaceRight = true;
+    }
+    else if (x_velocity < 0.f) {
+        bFaceRight = false;
+    }
+
+    int state;
+    if (y_velocity != 0.f) {
+        if (y_velocity > 0.f) {
+            // jump up
+            playerSprite.selected_animation = 3;
+            state = bFaceRight ? 8 : 7;
+            playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
+        }
+        else {
+            // jump down
+            playerSprite.selected_animation = 2;
+            state = bFaceRight ? 6 : 5;
+            playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
+        }
+    }
+    else if (x_velocity != 0.f) {
+        // run
+        playerSprite.selected_animation = 1;
+        state = bFaceRight ? 2 : 1;
+        playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
+    }
+    else {
+        // idle
+        playerSprite.selected_animation = 0;
+        state = bFaceRight ? 4 : 3;
+        playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
+    }
+
+    playerSprite.reverse = bFaceRight ? false : true;
+    player_animation_state = state;
+}
+
 void PlayerSystem::Step(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
@@ -287,6 +362,7 @@ void PlayerSystem::Step(float deltaTime)
 
     Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
+    SpriteComponent& playerSprite = registry.sprites.get(playerEntity);
     TransformComponent& playerTransform = registry.transforms.get(playerEntity);
     HolderComponent& playerHolder = registry.holders.get(playerEntity);
 
@@ -295,4 +371,6 @@ void PlayerSystem::Step(float deltaTime)
     HandleBasicMovementInput(playerMotion);
     HandleBasicInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion);
+    HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
+
 }

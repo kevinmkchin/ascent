@@ -14,6 +14,7 @@
 #include "world_system.hpp"
 #include "input.hpp"
 #include "player_system.hpp"
+#include "sprite_system.hpp"
 #include "ui_system.hpp"
 
 #define TINY_ECS_LIB_IMPLEMENTATION
@@ -104,6 +105,7 @@ int main(int argc, char* argv[])
 	RenderSystem renderer;
 	PhysicsSystem physics;
     PlayerSystem playerSystem;
+    SpriteSystem spriteSystem;
     ItemHolderSystem itemHolderSystem;
 	AISystem ai;
     UISystem ui;
@@ -138,6 +140,7 @@ int main(int argc, char* argv[])
             physics.step(deltaTime);
             playerSystem.Step(deltaTime);
             itemHolderSystem.Step(deltaTime);
+            spriteSystem.Step(deltaTime);
             world.handle_collisions();
         }
 
