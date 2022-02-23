@@ -29,7 +29,7 @@
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
-enum class TEXTURE_ASSET_ID : u16 
+enum class TEXTURE_ASSET_ID : u16
 {
 	EAGLE,
     MONSTER,
@@ -51,6 +51,7 @@ enum class TEXTURE_ASSET_ID : u16
     FIRE,
     EXITTILE,
     PLAYER,
+    SWORD,
 
     TEXTURE_COUNT
 };
@@ -78,6 +79,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("fire.png"),
         textures_path("exit.png"),
         textures_path("player.png"),
+        textures_path("sword.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -100,7 +102,6 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("text_ui"),
         shader_path("exp_ui"),
 };
-
 
 /**
  *
@@ -126,10 +127,22 @@ struct Enemy_projectile {
     Entity enemy_projectile;
 };
 
+struct Weapon
+{
+    float damage = 1.f;
+};
+
+struct Item
+{
+    // When player is holding an item, we don't want to have it colliding with the floor/ceiling etc
+    // When item is on the floor, we want it to be colliding with the floor
+    bool collidableWithEnvironment = true;
+};
+
 struct TransformComponent
 {
     vec2 position = { 0.f, 0.f };
-    vec2 scale = { 1.f, 1.f };
+    //vec2 scale = { 1.f, 1.f };
     vec2 center = { 0.f, 0.f }; // offset from "top-left". If a sprite has dimensions 16x16, then center of 8x8 points to center of sprite
     float rotation = 0.f;
 };
@@ -140,13 +153,15 @@ struct MotionComponent
     vec2 velocity = { 0.f, 0.f };               // signed
     vec2 acceleration = { 0.f, 0.f };           // signed
     vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
+    bool facingRight = true;
 };
 
 struct CollisionComponent
 {
+    vec2 collider_position = { 0.f, 0.f };
     // Collision
-    vec2 collision_pos = { 0.f, 0.f }; // Collision box x,y size in the positive direction from the center
-    vec2 collision_neg = { 0.f, 0.f }; // Collision box x,y size in the negative direction from the center
+    shortvec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
+    shortvec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
 };
 
 struct Animation
@@ -174,6 +189,16 @@ struct SpriteComponent
     size_t selected_animation = 0;
     size_t current_frame = 0;
     float elapsed_time = 0.f;
+};
+
+//For entities that can hold items
+struct HolderComponent
+{
+    Entity held_weapon = Entity();
+    Entity near_weapon = Entity();
+    bool want_to_pick_up = false;
+    bool want_to_drop = false;
+    bool want_to_throw = false;
 };
 
 struct CollisionEvent
@@ -217,6 +242,7 @@ struct HealthBar
 
 enum GAMETAGS : u8
 {
+    TAG_DEFAULT,
     TAG_PLAYER,
     TAG_LEVELENDPOINT,
     TAG_LADDER,

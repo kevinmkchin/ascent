@@ -19,6 +19,7 @@
 
 #define TINY_ECS_LIB_IMPLEMENTATION
 #include "tiny_ecs.hpp"
+#include "item_holder_system.hpp"
 
 #define WINDOW_TITLE "ASCENT"
 #define WINDOW_INITIAL_WIDTH 800
@@ -105,6 +106,7 @@ int main(int argc, char* argv[])
 	PhysicsSystem physics;
     PlayerSystem playerSystem;
     SpriteSystem spriteSystem;
+    ItemHolderSystem itemHolderSystem;
 	AISystem ai;
     UISystem ui;
 
@@ -137,6 +139,7 @@ int main(int argc, char* argv[])
             ai.Step(deltaTime);
             physics.step(deltaTime);
             playerSystem.Step(deltaTime);
+            itemHolderSystem.Step(deltaTime);
             spriteSystem.Step(deltaTime);
             world.handle_collisions();
         }
@@ -147,6 +150,7 @@ int main(int argc, char* argv[])
         Input::ResetKeyboardStates();
 
         renderer.Draw();
+
         SDL_GL_SwapWindow(window);
 	}
 

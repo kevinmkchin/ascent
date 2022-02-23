@@ -108,6 +108,7 @@ void WorldSystem::SpawnLevelEntities()
     {
         createEnemy(enemySpawn);
     }
+    createSword(currentLevelData.playerStart);
 }
 
 void WorldSystem::loadAllContent()
@@ -212,6 +213,8 @@ void WorldSystem::handle_collisions() {
             CollisionComponent& playerCollider = registry.colliders.get(entity);
 			HealthBar& playerHealth = registry.healthBar.get(entity);
 
+            CheckCollisionWithBlockable(entity, entity_other);
+
             if (entity_other.GetTag() == TAG_SPIKE)
             {
                 if (playerHealth.health > 0)
@@ -227,11 +230,11 @@ void WorldSystem::handle_collisions() {
                     playerHealth.health -= 20;
                     //Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
-			} 
+			}
 
             if (registry.enemyprojectile.has(entity_other))
             {
-                
+
                 if (playerHealth.health > 0)
                 {
                         playerHealth.health -= 40;
@@ -242,34 +245,11 @@ void WorldSystem::handle_collisions() {
                 registry.remove_all_components_of(fire_entity);
              }
 
-            if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
-            {
-                /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
-                 *  by moving entities around, the initial collection of collision events may become outdated.
-                 *  Checking that the two entities are still colliding is not a perfect solution (if there
-                 *  even is one), but it should be good enough... We can revisit this and attempt other
-                 *  solutions down the line if needed. */
-                CollisionInfo collisionCheckAgain = CheckCollision(playerTransform, playerCollider,
-                    registry.transforms.get(entity_other), registry.colliders.get(entity_other));
-                if(collisionCheckAgain.collides)
-                {
-                    if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
-                    {
-                        playerTransform.position.x += collisionCheckAgain.collision_overlap.x;
-                        playerMotion.velocity.x = 0.f;
-                    }
-                    else
-                    {
-                        playerTransform.position.y += collisionCheckAgain.collision_overlap.y;
-                    }
-                }
-            }
-
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed())
             {
                 StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
             }
-            
+
 //			// Checking Player - Deadly collisions
 //			if (registry.deadlys.has(entity_other)) {
 //
@@ -279,9 +259,64 @@ void WorldSystem::handle_collisions() {
 //
 //			}
 		}
+
+        if(registry.holders.has(entity))
+        {
+            HolderComponent& holder = registry.holders.get(entity);
+
+            if (registry.items.has(entity_other))
+            {
+                holder.near_weapon = entity_other;
+            }
+            else
+            {
+                // Assign to fake entity
+                holder.near_weapon = Entity();
+            }
+        }
+
+        if(registry.items.has(entity))
+        {
+            if(registry.items.get(entity).collidableWithEnvironment)
+            {
+                CheckCollisionWithBlockable(entity, entity_other);
+            }
+        }
 	}
 	// Remove all collisions from this simulation Step
 	registry.collisionEvents.clear();
+}
+
+void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other)
+{
+    if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+    {
+        CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
+        CollisionComponent& otherCollider = registry.colliders.get(entity_other);
+
+        /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
+         *  by moving entities around, the initial collection of collision events may become outdated.
+         *  Checking that the two entities are still colliding is not a perfect solution (if there
+         *  even is one), but it should be good enough... We can revisit this and attempt other
+         *  solutions down the line if needed. */
+        CollisionInfo collisionCheckAgain = CheckCollision(resolverCollider, otherCollider);
+        if(collisionCheckAgain.collides)
+        {
+            TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
+            if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
+            {
+                MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
+                resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
+                resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
+                resolverMotion.velocity.x = 0.f;
+            }
+            else
+            {
+                resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
+                resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+            }
+        }
+    }
 }
 
 void WorldSystem::handle_mutations(Mutation currentMutation) {
