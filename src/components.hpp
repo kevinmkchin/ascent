@@ -50,7 +50,9 @@ enum class TEXTURE_ASSET_ID : u16
     MAINMENUBG,
     FIRE,
     EXITTILE,
+    PLAYER,
     SWORD,
+
     TEXTURE_COUNT
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -76,6 +78,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
         textures_path("exit.png"),
+        textures_path("player.png"),
         textures_path("sword.png")
 };
 
@@ -161,6 +164,13 @@ struct CollisionComponent
     shortvec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
 };
 
+struct Animation
+{
+    size_t num_frames = 1;
+    size_t start_frame = 0;
+    float animation_duration = 0.f;
+};
+
 struct SpriteComponent
 {
     vec2 dimensions = {0.f,0.f};// in pixels
@@ -168,6 +178,17 @@ struct SpriteComponent
     TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::EAGLE;     // ID for the texture to use
     EFFECT_ASSET_ID shaderId = EFFECT_ASSET_ID::SPRITE;   // ID for the shader to use
     // TODO(Kevin): Info about which region of the texture to use as sprite
+    bool sprite_sheet = false;
+    bool reverse = false;
+
+    size_t sheetSizeX = 1;
+    size_t sheetSizeY = 1;
+
+    std::vector<Animation> animations = {};
+
+    size_t selected_animation = 0;
+    size_t current_frame = 0;
+    float elapsed_time = 0.f;
 };
 
 //For entities that can hold items

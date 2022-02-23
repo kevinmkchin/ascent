@@ -256,6 +256,48 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
         vertices[verticesCount + 14] = 1.f; // U
         vertices[verticesCount + 15] = 1.f; // V
 
+        if (sortedSprite.sprite.sprite_sheet) {
+
+            size_t frame = sortedSprite.sprite.animations[sortedSprite.sprite.selected_animation].start_frame
+                + sortedSprite.sprite.current_frame;
+
+            size_t sheetX = sortedSprite.sprite.sheetSizeX;
+            size_t sheetY = sortedSprite.sprite.sheetSizeY;
+
+            float offset_per_x = (1.f / sheetX);
+            float offset_per_y = (1.f / sheetY);
+
+            float offset_x = frame % sheetX;
+            float offset_y = frame / sheetX;
+
+            if (sortedSprite.sprite.reverse) {
+                vertices[verticesCount + 6] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 7] = offset_y * offset_per_y; // V
+
+                vertices[verticesCount + 2] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 3] = offset_y * offset_per_y; // V
+
+                vertices[verticesCount + 14] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 15] = (offset_y + 1.0f) * offset_per_y; // V
+
+                vertices[verticesCount + 10] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 11] = (offset_y + 1.0f) * offset_per_y; // V
+            }
+            else {
+                vertices[verticesCount + 2] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 3] = offset_y * offset_per_y; // V
+
+                vertices[verticesCount + 6] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 7] = offset_y * offset_per_y; // V
+
+                vertices[verticesCount + 10] = offset_x * offset_per_x; // U
+                vertices[verticesCount + 11] = (offset_y + 1.0f) * offset_per_y; // V
+
+                vertices[verticesCount + 14] = (offset_x + 1.0f) * offset_per_x; // U
+                vertices[verticesCount + 15] = (offset_y + 1.0f) * offset_per_y; // V
+            }
+        }
+
         if(sortedSprite.transform.rotation)
         {
             float c = cosf(sortedSprite.transform.rotation);
