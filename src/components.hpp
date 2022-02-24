@@ -32,6 +32,7 @@
 enum class TEXTURE_ASSET_ID : u16
 {
     ASCENT_LEVELTILES_SHEET,
+    ASCENT_MUTATIONS_SHEET,
     MONSTER,
     BG1,
     BOX,
@@ -48,6 +49,7 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 // Make sure these paths remain in sync with the associated enumerators.
 const std::array<std::string, texture_count> texture_paths = {
         textures_path("ascent_leveltiles_spritesheet.png"),
+        textures_path("mutations_spritesheet.png"),
         textures_path("monster.png"),
         textures_path("bg.png"),
         textures_path("box.png"),

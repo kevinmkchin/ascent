@@ -103,12 +103,19 @@ void WorldSystem::SpawnLevelEntities()
     // Create player
     player = createPlayer(currentLevelData.playerStart);
 
+    createSword(currentLevelData.playerStart);
+
     // Create enemies
     for(vec2 enemySpawn : currentLevelData.monsterSpawns)
     {
         createEnemy(enemySpawn);
     }
-    createSword(currentLevelData.playerStart);
+
+    // Create shop items
+    for(vec2 shopItemSpawn : currentLevelData.shopItemSpawns)
+    {
+        CreateShopItem(shopItemSpawn, rand()%5);
+    }
 }
 
 void WorldSystem::loadAllContent()

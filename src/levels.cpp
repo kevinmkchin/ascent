@@ -246,6 +246,7 @@ struct CurrentLevelData
     vec2 playerStart;
     std::vector<vec2> monsterSpawns;
     std::vector<vec2> treasureSpawns;
+    std::vector<vec2> shopItemSpawns;
 };
 INTERNAL CurrentLevelData currentLevelData;
 
@@ -256,6 +257,7 @@ INTERNAL void ClearCurrentLevelData()
     currentLevelData.playerStart = vec2(0.f,0.f);
     currentLevelData.monsterSpawns.clear();
     currentLevelData.treasureSpawns.clear();
+    currentLevelData.shopItemSpawns.clear();
 }
 
 INTERNAL void ClearLevelTiles()
@@ -313,6 +315,12 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                                                      roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
                 }break;
 
+                case 'S':{
+                    // shop items
+                    currentLevelData.shopItemSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE,
+                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE });
+                }break;
+
                 case '2':{
                     // end point
                     CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
@@ -328,13 +336,9 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                     CreateSpikeTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
-                case 'S':{
-                    // shop items
-                }break;
-
                 case 'B':{
                     // wooden tiles
-                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 5);
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 6);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
 
