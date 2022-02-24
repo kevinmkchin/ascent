@@ -165,7 +165,7 @@ Entity createSword(vec2 position)
             entity,
             {
                     dimensions,
-                    0,
+                    15,
                     EFFECT_ASSET_ID::SPRITE,
                     TEXTURE_ASSET_ID::SWORD
             }
@@ -173,7 +173,6 @@ Entity createSword(vec2 position)
 
     return entity;
 }
-
 
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
     auto entity = Entity::CreateEntity();
@@ -201,6 +200,43 @@ Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
                 TEXTURE_ASSET_ID::FIRE
         }
     );
+
+    return entity;
+}
+
+Entity CreateShopItem(vec2 position, u8 shopItemIndex) // remove later - just a temporary way of creating shop items
+{
+    Entity entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    transform.position = position;
+    transform.center = {0.f,0.f};
+
+    registry.sprites.insert(
+            entity,
+            {
+                { 16, 16 },
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::ASCENT_MUTATIONS_SHEET,
+                true, false, 128, 128,
+                0,
+                0,
+                0.f,
+                {
+                    {
+                        1,
+                        shopItemIndex,
+                        0.f
+                    }
+                }
+            }
+    );
+
+    auto& collider = registry.colliders.emplace(entity);
+    collider.collision_neg = { 0, 0 };
+    collider.collision_pos = { 16, 16 };
+    collider.collider_position = transform.position;
 
     return entity;
 }
