@@ -155,8 +155,8 @@ Entity createSword(vec2 position)
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
-    collider.collision_pos = dimensions / 2.f;
-    collider.collision_neg = dimensions / 2.f;
+    collider.collision_neg = { 6, 8 };
+    collider.collision_pos = { 6, 7 };
 
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;
