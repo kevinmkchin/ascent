@@ -74,19 +74,9 @@ bool Input::GameJumpIsPressed()
     return Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 }
 
-bool Input::GamePickUpIsPressed()
+bool Input::GamePickUpHasBeenPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_K) || Input::GetGamepad(0).IsPressed(GAMEPAD_B);
-}
-
-bool Input::GameDropIsPressed()
-{
-    return Input::IsKeyPressed(SDL_SCANCODE_L) || Input::GetGamepad(0).IsPressed(GAMEPAD_X);
-}
-
-bool Input::GameThrowIsPressed()
-{
-    return Input::IsKeyPressed(SDL_SCANCODE_H) || Input::GetGamepad(0).IsPressed(GAMEPAD_Y);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_K) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_B);
 }
 
 //////////////////////////////////////////////////////////////////////

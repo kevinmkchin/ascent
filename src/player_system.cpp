@@ -24,9 +24,9 @@ INTERNAL float playerAirDeceleration = 500.f;
 INTERNAL float jumpBufferMaxHoldSeconds = 0.22f;
 INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
 // COYOTE TIME
-INTERNAL float coyoteTimeDefaultSeconds = 0.08f;
+INTERNAL float coyoteTimeDefaultSeconds = 0.09f;
 // VARIABLE JUMP HEIGHT
-INTERNAL float percentYVelocityOnJumpRelease = 0.5f;
+INTERNAL float percentYVelocityOnJumpRelease = 0.6f;
 // LADDER
 INTERNAL float ladderClimbSpeed = 64.f;
 
@@ -258,10 +258,10 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
 }
 
 INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
-{
-    const bool bPickUpKeyPressed = Input::GamePickUpIsPressed();
-    const bool bDropKeyPressed = Input::GameDropIsPressed();
-    const bool bThrowKeyPressed = Input::GameThrowIsPressed();
+{   
+    const bool bThrowKeyPressed = playerHolder.held_weapon != 0 ? Input::GamePickUpHasBeenPressed() : false;
+    const bool bPickUpKeyPressed = playerHolder.held_weapon == 0 ? Input::GamePickUpHasBeenPressed() : false;
+    const bool bDropKeyPressed = Input::GamePickUpHasBeenPressed() && Input::GameDownIsPressed();
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;
