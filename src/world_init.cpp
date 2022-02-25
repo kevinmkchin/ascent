@@ -47,6 +47,7 @@ Entity createPlayer(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.players.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
+    hb.health = 2000.f;
     registry.holders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
@@ -98,8 +99,6 @@ Entity createPlayer(vec2 position)
         }
     );
 
-    hb.health = 2000.f;
-
     return entity;
 }
 
@@ -111,6 +110,7 @@ Entity createEnemy(vec2 position)
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
+    hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
 

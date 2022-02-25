@@ -2,7 +2,7 @@
 
 #include "player_system.hpp"
 #include "physics_system.hpp"
-
+#include "world_system.hpp"
 
 
 PlayerSystem::PlayerSystem()
@@ -257,7 +257,7 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
     }
 }
 
-INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
+INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
 {   
     const bool bThrowKeyPressed = playerHolder.held_weapon != 0 ? Input::GamePickUpHasBeenPressed() : false;
     const bool bPickUpKeyPressed = playerHolder.held_weapon == 0 ? Input::GamePickUpHasBeenPressed() : false;
@@ -355,10 +355,82 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
     player_animation_state = state;
 }
 
-void PlayerSystem::Step(float deltaTime)
+void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
+{
+    Player& playerComponent = registry.players.get(playerEntity);
+    TransformComponent& playerTransform = registry.transforms.get(playerEntity);
+
+    if(playerMeleeAttackCooldownTimer > 0.f)
+    {
+        playerMeleeAttackCooldownTimer -= deltaTime;
+    }
+
+    if(playerMeleeAttackEntity != 0)
+    {
+        registry.remove_all_components_of(playerMeleeAttackEntity);
+    }
+
+    if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed())
+    {
+        playerMeleeAttackCooldownTimer = playerComponent.playerMeleeAttackCooldown; // reset timer
+
+        playerMeleeAttackEntity = Entity::CreateEntity(TAG_PLAYERMELEEATTACK);
+        auto& transform = registry.transforms.emplace(playerMeleeAttackEntity);
+        auto& collider = registry.colliders.emplace(playerMeleeAttackEntity);
+
+        vec2 dimensions;
+        if(bFaceRight)
+        {
+            transform.position.x = playerTransform.position.x + 8;
+            transform.position.y = playerTransform.position.y;
+            dimensions = { 24, 16 };
+            transform.center = { 0, 8 };
+            collider.collider_position = transform.position;
+            collider.collision_pos = { 24, 8 };
+            collider.collision_neg = { 0, 8 };
+        }
+        else
+        {
+            transform.position.x = playerTransform.position.x - 8;
+            transform.position.y = playerTransform.position.y;
+            dimensions = { 24, 16 };
+            transform.center = { 16, 8 };
+            collider.collider_position = transform.position;
+            collider.collision_pos = { 0, 8 };
+            collider.collision_neg = { 24, 8 };
+        }
+
+        registry.sprites.insert(
+            playerMeleeAttackEntity,
+            {
+                    dimensions,
+                    20,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::BOX
+            }
+        );
+    }
+}
+
+void PlayerSystem::PlayerAttackStep()
+{
+    if(registry.colliders.has(playerMeleeAttackEntity))
+    {
+        registry.colliders.remove(playerMeleeAttackEntity);
+    }
+}
+
+void PlayerSystem::PrePhysicsStep(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
+
+    PlayerAttackPrePhysicsStep(deltaTime);
+}
+
+void PlayerSystem::Step(float deltaTime)
+{
+    if(registry.players.entities.empty()) { return; }
 
     Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
@@ -368,9 +440,10 @@ void PlayerSystem::Step(float deltaTime)
 
     CheckIfLevelUp();
 
+    PlayerAttackStep();
+
     HandleBasicMovementInput(playerMotion);
-    HandleBasicInteractionInput(playerHolder);
+    HandleItemInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion);
     HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
-
 }

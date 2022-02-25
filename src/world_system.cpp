@@ -123,12 +123,13 @@ void WorldSystem::loadAllContent()
     background_music = Mix_LoadMUS(audio_path("hadesmusiclmao.wav").c_str());
     chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
     chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
+    sword_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
+    monster_hit_sound = Mix_LoadWAV(audio_path("roblox_oof.wav").c_str());
 
-    if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr) {
-        fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-                audio_path("hadesmusiclmao.wav").c_str(),
-                audio_path("chicken_dead.wav").c_str(),
-                audio_path("chicken_eat.wav").c_str());
+    if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
+        || sword_sound == nullptr
+        || monster_hit_sound == nullptr) {
+        fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
     LoadAllLevelData();
@@ -143,6 +144,10 @@ void WorldSystem::unloadAllContent()
         Mix_FreeChunk(chicken_dead_sound);
     if (chicken_eat_sound != nullptr)
         Mix_FreeChunk(chicken_eat_sound);
+    if (sword_sound != nullptr)
+        Mix_FreeChunk(sword_sound);
+    if (monster_hit_sound != nullptr)
+        Mix_FreeChunk(monster_hit_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -213,6 +218,29 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
+        if (registry.enemy.has(entity))
+        {
+            if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK)
+            {
+                if(Mix_PlayChannel(-1, monster_hit_sound, 0) == -1) 
+                {
+                    printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                }
+
+                HealthBar& enemyHealth = registry.healthBar.get(entity);
+                Player& playerComponent = registry.players.get(player);
+                enemyHealth.health -= playerComponent.attackPower;
+
+                if(enemyHealth.health <= 0.f) // TODO: Remove from here and probably move to ai systems
+                {
+                    registry.remove_all_components_of(entity);
+                    playerComponent.experience += 40.f;
+                }
+
+                *GlobalPauseForSeconds = 0.06f;
+            }
+        }
+
 		if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
             TransformComponent& playerTransform = registry.transforms.get(entity);
@@ -235,7 +263,6 @@ void WorldSystem::handle_collisions() {
 				if (playerHealth.health > 0) 
                 {
                     playerHealth.health -= 20;
-                    //Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
 			}
 

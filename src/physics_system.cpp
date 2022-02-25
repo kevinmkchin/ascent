@@ -88,7 +88,7 @@ INTERNAL void CheckAllCollisions()
             if(e == entity) { continue; }
             CollisionComponent otherCollider = registry.colliders.components[i];
 
-            if(length(entityCollider.collider_position - otherCollider.collider_position) > 48.f) 
+            if(length(entityCollider.collider_position - otherCollider.collider_position) > 128.f) 
             {
                 continue; // if distance b/w is big then don't check
             }
