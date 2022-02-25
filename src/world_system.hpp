@@ -72,6 +72,8 @@ public:
 
     void set_is_over(bool over) { gameIsRunning = over; }
 
+    float* GlobalPauseForSeconds = nullptr;
+
 private:
     void loadAllContent();
 
@@ -100,6 +102,8 @@ private:
 	Mix_Music* background_music;
 	Mix_Chunk* chicken_dead_sound;
 	Mix_Chunk* chicken_eat_sound;
+	Mix_Chunk* sword_sound;
+	Mix_Chunk* monster_hit_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

@@ -74,9 +74,14 @@ bool Input::GameJumpIsPressed()
     return Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 }
 
+bool Input::GameAttackHasBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_K) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_X);
+}
+
 bool Input::GamePickUpHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_K) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_B);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_L) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_B);
 }
 
 //////////////////////////////////////////////////////////////////////
