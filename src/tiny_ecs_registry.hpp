@@ -25,6 +25,9 @@ public:
     ComponentContainer<Weapon> weapons;
     ComponentContainer<HolderComponent> holders;
     ComponentContainer<Item> items;
+	ComponentContainer<PathingBehavior> pathingBehaviors;
+	ComponentContainer<PatrollingBehavior> patrollingBehaviors;
+	ComponentContainer<VisionComponent> visionComponents;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -44,6 +47,9 @@ public:
         registry_list.push_back(&weapons);
         registry_list.push_back(&holders);
         registry_list.push_back(&items);
+		registry_list.push_back(&pathingBehaviors);
+		registry_list.push_back(&patrollingBehaviors);
+		registry_list.push_back(&visionComponents);
 	}
 
 	void clear_all_components() {
