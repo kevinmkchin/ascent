@@ -105,6 +105,17 @@ struct Enemy_projectile {
     Entity enemy_projectile;
 };
 
+struct PathingBehavior {
+    vec2 goalFromPlayer = { 0.f, 0.f }; // (absolute value?) distance from player enemy would ideally like to be (in (x,y))
+    float pathSpeed = 0;
+};
+
+struct PatrollingBehavior {
+    bool standStill; 
+    float patrolSpeed = 0;    // speed at which enemy patrols their spawnpoint
+    float patrolDistance = 0; // max distance enemy will patrol to from their spawnpoint in either direction
+};
+
 struct Weapon
 {
     float damage = 1.f;
@@ -140,6 +151,11 @@ struct CollisionComponent
     // Collision
     shortvec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
     shortvec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
+};
+
+struct VisionComponent
+{
+    float sightRadius = 0.f;
 };
 
 struct Animation // NOT A COMPONENT

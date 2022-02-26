@@ -78,6 +78,9 @@ INTERNAL void CheckAllCollisions()
     std::vector<Entity> enemies = registry.enemy.entities;
     entitiesToCheck.insert(entitiesToCheck.end(), enemies.begin(), enemies.end());
 
+    std::vector<Entity> enemyVisionBoxes = registry.visionComponents.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), enemyVisionBoxes.begin(), enemyVisionBoxes.end());
+
     for(auto entity : entitiesToCheck)
     {
         CollisionComponent entityCollider = registry.colliders.get(entity);
