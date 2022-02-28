@@ -13,6 +13,8 @@ public:
 
     void Step(float deltaTime);
 
+    float* GlobalPauseForSeconds = nullptr;
+
 private:
 
     void UpdateExpUI(float dt);

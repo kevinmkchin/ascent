@@ -121,6 +121,7 @@ int main(int argc, char* argv[])
 	world.init(&renderer, &playerSystem);
     world.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     ui.Init(&renderer, &world, &playerSystem);
+    ui.GlobalPauseForSeconds = &GlobalPauseForSeconds;
 
 	// Variable timestep loop
 	auto t = Clock::now();
@@ -140,6 +141,10 @@ int main(int argc, char* argv[])
         if(GlobalPauseForSeconds > 0.f)
         {
             GlobalPauseForSeconds -= deltaTime;
+        }
+        else if(world.gamePaused)
+        {
+            // paused
         }
         else
         {
@@ -162,12 +167,12 @@ int main(int argc, char* argv[])
                 world.handle_collisions();
                 //printf("handle_collisions: %f seconds\n", timer::timestamp());
             }
-
-            ui.Step(deltaTime);
-
-            Input::ResetControllerStates();
-            Input::ResetKeyboardStates();
         }
+
+        ui.Step(deltaTime);
+
+        Input::ResetControllerStates();
+        Input::ResetKeyboardStates();
 
         renderer.Draw();
         //printf("Draw: %f seconds\n", timer::timestamp());

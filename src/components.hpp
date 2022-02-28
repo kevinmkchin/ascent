@@ -93,7 +93,7 @@ struct Player
     u8  level = 1;
     float experience = 0.f;
 
-    i32 attackPower = 20;
+    i32 attackPower = 30;
     float playerMeleeAttackCooldown = 0.8f;
 };
 const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 

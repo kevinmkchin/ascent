@@ -4,6 +4,7 @@
 #include "world_system.hpp"
 #include "player_system.hpp"
 #include "file_system.hpp"
+#include "input.hpp"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
@@ -82,9 +83,9 @@ void UISystem::UpdateTextUI(float dt)
     {
         case MODE_MAINMENU:
         {
-            vtxt_move_cursor(400, 440);
+            vtxt_move_cursor(350, 440);
             vtxt_append_line("ASCENT", &font_c64, 72);
-            vtxt_move_cursor(400, 600);
+            vtxt_move_cursor(350, 600);
             vtxt_append_line("Press ENTER to play", &font_c64, 48);
         }break;
         case MODE_INGAME:
@@ -113,6 +114,12 @@ void UISystem::UpdateTextUI(float dt)
             }
             vtxt_move_cursor(662, UI_LAYER_RESOLUTION_HEIGHT - 8);
             vtxt_append_line(textBuffer, &font_c64, 24);
+
+            if(world->gamePaused)
+            {
+                vtxt_move_cursor(635, 556);
+                vtxt_append_line("PAUSED", &font_c64, 32);
+            }
         }break;
     }
 
@@ -120,6 +127,8 @@ void UISystem::UpdateTextUI(float dt)
     renderer->textLayer1FontAtlas = texture_c64;
     renderer->textLayer1Colour = vec4(1.f,1.f,1.f,1.0f);
     RebindMeshBufferObjects(renderer->textLayer1VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
+
+    LOCAL_PERSIST float showTutorialTimer = 0.f;
 
     // chapter change text
     LOCAL_PERSIST GAMELEVELENUM cachedGameStage = GAME_NOT_STARTED;
@@ -133,44 +142,58 @@ void UISystem::UpdateTextUI(float dt)
     }
     if(showChapterText)
     {
-        chapterTextAlpha -= 0.5f * dt;
+        if(!world->gamePaused)
+        {
+            chapterTextAlpha -= 0.5f * dt;
+        }
+
         if(chapterTextAlpha < 0.f)
         {
             showChapterText = false;
+
+            if(cachedGameStage == CHAPTER_ONE_STAGE_ONE)
+            {
+                *GlobalPauseForSeconds = 20.f;
+                showTutorialTimer = 20.f;
+                world->darkenGameFrame = true;
+            }
         }
 
         vtxt_clear_buffer();
 
-        switch(cachedGameStage)
+        if(!world->gamePaused)
         {
-            case CHAPTER_ONE_STAGE_ONE:
+            switch(cachedGameStage)
             {
-                vtxt_move_cursor(150,400);
-                vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                vtxt_move_cursor(420,530);
-                vtxt_append_line("Stage One", &font_medusa_gothic, 110);
-            }break;
-            case CHAPTER_ONE_STAGE_TWO:
-            {
-                vtxt_move_cursor(150,400);
-                vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                vtxt_move_cursor(420,530);
-                vtxt_append_line("Stage Two", &font_medusa_gothic, 110);
-            }break;
-            // case CHAPTER_ONE_STAGE_THREE:
-            // {
-            //     vtxt_move_cursor(150,400);
-            //     vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-            //     vtxt_move_cursor(420,530);
-            //     vtxt_append_line("Stage Three", &font_medusa_gothic, 110);
-            // }break;
-            // case CHAPTER_TWO_STAGE_ONE:
-            // {
-            //     vtxt_move_cursor(150,400);
-            //     vtxt_append_line("Chapter Two", &font_medusa_gothic, 180);
-            //     vtxt_move_cursor(420,530);
-            //     vtxt_append_line("Stage One", &font_medusa_gothic, 110);
-            // }break;
+                case CHAPTER_ONE_STAGE_ONE:
+                {
+                    vtxt_move_cursor(150,400);
+                    vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
+                    vtxt_move_cursor(420,530);
+                    vtxt_append_line("Stage One", &font_medusa_gothic, 110);
+                }break;
+                case CHAPTER_ONE_STAGE_TWO:
+                {
+                    vtxt_move_cursor(150,400);
+                    vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
+                    vtxt_move_cursor(420,530);
+                    vtxt_append_line("Stage Two", &font_medusa_gothic, 110);
+                }break;
+                // case CHAPTER_ONE_STAGE_THREE:
+                // {
+                //     vtxt_move_cursor(150,400);
+                //     vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
+                //     vtxt_move_cursor(420,530);
+                //     vtxt_append_line("Stage Three", &font_medusa_gothic, 110);
+                // }break;
+                // case CHAPTER_TWO_STAGE_ONE:
+                // {
+                //     vtxt_move_cursor(150,400);
+                //     vtxt_append_line("Chapter Two", &font_medusa_gothic, 180);
+                //     vtxt_move_cursor(420,530);
+                //     vtxt_append_line("Stage One", &font_medusa_gothic, 110);
+                // }break;
+            }
         }
 
         vb = vtxt_grab_buffer();
@@ -178,11 +201,82 @@ void UISystem::UpdateTextUI(float dt)
         renderer->textLayer2Colour = vec4(1.f,1.f,1.f,chapterTextAlpha);
         RebindMeshBufferObjects(renderer->textLayer2VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
     }
+
+    if(showTutorialTimer > 0.f && !world->gamePaused)
+    {
+        vtxt_clear_buffer();
+
+        showTutorialTimer -= dt;
+
+        if(Input::HasKeyBeenPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A))
+        {
+            showTutorialTimer = -1.f;
+            *GlobalPauseForSeconds = -1.f;
+            world->darkenGameFrame = false;
+        }
+
+        if(Input::GetGamepad(0).isConnected)
+        {
+            vtxt_move_cursor(60, 190);
+            vtxt_append_line("D-Pad or Left Thumbstick to move.", &font_c64, 40);
+            vtxt_move_cursor(60, 260);
+            vtxt_append_line("A to jump", &font_c64, 40);
+            vtxt_move_cursor(60, 330);
+            vtxt_append_line("X to attack", &font_c64, 40);
+            vtxt_move_cursor(60, 400);
+            vtxt_append_line("B to pick up item", &font_c64, 40);
+            vtxt_move_cursor(60, 450);
+            vtxt_append_line("B while holding item to throw item", &font_c64, 40);
+            vtxt_move_cursor(60, 500);
+            vtxt_append_line("B + down to drop item", &font_c64, 40);
+            vtxt_move_cursor(120, 800);
+            vtxt_append_line("Press A to continue...", &font_c64, 40);
+        }
+        else
+        {
+            vtxt_move_cursor(60, 190);
+            vtxt_append_line("WASD to move.", &font_c64, 40);
+            vtxt_move_cursor(60, 260);
+            vtxt_append_line("J to jump", &font_c64, 40);
+            vtxt_move_cursor(60, 330);
+            vtxt_append_line("K to attack", &font_c64, 40);
+            vtxt_move_cursor(60, 400);
+            vtxt_append_line("L to pick up item", &font_c64, 40);
+            vtxt_move_cursor(60, 450);
+            vtxt_append_line("L while holding item to throw item", &font_c64, 40);
+            vtxt_move_cursor(60, 500);
+            vtxt_append_line("L + down to drop item", &font_c64, 40);
+            vtxt_move_cursor(120, 800);
+            vtxt_append_line("Press J to continue...", &font_c64, 40);
+        }
+
+        vtxt_vertex_buffer vb = vtxt_grab_buffer();
+        renderer->textLayer1FontAtlas = texture_c64;
+        renderer->textLayer1Colour = vec4(1.f,1.f,1.f,1.0f);
+        RebindMeshBufferObjects(renderer->textLayer1VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
+    }
 }
 #pragma warning(pop)
 
 void UISystem::Step(float deltaTime)
 {
+    // Check pause
+    if(world->GetCurrentMode() == MODE_INGAME && Input::GamePauseHasBeenPressed())
+    {
+        if(world->gamePaused)
+        {
+            // unpause
+            world->gamePaused = false;
+            world->darkenGameFrame = false;
+        }
+        else
+        {
+            // pause
+            world->gamePaused = true;
+            world->darkenGameFrame = true;
+        }
+    }
+
     UpdateExpUI(deltaTime);
     UpdateTextUI(deltaTime);
 }

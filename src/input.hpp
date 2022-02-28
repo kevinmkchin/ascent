@@ -57,6 +57,8 @@ namespace Input {
     bool GameAttackHasBeenPressed();
     bool GamePickUpHasBeenPressed();
 
+    bool GamePauseHasBeenPressed();
+
 //////////////////////////////////////////////////////////////////////
 // GENERIC CLASSES AND FUNCTIONS BELOW
 //////////////////////////////////////////////////////////////////////
@@ -70,7 +72,9 @@ namespace Input {
         float leftTrigger = 0.f; // 0.0 to 1.0
         float rightTrigger = 0.f; // 0.0 to 1.0
         vec2 leftThumbStickDir = {0.f, 0.f}; // normalized vector representing offset
+        vec2 leftThumbStickDelta = {0.f, 0.f}; // difference in vector since last frame
         vec2 rightThumbStickDir = {0.f, 0.f}; // normalized vector representing offset
+        vec2 rightThumbStickDelta = {0.f, 0.f}; // difference in vector since last frame
 
         bool IsPressed(u16 button /* bitwise-OR-able */) const;
 
