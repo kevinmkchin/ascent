@@ -1,6 +1,7 @@
 #version 330
 
 uniform sampler2D screen_texture;
+uniform float darkenFactor;
 
 in vec2 texcoord;
 
@@ -13,5 +14,5 @@ void main()
     {
     	discard;
     }
-	color = in_color;
+	color = in_color * (1.0 - darkenFactor);
 }

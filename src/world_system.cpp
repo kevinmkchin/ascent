@@ -124,7 +124,7 @@ void WorldSystem::loadAllContent()
     chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
     chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
     sword_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
-    monster_hit_sound = Mix_LoadWAV(audio_path("roblox_oof.wav").c_str());
+    monster_hit_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
         || sword_sound == nullptr
@@ -173,7 +173,7 @@ void WorldSystem::UpdateMode()
 {
     if(GetCurrentMode() == MODE_MAINMENU)
     {
-        if(Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN))
+        if(Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A))
         {
             StartNewRun();
         }

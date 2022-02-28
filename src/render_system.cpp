@@ -265,11 +265,11 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             size_t frame = sortedSpriteSprite.animations[sortedSpriteSprite.selected_animation].start_frame
                 + sortedSpriteSprite.current_frame;
 
-            size_t sheetX = sortedSpriteSprite.sheetSizeX / sortedSpriteSprite.dimensions.x;
-            size_t sheetY = sortedSpriteSprite.sheetSizeY / sortedSpriteSprite.dimensions.y ;
+            size_t sheetX = (size_t) std::floor((float) sortedSpriteSprite.sheetSizeX / (float) sortedSpriteSprite.dimensions.x);
+            size_t sheetY = (size_t) std::ceil((float) sortedSpriteSprite.sheetSizeY / (float) sortedSpriteSprite.dimensions.y);
 
-            float offset_per_x = (1.f / sheetX);
-            float offset_per_y = (1.f / sheetY);
+            float offset_per_x = (1.f / (float) sheetX);
+            float offset_per_y = (1.f / ((float) sortedSpriteSprite.sheetSizeY / (float) sortedSpriteSprite.dimensions.y));
 
             float offset_x = (float)(frame % sheetX);
             float offset_y = (float)(frame / sheetX);
@@ -537,9 +537,14 @@ void RenderSystem::FinalDrawToScreen()
         printf("Screen size changed.\n");
     }
 
+    GLint currProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+    GLuint darkenFactor_loc = glGetUniformLocation(currProgram, "darkenFactor");
+
     // Bind game frame texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, offScreenRenderBufferColor);
+    world->darkenGameFrame ? glUniform1f(darkenFactor_loc, 0.5f) : glUniform1f(darkenFactor_loc, 0.0f);
 
     // Draw game frame
     glBindVertexArray(finalQuadVAO);
@@ -551,6 +556,7 @@ void RenderSystem::FinalDrawToScreen()
     // Bind UI frame texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, offScreenUiBufferColor);
+    glUniform1f(darkenFactor_loc, 0.0f);
 
     // Draw UI frame
     glBindVertexArray(finalQuadVAO);

@@ -73,6 +73,8 @@ public:
     void set_is_over(bool over) { gameIsRunning = over; }
 
     float* GlobalPauseForSeconds = nullptr;
+    bool darkenGameFrame = false;
+    bool gamePaused = false;
 
 private:
     void loadAllContent();
