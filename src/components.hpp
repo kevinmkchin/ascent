@@ -94,7 +94,7 @@ struct Player
     float experience = 0.f;
 
     i32 attackPower = 30;
-    float playerMeleeAttackCooldown = 0.8f;
+    float playerMeleeAttackCooldown = 0.2f;//0.8f; //TODO: maybe make this a percentage decrease than a flat number?
 };
 const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
 

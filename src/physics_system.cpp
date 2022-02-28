@@ -52,11 +52,22 @@ INTERNAL void MoveEntities(float deltaTime)
     for(u32 i = 0; i< motion_registry.size(); i++)
     {
         MotionComponent& motion = motion_registry.components[i];
-        motion.velocity += motion.acceleration * deltaTime;
-        motion.velocity.x = motion.velocity.x >= 0.f ? min(abs(motion.velocity.x), motion.terminalVelocity.x)
-                : -min(abs(motion.velocity.x), motion.terminalVelocity.x);
-        motion.velocity.y = motion.velocity.y >= 0.f ? min(abs(motion.velocity.y), motion.terminalVelocity.y)
-                : -min(abs(motion.velocity.y), motion.terminalVelocity.y);
+        if(std::abs(motion.velocity.x) > std::abs(motion.terminalVelocity.x))
+        {
+            motion.velocity.x -= (motion.velocity.x/abs(motion.velocity.x)) * max(abs(motion.acceleration.x), 800.f) * deltaTime;
+        }
+        else
+        {
+            motion.velocity.x += motion.acceleration.x * deltaTime;
+        }
+        if(std::abs(motion.velocity.y) > std::abs(motion.terminalVelocity.y))
+        {
+            motion.velocity.y -= (motion.velocity.y/abs(motion.velocity.y)) * max(abs(motion.acceleration.y), 800.f) * deltaTime;
+        }
+        else
+        {
+            motion.velocity.y += motion.acceleration.y * deltaTime;
+        }
         Entity e = motion_registry.entities[i];
         registry.transforms.get(e).position += motion.velocity * deltaTime;
         if(registry.colliders.has(e))

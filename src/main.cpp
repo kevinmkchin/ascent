@@ -107,6 +107,7 @@ int main(int argc, char* argv[])
 	RenderSystem renderer;
 	PhysicsSystem physics;
     PlayerSystem playerSystem;
+    playerSystem.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     SpriteSystem spriteSystem;
     ItemHolderSystem itemHolderSystem;
 	AISystem ai;
@@ -138,13 +139,10 @@ int main(int argc, char* argv[])
         float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
         if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
 
-        if(GlobalPauseForSeconds > 0.f)
+        if(GlobalPauseForSeconds > 0.f || world.gamePaused)
         {
-            GlobalPauseForSeconds -= deltaTime;
-        }
-        else if(world.gamePaused)
-        {
-            // paused
+            if(!world.gamePaused) { GlobalPauseForSeconds -= deltaTime; }
+            playerSystem.PausedStep(deltaTime);
         }
         else
         {

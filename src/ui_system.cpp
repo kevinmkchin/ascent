@@ -120,6 +120,26 @@ void UISystem::UpdateTextUI(float dt)
                 vtxt_move_cursor(635, 556);
                 vtxt_append_line("PAUSED", &font_c64, 32);
             }
+
+            LOCAL_PERSIST float levelUpTextTimer = 0.f;
+            if(playerSystem->bLeveledUpLastFrame)
+            {
+                levelUpTextTimer = 1.0f;
+                *GlobalPauseForSeconds = 1.0f;
+            }
+
+            if(levelUpTextTimer > 0.f)
+            {
+                if(!world->gamePaused)
+                {
+                    levelUpTextTimer -= dt;
+                }
+
+                vtxt_move_cursor(450, 580);
+                vtxt_append_line("Level Up!", &font_c64, 80);
+            }
+
+
         }break;
     }
 

@@ -173,7 +173,7 @@ void WorldSystem::UpdateMode()
 {
     if(GetCurrentMode() == MODE_MAINMENU)
     {
-        if(Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A))
+        if(Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN))
         {
             StartNewRun();
         }
@@ -231,13 +231,27 @@ void WorldSystem::handle_collisions() {
                 Player& playerComponent = registry.players.get(player);
                 enemyHealth.health -= playerComponent.attackPower;
 
+                // Move the player a little bit - its more fun 
+                if(playerSystem->lastAttackDirection == 3)
+                {
+                    auto& playerMotion = registry.motions.get(player);
+                    playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
+                    playerMotion.velocity.x *= 1.7f;
+                }
+                else if(playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1)
+                {
+                    auto& playerMotion = registry.motions.get(player);
+                    float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
+                    playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
+                }
+
                 if(enemyHealth.health <= 0.f) // TODO: Remove from here and probably move to ai systems
                 {
                     registry.remove_all_components_of(entity);
                     playerComponent.experience += 40.f;
                 }
 
-                *GlobalPauseForSeconds = 0.06f;
+                *GlobalPauseForSeconds = 0.1f;
             }
         }
 
