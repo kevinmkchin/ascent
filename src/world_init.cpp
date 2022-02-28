@@ -140,6 +140,8 @@ Entity createEnemy(vec2 position)
 
     visualComponent.sightRadius = 64.f;
 
+    motion.acceleration.y = 5;
+
 	registry.sprites.insert(
 		entity,
 		{

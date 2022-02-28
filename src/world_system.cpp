@@ -266,6 +266,10 @@ void WorldSystem::handle_collisions() {
 //			}
 		}
 
+        if (registry.enemy.has(entity)) {
+            CheckCollisionWithBlockable(entity, entity_other);
+        }
+
         if(registry.holders.has(entity))
         {
             HolderComponent& holder = registry.holders.get(entity);
