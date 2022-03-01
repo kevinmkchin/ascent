@@ -5,6 +5,7 @@
 
 #include "common.hpp"
 #include "tiny_ecs_registry.hpp"
+//#include "world_system.hpp"
 
 #define TILE_SIZE 16
 #define ROOM_DIMENSION_X 11
@@ -29,27 +30,27 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
 
     auto& transform = registry.transforms.emplace(entity);
     transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
-    transform.center = {0.f,0.f};
+    transform.center = { 0.f,0.f };
 
     registry.sprites.insert(
-            entity,
+        entity,
+        {
+            { TILE_SIZE, TILE_SIZE },
+            10,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+            true, false, 256, 256,
+            0,
+            0,
+            0.f,
             {
-                { TILE_SIZE, TILE_SIZE },
-                10,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
-                true, false, 256, 256,
-                0,
-                0,
-                0.f,
                 {
-                    {
-                        1,
-                        spriteFrame,
-                        0.f
-                    }
+                    1,
+                    spriteFrame,
+                    0.f
                 }
             }
+        }
     );
 
     return entity;
@@ -61,27 +62,27 @@ INTERNAL Entity CreateLadderTile(i32 column, i32 row)
 
     auto& transform = registry.transforms.emplace(entity);
     transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
-    transform.center = {0.f,0.f};
+    transform.center = { 0.f,0.f };
 
     registry.sprites.insert(
-            entity,
+        entity,
+        {
+            { TILE_SIZE, TILE_SIZE },
+            0,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+            true, false, 256, 256,
+            0,
+            0,
+            0.f,
             {
-                { TILE_SIZE, TILE_SIZE },
-                0,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
-                true, false, 256, 256,
-                0,
-                0,
-                0.f,
                 {
-                    {
-                        1,
-                        10,
-                        0.f
-                    }
+                    1,
+                    10,
+                    0.f
                 }
             }
+        }
     );
 
     AddTileSizedCollider(entity);
@@ -94,31 +95,31 @@ INTERNAL Entity CreateSpikeTile(i32 col, i32 row)
     Entity entity = Entity::CreateEntity(TAG_SPIKE);
 
     auto& transform = registry.transforms.emplace(entity);
-    transform.center = {1.f,8.f};
-    transform.position = vec2(col * TILE_SIZE + transform.center.x, 
-                              row * TILE_SIZE + transform.center.y);
+    transform.center = { 1.f,8.f };
+    transform.position = vec2(col * TILE_SIZE + transform.center.x,
+        row * TILE_SIZE + transform.center.y);
 
-    u8 whichSpike = rand()%2;
+    u8 whichSpike = rand() % 2;
     u16 spikeTexFrame = whichSpike ? 7 : 8;
     registry.sprites.insert(
-            entity,
+        entity,
+        {
+            { TILE_SIZE, TILE_SIZE },
+            0,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+            true, false, 256, 256,
+            0,
+            0,
+            0.f,
             {
-                { TILE_SIZE, TILE_SIZE },
-                0,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
-                true, false, 256, 256,
-                0,
-                0,
-                0.f,
                 {
-                    {
-                        1,
-                        spikeTexFrame,
-                        0.f
-                    }
+                    1,
+                    spikeTexFrame,
+                    0.f
                 }
             }
+        }
     );
 
     auto& collider = registry.colliders.emplace(entity); // TODO
@@ -135,27 +136,27 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
 
     auto& transform = registry.transforms.emplace(entity);
     transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
-    transform.center = {0.f,0.f};
+    transform.center = { 0.f,0.f };
 
     registry.sprites.insert(
-            entity,
+        entity,
+        {
+            { TILE_SIZE, TILE_SIZE },
+            0,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
+            true, false, 256, 256,
+            0,
+            0,
+            0.f,
             {
-                { TILE_SIZE, TILE_SIZE },
-                0,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
-                true, false, 256, 256,
-                0,
-                0,
-                0.f,
                 {
-                    {
-                        1,
-                        9,
-                        0.f
-                    }
+                    1,
+                    9,
+                    0.f
                 }
             }
+        }
     );
 
     AddTileSizedCollider(entity);
@@ -169,16 +170,16 @@ INTERNAL Entity CreateShopBackground(i32 col, i32 row)
 
     auto& transform = registry.transforms.emplace(entity);
     transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
-    transform.center = {0.f,0.f};
+    transform.center = { 0.f,0.f };
 
     registry.sprites.insert(
-            entity,
-            {
-                { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
-                -128,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::SHOPBG
-            }
+        entity,
+        {
+            { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
+            -128,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::SHOPBG
+        }
     );
 
     return entity;
@@ -215,8 +216,8 @@ INTERNAL void LoadAllLevelData()
     using JSON = nlohmann::json;
 
     std::ifstream ifs = std::ifstream(level_path("chapter1.json"));
-    if(!ifs.is_open()){
-        std::cerr <<" Failed to open level data..."<<std::endl;
+    if (!ifs.is_open()) {
+        std::cerr << " Failed to open level data..." << std::endl;
         assert(0);
         return;
     }
@@ -230,9 +231,9 @@ INTERNAL void LoadAllLevelData()
     {
         JSON room = *it;
         auto roomRawData = room.get<ns::RoomRawData>();
-        if(chapterOneRooms.count(roomRawData.type) == 0)
+        if (chapterOneRooms.count(roomRawData.type) == 0)
         {
-            chapterOneRooms.insert({roomRawData.type, std::vector<ns::RoomRawData>()});
+            chapterOneRooms.insert({ roomRawData.type, std::vector<ns::RoomRawData>() });
         }
         chapterOneRooms.at(roomRawData.type).push_back(roomRawData);
     }
@@ -254,7 +255,7 @@ INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
 
 INTERNAL void ClearCurrentLevelData()
 {
-    currentLevelData.playerStart = vec2(0.f,0.f);
+    currentLevelData.playerStart = vec2(0.f, 0.f);
     currentLevelData.monsterSpawns.clear();
     currentLevelData.treasureSpawns.clear();
     currentLevelData.shopItemSpawns.clear();
@@ -262,9 +263,9 @@ INTERNAL void ClearCurrentLevelData()
 
 INTERNAL void ClearLevelTiles()
 {
-    for(int i = 0; i < NUMTILESWIDE; ++i)
+    for (int i = 0; i < NUMTILESWIDE; ++i)
     {
-        for(int j = 0; j < NUMTILESTALL; ++j)
+        for (int j = 0; j < NUMTILESTALL; ++j)
         {
             levelTiles[i][j] = Entity();
         }
@@ -274,76 +275,76 @@ INTERNAL void ClearLevelTiles()
 INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYIndex)
 {
     // Check room type
-    if(r.type == "shop")
+    if (r.type == "shop")
     {
         CreateShopBackground(roomXIndex * r.width, roomYIndex * r.height);
     }
 
     // Check individual tiles
-    for(int i = 0; i < r.height; ++i)
+    for (int i = 0; i < r.height; ++i)
     {
-        for(int j = 0; j < r.width; ++j)
+        for (int j = 0; j < r.width; ++j)
         {
             const char& c = r.data.at(i * r.width + j);
-            switch(c)
+            switch (c)
             {
-                case 'A':{
+            case 'A': {
+                Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+                levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+            }break;
+            case 'C': {
+                u8 roll = rand() % 2;
+                if (roll == 0)
+                {
                     Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
-                }break;
-                case 'C':{
-                    u8 roll = rand()%2;
-                    if(roll == 0)
-                    {
-                        Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
-                        levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
-                    }
-                }break;
+                }
+            }break;
 
-                case '1':{
-                    currentLevelData.playerStart = { roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
-                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) };
-                }break;
+            case '1': {
+                currentLevelData.playerStart = { roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                                 roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) };
+            }break;
 
-                case 'M':{
-                    currentLevelData.monsterSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
-                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
-                }break;
+            case 'M': {
+                currentLevelData.monsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                                 roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
+            }break;
 
-                case 'T':{
-                    currentLevelData.treasureSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE + (TILE_SIZE/2.f),
-                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE + (TILE_SIZE/2.f) });
-                }break;
+            case 'T': {
+                currentLevelData.treasureSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                                 roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
+            }break;
 
-                case 'S':{
-                    // shop items
-                    currentLevelData.shopItemSpawns.push_back({ roomXIndex*r.width*TILE_SIZE + j*TILE_SIZE,
-                                                     roomYIndex*r.height*TILE_SIZE + i*TILE_SIZE });
-                }break;
+            case 'S': {
+                // shop items
+                currentLevelData.shopItemSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE,
+                                                 roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE });
+            }break;
 
-                case '2':{
-                    // end point
-                    CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
-                }break;
+            case '2': {
+                // end point
+                CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+            }break;
 
-                case 'L':{
-                    // ladder
-                    CreateLadderTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
-                }break;
+            case 'L': {
+                // ladder
+                CreateLadderTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+            }break;
 
-                case 'W':{
-                    // spikes
-                    CreateSpikeTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
-                }break;
+            case 'W': {
+                // spikes
+                CreateSpikeTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
+            }break;
 
-                case 'B':{
-                    // wooden tiles
-                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 6);
-                    levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
-                }break;
+            case 'B': {
+                // wooden tiles
+                Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 6);
+                levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+            }break;
 
-                default:{
-                }break;
+            default: {
+            }break;
             }
         }
     }
@@ -352,9 +353,9 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
 INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
 {
     auto& spr = registry.sprites.get(e);
-    if(spr.GetStartFrame() != 0)
+    if (spr.GetStartFrame() != 0)
     {
-        return; 
+        return;
     }
 
     bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
@@ -365,12 +366,12 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
         spr.dimensions.y += 3;
         registry.transforms.get(e).center.y += 2;
     }
-    else if(botClear)
+    else if (botClear)
     {
         spr.SetStartFrame(1);
         spr.dimensions.y += 1;
     }
-    else if(topClear)
+    else if (topClear)
     {
         spr.SetStartFrame(2);
         spr.dimensions.y += 2;
@@ -379,17 +380,17 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
     else
     {
         // mid
-        int which = rand()%10;
-        switch(which)
+        int which = rand() % 10;
+        switch (which)
         {
-            case 0:{
-                spr.SetStartFrame(4);
-            }break;
-            case 1:{
-                spr.SetStartFrame(5);
-            }break;
-            default:{
-            }break;
+        case 0: {
+            spr.SetStartFrame(4);
+        }break;
+        case 1: {
+            spr.SetStartFrame(5);
+        }break;
+        default: {
+        }break;
         }
     }
 }
@@ -401,7 +402,7 @@ INTERNAL void AddColliderIfRequired(Entity tileEntity, i32 col, i32 row)
     bool leftClear = col - 1 >= 0 && levelTiles[col - 1][row] == 0;
     bool rightClear = col + 1 < NUMTILESWIDE && levelTiles[col + 1][row] == 0;
     bool atLeastOneFaceIsClear = topClear || botClear || leftClear || rightClear;
-    if(atLeastOneFaceIsClear)
+    if (atLeastOneFaceIsClear)
     {
         AddTileSizedCollider(tileEntity);
     }
@@ -412,12 +413,12 @@ INTERNAL void AddColliderIfRequired(Entity tileEntity, i32 col, i32 row)
  *  Add colliders to tiles that can be collided with. */
 INTERNAL void UpdateLevelGeometry()
 {
-    for(int col = 0; col < NUMTILESWIDE; ++col)
+    for (int col = 0; col < NUMTILESWIDE; ++col)
     {
-        for(int row = 0; row < NUMTILESTALL; ++row)
+        for (int row = 0; row < NUMTILESTALL; ++row)
         {
             Entity e = levelTiles[col][row];
-            if(e != 0)
+            if (e != 0)
             {
                 ChangeSpritesBasedOnTopBottom(e, col, row);
                 AddColliderIfRequired(e, col, row);
@@ -435,14 +436,14 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
     i32 rw = sampleRoom.width;
     i32 rh = sampleRoom.height;
-    char* tileDataArray = (char*) malloc(rw * rh);
+    char* tileDataArray = (char*)malloc(rw * rh);
 
     // FALLING AND LANDING ROOMS
-    for(size_t floor = 0; floor < NUMFLOORS-1; ++floor)
+    for (size_t floor = 0; floor < NUMFLOORS - 1; ++floor)
     {
         u32 fallingAndLanding = rand() % NUMROOMSWIDE;
-        while(!roomDataArray[floor][fallingAndLanding].data.empty()
-           || !roomDataArray[floor + 1][fallingAndLanding].data.empty())
+        while (!roomDataArray[floor][fallingAndLanding].data.empty()
+            || !roomDataArray[floor + 1][fallingAndLanding].data.empty())
         {
             fallingAndLanding = rand() % NUMROOMSWIDE;
         }
@@ -455,7 +456,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
 
     // END ROOM
     u32 end = rand() % NUMROOMSWIDE;
-    while(!roomDataArray[0][end].data.empty())
+    while (!roomDataArray[0][end].data.empty())
     {
         end = rand() % NUMROOMSWIDE;
     }
@@ -464,27 +465,27 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
 
     // START ROOM
     u32 start = rand() % NUMROOMSWIDE;
-    while(!roomDataArray[NUMFLOORS-1][start].data.empty())
+    while (!roomDataArray[NUMFLOORS - 1][start].data.empty())
     {
         start = rand() % NUMROOMSWIDE;
     }
     u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
-    roomDataArray[NUMFLOORS-1][start] = chapterOneRooms["start"][startRoomIndex];
+    roomDataArray[NUMFLOORS - 1][start] = chapterOneRooms["start"][startRoomIndex];
 
     // SHOP ROOM
-    u32 shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
+    u32 shopCol = rand() % 2 == 0 ? 0 : NUMROOMSWIDE - 1;
     u32 shopRow = 1 + rand() % (NUMFLOORS - 2);
     u32 loop = 0;
-    while(!roomDataArray[shopRow][shopCol].data.empty())
+    while (!roomDataArray[shopRow][shopCol].data.empty())
     {
-        if(loop > 10)
+        if (loop > 10)
         {
             shopCol = rand() % NUMROOMSWIDE;
             shopRow = 1 + rand() % (NUMFLOORS - 2);
         }
         else
         {
-            shopCol = rand()%2 == 0 ? 0 : NUMROOMSWIDE - 1;
+            shopCol = rand() % 2 == 0 ? 0 : NUMROOMSWIDE - 1;
             shopRow = 1 + rand() % (NUMFLOORS - 2);
         }
         ++loop;
@@ -493,11 +494,11 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     roomDataArray[shopRow][shopCol] = chapterOneRooms["shop"][shopRoomIndex];
 
     // CORRIDORS
-    for(int i = 0; i < NUMFLOORS; ++i)
+    for (int i = 0; i < NUMFLOORS; ++i)
     {
-        for(int j = 0; j < NUMROOMSWIDE; ++j)
+        for (int j = 0; j < NUMROOMSWIDE; ++j)
         {
-            if(roomDataArray[i][j].data.empty())
+            if (roomDataArray[i][j].data.empty())
             {
                 u32 corridorRoomIndex = rand() % chapterOneRooms["corridor"].size();
                 roomDataArray[i][j] = chapterOneRooms["corridor"][corridorRoomIndex];
@@ -506,9 +507,9 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     }
 
     // actually create tiles
-    for(int i = 0; i < NUMFLOORS; ++i)
+    for (int i = 0; i < NUMFLOORS; ++i)
     {
-        for(int j = 0; j < NUMROOMSWIDE; ++j)
+        for (int j = 0; j < NUMROOMSWIDE; ++j)
         {
             ParseRoomData(roomDataArray[i][j], j, i);
         }
@@ -518,7 +519,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     UpdateLevelGeometry();
 
     // Boundary
-    for(int i = -1; i < ((NUMTILESWIDE)+1); ++i)
+    for (int i = -1; i < ((NUMTILESWIDE)+1); ++i)
     {
         auto _a = CreateBasicLevelTile(i, -1);
         auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
@@ -527,7 +528,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
         ChangeSpritesBasedOnTopBottom(_a, i, -1);
         ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
     }
-    for(int i = -1; i < ((NUMTILESTALL)+1); ++i)
+    for (int i = -1; i < ((NUMTILESTALL)+1); ++i)
     {
         auto _a = CreateBasicLevelTile(-1, i);
         auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
@@ -563,8 +564,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     // rightBoundECollider.collision_neg = {0.f,0.f};
     // rightBoundECollider.collision_pos = { TILE_SIZE, TILE_SIZE*NUMTILESTALL };
 
-    float halfWidth = (float) GAME_RESOLUTION_WIDTH / 2.f;
-    float halfHeight = (float) GAME_RESOLUTION_HEIGHT / 2.f;
+    float halfWidth = (float)GAME_RESOLUTION_WIDTH / 2.f;
+    float halfHeight = (float)GAME_RESOLUTION_HEIGHT / 2.f;
 
     currentLevelData.cameraBoundMin.x = (-1 * TILE_SIZE) + halfWidth;
     currentLevelData.cameraBoundMin.y = (-1 * TILE_SIZE) + halfHeight;

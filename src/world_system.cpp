@@ -9,7 +9,6 @@
 #include "physics_system.hpp"
 #include "player_system.hpp"
 #include "input.hpp"
-
 #include "levels.cpp"
 
 WorldSystem::WorldSystem()
@@ -31,10 +30,11 @@ WorldSystem::WorldSystem()
 
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg)
+void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg, AISystem* ai_sys_arg)
 {
     this->renderer = renderer_arg;
     this->playerSystem = player_sys_arg;
+    this->aiSystem = ai_sys_arg;
 
     loadAllContent();
 
@@ -93,6 +93,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
 
     // Create random level
     GenerateNewLevel(stage);
+    aiSystem->Init(levelForAI());
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
     SpawnLevelEntities();
@@ -152,6 +153,18 @@ void WorldSystem::unloadAllContent()
 
     // Destroy all created components
     registry.clear_all_components();
+}
+
+std::vector<std::vector<int>> WorldSystem::levelForAI() {
+    std::vector<std::vector<int>> newLevelTiles;
+    for (int i = 0; i < NUMTILESWIDE; i++) {
+        std::vector<int> currentLayer;
+        for (int j = 0; j < NUMTILESTALL; j++) {
+            currentLayer.push_back((levelTiles[i][j] != 0) ? 1 : 0);
+        }
+        newLevelTiles.push_back(currentLayer);
+    }
+    return newLevelTiles;
 }
 
 void WorldSystem::SetCurrentMode(GAMEMODE mode)
@@ -313,6 +326,10 @@ void WorldSystem::handle_collisions() {
 //
 //			}
 		}
+
+        if (registry.enemy.has(entity)) {
+            CheckCollisionWithBlockable(entity, entity_other);
+        }
 
         if(registry.holders.has(entity))
         {

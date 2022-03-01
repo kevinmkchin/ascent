@@ -3,6 +3,7 @@
 // internal
 #include "common.hpp"
 #include "components.hpp"
+#include "ai_system.hpp"
 
 // stlib
 #include <vector>
@@ -10,6 +11,7 @@
 
 #include <SDL.h>
 #include <SDL_mixer.h>
+
 
 
 class RenderSystem;
@@ -45,13 +47,15 @@ public:
 	WorldSystem();
 
 	// starts the game
-	void init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg);
+	void init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg, AISystem* ai_sys_arg);
 
     void cleanUp();
 
     void StartNewRun();
 
     void UpdateMode();
+
+	std::vector<std::vector<int>> levelForAI();
 
 	// Steps the game ahead by deltaTime
 	bool step(float deltaTime);
@@ -98,6 +102,7 @@ private:
     GAMELEVELENUM currentGameStage;
 	RenderSystem* renderer;
 	PlayerSystem* playerSystem;
+	AISystem* aiSystem;
 	Entity player;
 
 	// music references

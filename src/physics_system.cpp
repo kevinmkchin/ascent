@@ -77,6 +77,19 @@ INTERNAL void MoveEntities(float deltaTime)
     }
 }
 
+struct ColEventWrapper {
+    Entity e;
+    CollisionEvent event;
+};
+
+bool ColEventWrapperSorter(ColEventWrapper const& lhs, ColEventWrapper const& rhs) 
+{
+    // Sort collision events by how much larger their y overlap is than x overlap
+    // This makes it so we iterate over collisions that resolve vertically before looking at horizontal collisions
+    return (abs(lhs.event.collision_overlap.y) - abs(lhs.event.collision_overlap.x)) 
+            < (abs(rhs.event.collision_overlap.y) - abs(rhs.event.collision_overlap.x));
+}
+
 INTERNAL void CheckAllCollisions()
 {
     // check all necessary entities
@@ -88,6 +101,11 @@ INTERNAL void CheckAllCollisions()
 
     std::vector<Entity> enemies = registry.enemy.entities;
     entitiesToCheck.insert(entitiesToCheck.end(), enemies.begin(), enemies.end());
+
+    std::vector<Entity> enemyVisionBoxes = registry.visionComponents.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), enemyVisionBoxes.begin(), enemyVisionBoxes.end());
+
+    std::vector<ColEventWrapper> colEventSortingVector;
 
     for(auto entity : entitiesToCheck)
     {
@@ -113,10 +131,17 @@ INTERNAL void CheckAllCollisions()
                 colEventAgainstOther.collision_overlap = colInfo.collision_overlap;
                 colEventAgainstEntity.collision_overlap = -colInfo.collision_overlap;
 
-                registry.collisionEvents.insert(entity, colEventAgainstOther, false);
-                registry.collisionEvents.insert(e, colEventAgainstEntity, false);
+                colEventSortingVector.push_back({ entity, colEventAgainstOther });
+                colEventSortingVector.push_back({ e, colEventAgainstEntity });
             }
         }
+    }
+
+    std::sort(colEventSortingVector.begin(), colEventSortingVector.end(), &ColEventWrapperSorter);
+
+    for(const auto& sortedColEvent : colEventSortingVector)
+    {
+        registry.collisionEvents.insert(sortedColEvent.e, sortedColEvent.event, false);
     }
 }
 
