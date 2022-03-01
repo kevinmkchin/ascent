@@ -11,9 +11,8 @@ Sprite sheet animation:
 	
 Game logic response:
 	mostly in AI system, and player system (reacting to button presses etc.)]
-	the flying enemies (which use A*) are temporarily disabled (I'll be finishing them tomorrow likely
-	I would've finished them sooner but I had covid followed by a pretty severe stomach flu which slowed me down immensely)
-	
+	the flying enemies (which use A*) are enabled or disabled through the setting: pathingBehavior.flyingType = true; in createEnemy() method in world_init.cpp
+
 New integrated assets:
 	assuming this is referring to art etc., you can see it in the data section specifically textures
 	
@@ -21,7 +20,7 @@ Tutorial:
 	its in the ui system primarily, best experienced in game
 	
 Sprite batching
-	(?)
+	(Sorry, not sure where this one is mostly implemented. Kevin will update it later)
 	
 Parallax scrolling background:
 	render system and world system
