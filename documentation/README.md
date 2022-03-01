@@ -6,7 +6,7 @@ Two procedurally generated levels:
 	this is mostly in world_system.cpp and levels.cpp
 	
 Sprite sheet animation: 
-	render system, render system init, and sprite system (a bit is in other parts like physics, ui, world init, levels.cpp...)
+	render system, render system init, and sprite system (a bit is in other parts like player system, physics, ui, world init, levels.cpp...)
 	the spritesheet itself is in data textures
 	
 Game logic response:
