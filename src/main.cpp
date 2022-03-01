@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
 	// Initialize the main systems
     renderer.Init(window, &world);
-	world.init(&renderer, &playerSystem);
+	  world.init(&renderer, &playerSystem);
     world.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     ui.Init(&renderer, &world, &playerSystem);
     ui.GlobalPauseForSeconds = &GlobalPauseForSeconds;
@@ -151,11 +151,11 @@ int main(int argc, char* argv[])
             //printf("world.Step: %f seconds\n", timer::timestamp());
             if(world.GetCurrentMode() == MODE_INGAME)
             {   
-                ai.Step(deltaTime);
-                //printf("ai.Step: %f seconds\n", timer::timestamp());
                 playerSystem.PrePhysicsStep(deltaTime);
                 physics.step(deltaTime);
                 //printf("physics.Step: %f seconds\n", timer::timestamp());
+                ai.Step(deltaTime);
+                //printf("ai.Step: %f seconds\n", timer::timestamp());
                 playerSystem.Step(deltaTime);
                 //printf("playerSystem.Step: %f seconds\n", timer::timestamp());
                 itemHolderSystem.Step(deltaTime);
@@ -174,6 +174,8 @@ int main(int argc, char* argv[])
 
         renderer.Draw();
         //printf("Draw: %f seconds\n", timer::timestamp());
+        //float fps = 1 / deltaTime;
+        //printf("%f DELTA TIME \n", fps);
 
         SDL_GL_SwapWindow(window);
 	}
