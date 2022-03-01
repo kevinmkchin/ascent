@@ -5,6 +5,7 @@
 
 #include "common.hpp"
 #include "tiny_ecs_registry.hpp"
+//#include "world_system.hpp"
 
 #define TILE_SIZE 16
 #define ROOM_DIMENSION_X 11
