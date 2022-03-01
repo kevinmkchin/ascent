@@ -2,7 +2,7 @@
 
 #include "player_system.hpp"
 #include "physics_system.hpp"
-
+#include "world_system.hpp"
 
 
 PlayerSystem::PlayerSystem()
@@ -19,14 +19,14 @@ INTERNAL float playerMaxFallSpeed = 200.f;
 INTERNAL float playerGroundAcceleration = 700.f;
 INTERNAL float playerGroundDeceleration = 1000.f;
 INTERNAL float playerAirAcceleration = 650.f;
-INTERNAL float playerAirDeceleration = 500.f;
+INTERNAL float playerAirDeceleration = 300.f;
 // JUMP BUFFERING https://twitter.com/MaddyThorson/status/1238338575545978880?s=20&t=iRoDq7J9Um83kDeZYr_dvg
 INTERNAL float jumpBufferMaxHoldSeconds = 0.22f;
 INTERNAL float jumpBufferMaxTapSeconds = 0.12f;
 // COYOTE TIME
-INTERNAL float coyoteTimeDefaultSeconds = 0.08f;
+INTERNAL float coyoteTimeDefaultSeconds = 0.09f;
 // VARIABLE JUMP HEIGHT
-INTERNAL float percentYVelocityOnJumpRelease = 0.5f;
+INTERNAL float percentYVelocityOnJumpRelease = 0.6f;
 // LADDER
 INTERNAL float ladderClimbSpeed = 64.f;
 
@@ -97,6 +97,10 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
     playerMotion.acceleration.y = playerGravity;
     playerMotion.terminalVelocity.x = playerMaxMoveSpeed;
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
+
+    // playerMotion.velocity.x = playerMotion.velocity.x >= 0.f ?
+    //     min(abs(playerMotion.velocity.x), playerMotion.playerMaxMoveSpeed) : 
+    //     -min(abs(playerMotion.velocity.x), playerMotion.playerMaxMoveSpeed);
 }
 
 INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion)
@@ -257,11 +261,11 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
     }
 }
 
-INTERNAL void HandleBasicInteractionInput(HolderComponent& playerHolder)
-{
-    const bool bPickUpKeyPressed = Input::GamePickUpIsPressed();
-    const bool bDropKeyPressed = Input::GameDropIsPressed();
-    const bool bThrowKeyPressed = Input::GameThrowIsPressed();
+INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
+{   
+    const bool bThrowKeyPressed = playerHolder.held_weapon != 0 ? Input::GamePickUpHasBeenPressed() : false;
+    const bool bPickUpKeyPressed = playerHolder.held_weapon == 0 ? Input::GamePickUpHasBeenPressed() : false;
+    const bool bDropKeyPressed = playerHolder.held_weapon != 0 && Input::GamePickUpHasBeenPressed() && Input::GameDownIsPressed();
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;
@@ -275,6 +279,7 @@ void PlayerSystem::CheckIfLevelUp()
     if(playerComponent.experience > PLAYER_EXP_THRESHOLDS_ARRAY[playerComponent.level])
     {
         ++playerComponent.level;
+        bLeveledUpLastFrame = true;
         printf("LEVEL UP!\n");
     }
 
@@ -316,16 +321,16 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
     float x_velocity = playerMotion.velocity.x;
     float y_velocity = playerMotion.velocity.y;
 
-    if (x_velocity > 0.f) {
-        bFaceRight = true;
-    }
-    else if (x_velocity < 0.f) {
+    if (Input::GameLeftIsPressed()) {
         bFaceRight = false;
+    }
+    else if (Input::GameRightIsPressed()) {
+        bFaceRight = true;
     }
 
     int state;
     if (y_velocity != 0.f) {
-        if (y_velocity > 0.f) {
+        if (bJumping && y_velocity > 0.f) {
             // jump up
             playerSprite.selected_animation = 3;
             state = bFaceRight ? 8 : 7;
@@ -355,10 +360,133 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
     player_animation_state = state;
 }
 
-void PlayerSystem::Step(float deltaTime)
+void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
+{
+    Player& playerComponent = registry.players.get(playerEntity);
+    TransformComponent& playerTransform = registry.transforms.get(playerEntity);
+
+    if(playerMeleeAttackCooldownTimer > 0.f)
+    {
+        playerMeleeAttackCooldownTimer -= deltaTime;
+    }
+
+    if(playerMeleeAttackEntity != 0)
+    {
+        registry.remove_all_components_of(playerMeleeAttackEntity);
+    }
+
+    if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed())
+    {
+        u8 attackDir = bFaceRight; // 0 left, 1 right, 2 up, 3 down
+
+        if(Input::GameDownIsPressed())
+        {
+            attackDir = 3;
+        }
+        if(Input::GameUpIsPressed())
+        {
+            attackDir = 2;
+        }
+        if(Input::GameLeftIsPressed())
+        {
+            attackDir = 0;
+        }
+        if(Input::GameRightIsPressed())
+        {
+            attackDir = 1;
+        }
+
+        if(attackDir == 3 && !bJumping)
+        {
+            return; // can only attack down if jumping
+        }
+
+        lastAttackDirection = attackDir;
+
+        playerMeleeAttackCooldownTimer = playerComponent.playerMeleeAttackCooldown; // reset timer
+
+        playerMeleeAttackEntity = Entity::CreateEntity(TAG_PLAYERMELEEATTACK);
+        auto& transform = registry.transforms.emplace(playerMeleeAttackEntity);
+        auto& collider = registry.colliders.emplace(playerMeleeAttackEntity);
+
+        vec2 dimensions;
+        if(attackDir == 0)
+        {
+            transform.position.x = playerTransform.position.x - 8;
+            transform.position.y = playerTransform.position.y;
+            dimensions = { 24, 16 };
+            transform.center = { 24, 8 };
+            collider.collider_position = transform.position;
+            collider.collision_pos = { 0, 8 };
+            collider.collision_neg = { 24, 8 };
+        }
+        else if(attackDir == 1)
+        {
+            transform.position.x = playerTransform.position.x + 8;
+            transform.position.y = playerTransform.position.y;
+            dimensions = { 24, 16 };
+            transform.center = { 0, 8 };
+            collider.collider_position = transform.position;
+            collider.collision_pos = { 24, 8 };
+            collider.collision_neg = { 0, 8 };
+        }
+        else if(attackDir == 2)
+        {
+            transform.position.x = playerTransform.position.x;
+            transform.position.y = playerTransform.position.y - 11;
+            dimensions = { 16, 24 };
+            transform.center = { 8, 24 };
+            collider.collider_position = transform.position;
+            collider.collision_pos = { 8, 0 };
+            collider.collision_neg = { 8, 24 };
+        }
+        else if(attackDir == 3)
+        {
+            transform.position.x = playerTransform.position.x;
+            transform.position.y = playerTransform.position.y + 11;
+            dimensions = { 16, 24 };
+            transform.center = { 8, 0 };
+            collider.collider_position = transform.position;
+            collider.collision_pos = { 8, 24 };
+            collider.collision_neg = { 8, 0 };
+        }
+
+        registry.sprites.insert(
+            playerMeleeAttackEntity,
+            {
+                    dimensions,
+                    20,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::BOX
+            }
+        );
+    }
+}
+
+void PlayerSystem::PlayerAttackStep()
+{
+    if(registry.colliders.has(playerMeleeAttackEntity))
+    {
+        registry.colliders.remove(playerMeleeAttackEntity);
+    }
+}
+
+void PlayerSystem::PausedStep(float deltaTime)
+{
+    bLeveledUpLastFrame = false;
+}
+
+void PlayerSystem::PrePhysicsStep(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
+
+    PlayerAttackPrePhysicsStep(deltaTime);
+}
+
+void PlayerSystem::Step(float deltaTime)
+{
+    if(registry.players.entities.empty()) { return; }
 
     Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
@@ -368,9 +496,10 @@ void PlayerSystem::Step(float deltaTime)
 
     CheckIfLevelUp();
 
+    PlayerAttackStep();
+
     HandleBasicMovementInput(playerMotion);
-    HandleBasicInteractionInput(playerHolder);
+    HandleItemInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion);
     HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
-
 }

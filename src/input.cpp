@@ -8,23 +8,29 @@
 bool Input::GameUpHasBeenPressed()
 {
     return Input::HasKeyBeenPressed(SDL_SCANCODE_W) 
-    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_UP);
+    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_UP)
+    || Input::GetGamepad(0).leftThumbStickDelta.y > 0.5f;
 }
 
 bool Input::GameDownHasBeenPressed()
 {
     return Input::HasKeyBeenPressed(SDL_SCANCODE_S) 
-    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_DOWN);
+    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_DOWN)
+    || Input::GetGamepad(0).leftThumbStickDelta.y < -0.5f;
 }
 
 bool Input::GameLeftHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_A) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_LEFT);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_A) 
+    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_LEFT)
+    || Input::GetGamepad(0).leftThumbStickDelta.x > 0.5f;
 }
 
 bool Input::GameRightHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_D) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_RIGHT);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_D) 
+    || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_DPAD_RIGHT)
+    || Input::GetGamepad(0).leftThumbStickDelta.y < -0.5f;
 }
 
 bool Input::GameUpIsPressed()
@@ -74,19 +80,19 @@ bool Input::GameJumpIsPressed()
     return Input::IsKeyPressed(SDL_SCANCODE_J) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 }
 
-bool Input::GamePickUpIsPressed()
+bool Input::GameAttackHasBeenPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_K) || Input::GetGamepad(0).IsPressed(GAMEPAD_B);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_K) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_X);
 }
 
-bool Input::GameDropIsPressed()
+bool Input::GamePickUpHasBeenPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_L) || Input::GetGamepad(0).IsPressed(GAMEPAD_X);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_L) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_B);
 }
 
-bool Input::GameThrowIsPressed()
+bool Input::GamePauseHasBeenPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_H) || Input::GetGamepad(0).IsPressed(GAMEPAD_Y);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_ESCAPE) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_START);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -342,44 +348,84 @@ namespace Input {
             case SDL_CONTROLLER_AXIS_LEFTX: {
                 if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
                     vec2 leftAxisDir = gGamepadStates[gamepadIndex].leftThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    float oldX = leftAxisDir.x;
                     leftAxisDir.x = (float) axisValue;
                     leftAxisDir /= (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].leftThumbStickDir = leftAxisDir;
+
+                    vec2 leftAxisDelta = gGamepadStates[gamepadIndex].leftThumbStickDelta;
+                    leftAxisDelta.x = leftAxisDir.x - oldX;
+                    gGamepadStates[gamepadIndex].leftThumbStickDelta = leftAxisDelta / (float) SDL_JOYSTICK_MAX;
                 } else {
+                    float oldX = gGamepadStates[gamepadIndex].leftThumbStickDir.x * (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].leftThumbStickDir.x = 0.f;
+
+                    vec2 leftAxisDelta = gGamepadStates[gamepadIndex].leftThumbStickDelta;
+                    leftAxisDelta.x = -oldX;
+                    gGamepadStates[gamepadIndex].leftThumbStickDelta = leftAxisDelta / (float) SDL_JOYSTICK_MAX;
                 }
             }
                 break;
             case SDL_CONTROLLER_AXIS_LEFTY: {
                 if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
                     vec2 leftAxisDir = gGamepadStates[gamepadIndex].leftThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    float oldY = leftAxisDir.y;
                     leftAxisDir.y = (float) (invertYAxis ? -axisValue : axisValue);
                     leftAxisDir /= (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].leftThumbStickDir = leftAxisDir;
+
+                    vec2 leftAxisDelta = gGamepadStates[gamepadIndex].leftThumbStickDelta;
+                    leftAxisDelta.y = leftAxisDir.y - oldY;
+                    gGamepadStates[gamepadIndex].leftThumbStickDelta = leftAxisDelta / (float) SDL_JOYSTICK_MAX;
                 } else {
+                    float oldY = gGamepadStates[gamepadIndex].leftThumbStickDir.y * (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].leftThumbStickDir.y = 0.f;
+
+                    vec2 leftAxisDelta = gGamepadStates[gamepadIndex].leftThumbStickDelta;
+                    leftAxisDelta.y = -oldY;
+                    gGamepadStates[gamepadIndex].leftThumbStickDelta = leftAxisDelta / (float) SDL_JOYSTICK_MAX;
                 }
             }
                 break;
             case SDL_CONTROLLER_AXIS_RIGHTX: {
                 if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
                     vec2 rightAxisDir = gGamepadStates[gamepadIndex].rightThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    float oldX = rightAxisDir.x;
                     rightAxisDir.x = (float) axisValue;
                     rightAxisDir /= (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].rightThumbStickDir = rightAxisDir;
+
+                    vec2 rightAxisDelta = gGamepadStates[gamepadIndex].rightThumbStickDelta;
+                    rightAxisDelta.x = rightAxisDir.x - oldX;
+                    gGamepadStates[gamepadIndex].leftThumbStickDelta = rightAxisDelta / (float) SDL_JOYSTICK_MAX;
                 } else {
+                    float oldX = gGamepadStates[gamepadIndex].rightThumbStickDir.x * (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].rightThumbStickDir.x = 0.f;
+
+                    vec2 rightAxisDelta = gGamepadStates[gamepadIndex].rightThumbStickDelta;
+                    rightAxisDelta.x = -oldX;
+                    gGamepadStates[gamepadIndex].rightThumbStickDelta = rightAxisDelta / (float) SDL_JOYSTICK_MAX;
                 }
             }
                 break;
             case SDL_CONTROLLER_AXIS_RIGHTY: {
                 if (ASCENT_abs(axisValue) > SDL_JOYSTICK_DEAD_ZONE) {
                     vec2 rightAxisDir = gGamepadStates[gamepadIndex].rightThumbStickDir * (float) SDL_JOYSTICK_MAX;
+                    float oldY = rightAxisDir.y;
                     rightAxisDir.y = (float) (invertYAxis ? -axisValue : axisValue);
                     rightAxisDir /= (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].rightThumbStickDir = rightAxisDir;
+
+                    vec2 rightAxisDelta = gGamepadStates[gamepadIndex].rightThumbStickDelta;
+                    rightAxisDelta.y = rightAxisDir.y - oldY;
+                    gGamepadStates[gamepadIndex].leftThumbStickDelta = rightAxisDelta;
                 } else {
+                    float oldY = gGamepadStates[gamepadIndex].rightThumbStickDir.y * (float) SDL_JOYSTICK_MAX;
                     gGamepadStates[gamepadIndex].rightThumbStickDir.y = 0.f;
+
+                    vec2 rightAxisDelta = gGamepadStates[gamepadIndex].rightThumbStickDelta;
+                    rightAxisDelta.y = -oldY;
+                    gGamepadStates[gamepadIndex].rightThumbStickDelta = rightAxisDelta / (float) SDL_JOYSTICK_MAX;
                 }
             }
                 break;

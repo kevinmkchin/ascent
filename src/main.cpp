@@ -74,7 +74,7 @@ INTERNAL bool SDLInitialize()
         fprintf(stderr, "Failed to initialize SDL Audio");
         return false;
     }
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
         fprintf(stderr, "Failed to open audio device");
         return false;
     }
@@ -101,11 +101,13 @@ using Clock = std::chrono::high_resolution_clock;
 // Entry point
 int main(int argc, char* argv[])
 {
+    float GlobalPauseForSeconds = 0.f;
 	// Global systems
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
     PlayerSystem playerSystem;
+    playerSystem.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     SpriteSystem spriteSystem;
     ItemHolderSystem itemHolderSystem;
 	AISystem ai;
@@ -117,8 +119,11 @@ int main(int argc, char* argv[])
 
 	// Initialize the main systems
     renderer.Init(window, &world);
-	world.init(&renderer, &playerSystem, &ai);
+	  world.init(&renderer, &playerSystem);
+    world.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     ui.Init(&renderer, &world, &playerSystem);
+    ui.GlobalPauseForSeconds = &GlobalPauseForSeconds;
+
 	// Variable timestep loop
 	auto t = Clock::now();
 	while (!world.is_over()) {
@@ -134,23 +139,32 @@ int main(int argc, char* argv[])
         float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
         if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
 
-        world.UpdateMode();
-		world.step(deltaTime);
-        //printf("world.Step: %f seconds\n", timer::timestamp());
-        if(world.GetCurrentMode() == MODE_INGAME)
-        {   
-            physics.step(deltaTime);
-            //printf("physics.Step: %f seconds\n", timer::timestamp());
-            ai.Step(deltaTime);
-            //printf("ai.Step: %f seconds\n", timer::timestamp());
-            playerSystem.Step(deltaTime);
-            //printf("playerSystem.Step: %f seconds\n", timer::timestamp());
-            itemHolderSystem.Step(deltaTime);
-            //printf("itemHolderSystem.Step: %f seconds\n", timer::timestamp());
-            spriteSystem.Step(deltaTime);
-            //printf("spriteSystem.Step: %f seconds\n", timer::timestamp());
-            world.handle_collisions();
-            //printf("handle_collisions: %f seconds\n", timer::timestamp());
+        if(GlobalPauseForSeconds > 0.f || world.gamePaused)
+        {
+            if(!world.gamePaused) { GlobalPauseForSeconds -= deltaTime; }
+            playerSystem.PausedStep(deltaTime);
+        }
+        else
+        {
+            world.UpdateMode();
+            world.step(deltaTime);
+            //printf("world.Step: %f seconds\n", timer::timestamp());
+            if(world.GetCurrentMode() == MODE_INGAME)
+            {   
+                playerSystem.PrePhysicsStep(deltaTime);
+                physics.step(deltaTime);
+                //printf("physics.Step: %f seconds\n", timer::timestamp());
+                ai.Step(deltaTime);
+                //printf("ai.Step: %f seconds\n", timer::timestamp());
+                playerSystem.Step(deltaTime);
+                //printf("playerSystem.Step: %f seconds\n", timer::timestamp());
+                itemHolderSystem.Step(deltaTime);
+                //printf("itemHolderSystem.Step: %f seconds\n", timer::timestamp());
+                spriteSystem.Step(deltaTime);
+                //printf("spriteSystem.Step: %f seconds\n", timer::timestamp());
+                world.handle_collisions();
+                //printf("handle_collisions: %f seconds\n", timer::timestamp());
+            }
         }
 
         ui.Step(deltaTime);

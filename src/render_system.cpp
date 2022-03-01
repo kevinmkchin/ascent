@@ -69,9 +69,9 @@ INTERNAL void radixSort(std::vector<SpriteTransformPair>& array)
         countingSort(array, size, place);
 }
 
-void RenderSystem::DrawBackground()
+void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
 {
-    if(bgTexId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
+    if(texId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
     {
         return;
     }
@@ -85,6 +85,9 @@ void RenderSystem::DrawBackground()
     GLint currProgram;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     gl_has_errors();
+
+    GLuint offset_loc = glGetUniformLocation(currProgram, "bg_offset");
+    glUniform1f(offset_loc, offset);
 
     LOCAL_PERSIST u32 bgQuadVAO;
     LOCAL_PERSIST u32 bgQuadVBO;
@@ -122,7 +125,7 @@ void RenderSystem::DrawBackground()
 
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    GLuint texture_id = texture_gl_handles[(GLuint)bgTexId];
+    GLuint texture_id = texture_gl_handles[(GLuint)texId];
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
     // Draw
@@ -133,6 +136,25 @@ void RenderSystem::DrawBackground()
     glBindVertexArray(0);
 
     gl_has_errors();
+}
+
+void RenderSystem::DrawAllBackgrounds()
+{
+    float offset = 0.f;
+    if (registry.players.size() > 0 && bgTexId.size() > 1) {
+        Entity player = registry.players.entities[0];
+        TransformComponent& playerTransform = registry.transforms.get(player);
+        float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
+        playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
+        playerPositionX = playerPositionX / GAME_RESOLUTION_WIDTH;
+        offset = playerPositionX / ((float) bgTexId.size());
+        offset *= 0.5f; // Constant to slow down movement
+    }
+
+    for (int i = 0; i < bgTexId.size(); i++) {
+        DrawBackground(bgTexId[i], offset);
+        offset += offset;
+    }
 }
 
 void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3 &projection)
@@ -265,11 +287,11 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             size_t frame = sortedSpriteSprite.animations[sortedSpriteSprite.selected_animation].start_frame
                 + sortedSpriteSprite.current_frame;
 
-            size_t sheetX = sortedSpriteSprite.sheetSizeX / sortedSpriteSprite.dimensions.x;
-            size_t sheetY = sortedSpriteSprite.sheetSizeY / sortedSpriteSprite.dimensions.y ;
+            size_t sheetX = (size_t) std::floor((float) sortedSpriteSprite.sheetSizeX / (float) sortedSpriteSprite.dimensions.x);
+            size_t sheetY = (size_t) std::ceil((float) sortedSpriteSprite.sheetSizeY / (float) sortedSpriteSprite.dimensions.y);
 
-            float offset_per_x = (1.f / sheetX);
-            float offset_per_y = (1.f / sheetY);
+            float offset_per_x = (1.f / (float) sheetX);
+            float offset_per_y = (1.f / ((float) sortedSpriteSprite.sheetSizeY / (float) sortedSpriteSprite.dimensions.y));
 
             float offset_x = (float)(frame % sheetX);
             float offset_y = (float)(frame / sheetX);
@@ -365,7 +387,7 @@ void RenderSystem::Draw()
 	mat3 projection_2D = CreateGameProjectionMatrix();
 
     // DRAW BACKGROUND
-    DrawBackground();
+    DrawAllBackgrounds();
 
     // DRAW SPRITES
     if(registry.sprites.size() > 0)
@@ -537,9 +559,14 @@ void RenderSystem::FinalDrawToScreen()
         printf("Screen size changed.\n");
     }
 
+    GLint currProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+    GLuint darkenFactor_loc = glGetUniformLocation(currProgram, "darkenFactor");
+
     // Bind game frame texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, offScreenRenderBufferColor);
+    world->darkenGameFrame ? glUniform1f(darkenFactor_loc, 0.5f) : glUniform1f(darkenFactor_loc, 0.0f);
 
     // Draw game frame
     glBindVertexArray(finalQuadVAO);
@@ -551,6 +578,7 @@ void RenderSystem::FinalDrawToScreen()
     // Bind UI frame texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, offScreenUiBufferColor);
+    glUniform1f(darkenFactor_loc, 0.0f);
 
     // Draw UI frame
     glBindVertexArray(finalQuadVAO);
