@@ -69,9 +69,9 @@ INTERNAL void radixSort(std::vector<SpriteTransformPair>& array)
         countingSort(array, size, place);
 }
 
-void RenderSystem::DrawBackground()
+void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
 {
-    if(bgTexId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
+    if(texId == TEXTURE_ASSET_ID::TEXTURE_COUNT)
     {
         return;
     }
@@ -85,6 +85,9 @@ void RenderSystem::DrawBackground()
     GLint currProgram;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     gl_has_errors();
+
+    GLuint offset_loc = glGetUniformLocation(currProgram, "bg_offset");
+    glUniform1f(offset_loc, offset);
 
     LOCAL_PERSIST u32 bgQuadVAO;
     LOCAL_PERSIST u32 bgQuadVBO;
@@ -122,7 +125,7 @@ void RenderSystem::DrawBackground()
 
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    GLuint texture_id = texture_gl_handles[(GLuint)bgTexId];
+    GLuint texture_id = texture_gl_handles[(GLuint)texId];
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
     // Draw
@@ -133,6 +136,25 @@ void RenderSystem::DrawBackground()
     glBindVertexArray(0);
 
     gl_has_errors();
+}
+
+void RenderSystem::DrawAllBackgrounds()
+{
+    float offset = 0.f;
+    if (registry.players.size() > 0 && bgTexId.size() > 1) {
+        Entity player = registry.players.entities[0];
+        TransformComponent& playerTransform = registry.transforms.get(player);
+        float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
+        playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
+        playerPositionX = playerPositionX / GAME_RESOLUTION_WIDTH;
+        offset = playerPositionX / ((float) bgTexId.size());
+        offset *= 0.5f; // Constant to slow down movement
+    }
+
+    for (int i = 0; i < bgTexId.size(); i++) {
+        DrawBackground(bgTexId[i], offset);
+        offset += offset;
+    }
 }
 
 void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3 &projection)
@@ -365,7 +387,7 @@ void RenderSystem::Draw()
 	mat3 projection_2D = CreateGameProjectionMatrix();
 
     // DRAW BACKGROUND
-    DrawBackground();
+    DrawAllBackgrounds();
 
     // DRAW SPRITES
     if(registry.sprites.size() > 0)
