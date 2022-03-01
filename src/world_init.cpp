@@ -47,6 +47,7 @@ Entity createPlayer(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.players.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
+    hb.health = 2000.f;
     registry.holders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
@@ -98,8 +99,6 @@ Entity createPlayer(vec2 position)
         }
     );
 
-    hb.health = 2000.f;
-
     return entity;
 }
 
@@ -114,7 +113,7 @@ Entity createEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
-
+    hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
 
@@ -165,8 +164,8 @@ Entity createSword(vec2 position)
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
-    collider.collision_pos = dimensions / 2.f;
-    collider.collision_neg = dimensions / 2.f;
+    collider.collision_neg = { 6, 8 };
+    collider.collision_pos = { 6, 7 };
 
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;

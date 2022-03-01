@@ -369,7 +369,7 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
     else if (botClear)
     {
         spr.SetStartFrame(1);
-        spr.dimensions.y = spr.dimensions.y + 1;
+        spr.dimensions.y += 1;
     }
     else if (topClear)
     {

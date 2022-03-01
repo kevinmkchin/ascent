@@ -124,12 +124,13 @@ void WorldSystem::loadAllContent()
     background_music = Mix_LoadMUS(audio_path("hadesmusiclmao.wav").c_str());
     chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
     chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
+    sword_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
+    monster_hit_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
 
-    if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr) {
-        fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-                audio_path("hadesmusiclmao.wav").c_str(),
-                audio_path("chicken_dead.wav").c_str(),
-                audio_path("chicken_eat.wav").c_str());
+    if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
+        || sword_sound == nullptr
+        || monster_hit_sound == nullptr) {
+        fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
     LoadAllLevelData();
@@ -144,6 +145,10 @@ void WorldSystem::unloadAllContent()
         Mix_FreeChunk(chicken_dead_sound);
     if (chicken_eat_sound != nullptr)
         Mix_FreeChunk(chicken_eat_sound);
+    if (sword_sound != nullptr)
+        Mix_FreeChunk(sword_sound);
+    if (monster_hit_sound != nullptr)
+        Mix_FreeChunk(monster_hit_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -169,10 +174,16 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode)
     switch(mode)
     {
         case MODE_MAINMENU:{
-            renderer->bgTexId = TEXTURE_ASSET_ID::MAINMENUBG;
+            renderer->bgTexId = { TEXTURE_ASSET_ID::MAINMENUBG };
         }break;
         case MODE_INGAME:{
-            renderer->bgTexId = TEXTURE_ASSET_ID::BG1;
+            renderer->bgTexId = {
+                TEXTURE_ASSET_ID::BG_LAYER1,
+                TEXTURE_ASSET_ID::BG_LAYER2,
+                TEXTURE_ASSET_ID::BG_LAYER3,
+                TEXTURE_ASSET_ID::BG_LAYER4,
+                TEXTURE_ASSET_ID::BG_LAYER5
+            };
         }break;
     }
 }
@@ -226,6 +237,43 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
+        if (registry.enemy.has(entity))
+        {
+            if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK)
+            {
+                if(Mix_PlayChannel(-1, monster_hit_sound, 0) == -1) 
+                {
+                    printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                }
+
+                HealthBar& enemyHealth = registry.healthBar.get(entity);
+                Player& playerComponent = registry.players.get(player);
+                enemyHealth.health -= playerComponent.attackPower;
+
+                // Move the player a little bit - its more fun 
+                if(playerSystem->lastAttackDirection == 3)
+                {
+                    auto& playerMotion = registry.motions.get(player);
+                    playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
+                    playerMotion.velocity.x *= 1.7f;
+                }
+                else if(playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1)
+                {
+                    auto& playerMotion = registry.motions.get(player);
+                    float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
+                    playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
+                }
+
+                if(enemyHealth.health <= 0.f) // TODO: Remove from here and probably move to ai systems
+                {
+                    registry.remove_all_components_of(entity);
+                    playerComponent.experience += 40.f;
+                }
+
+                *GlobalPauseForSeconds = 0.1f;
+            }
+        }
+
 		if (registry.players.has(entity)) {
             Player& player = registry.players.get(entity);
             TransformComponent& playerTransform = registry.transforms.get(entity);
@@ -248,7 +296,6 @@ void WorldSystem::handle_collisions() {
 				if (playerHealth.health > 0) 
                 {
                     playerHealth.health -= 20;
-                    //Mix_PlayChannel(-1, chicken_dead_sound, 0);
 				}
 			}
 

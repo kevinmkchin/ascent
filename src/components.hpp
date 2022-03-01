@@ -41,6 +41,11 @@ enum class TEXTURE_ASSET_ID : u16
     FIRE,
     PLAYER,
     SWORD,
+    BG_LAYER1,
+    BG_LAYER2,
+    BG_LAYER3,
+    BG_LAYER4,
+    BG_LAYER5,
 
     TEXTURE_COUNT
 };
@@ -57,7 +62,12 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
         textures_path("player.png"),
-        textures_path("sword.png")
+        textures_path("sword.png"),
+        textures_path("bg_layer1.png"),
+        textures_path("bg_layer2.png"),
+        textures_path("bg_layer3.png"),
+        textures_path("bg_layer4.png"),
+        textures_path("bg_layer5.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -90,9 +100,11 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
-    i32 attackPower = 3;
     u8  level = 1;
     float experience = 0.f;
+
+    i32 attackPower = 30;
+    float playerMeleeAttackCooldown = 0.2f;//0.8f; //TODO: maybe make this a percentage decrease than a flat number?
 };
 const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
 
@@ -255,4 +267,5 @@ enum GAMETAGS : u8
     TAG_LADDER,
     TAG_SPIKE,
     TAG_PLAYERBLOCKABLE,
+    TAG_PLAYERMELEEATTACK
 };
