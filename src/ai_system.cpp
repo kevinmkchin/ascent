@@ -2,9 +2,9 @@
 #include "ai_system.hpp"
 
 /* FLOOR-BOUND ENEMY PHYSICS CONFIGURATION */
-INTERNAL float enemyGravity = 500.f;
+INTERNAL float enemyGravity = 400.f;
 INTERNAL float enemyJumpSpeed = 200.f;
-INTERNAL float enemyMaxMoveSpeed = 64.f;
+// INTERNAL float enemyMaxMoveSpeed = 64.f;
 INTERNAL float enemyMaxFallSpeed = 200.f;
 INTERNAL float enemyGroundAcceleration = 700.f;
 INTERNAL float enemyGroundDeceleration = 1000.f;
@@ -35,7 +35,7 @@ void AISystem::Step(float deltaTime)
 	for (Entity& enemy : registry.enemy.entities) {
 		// if entity in range of some amount of player (to reduce issues w/ run time) 
 		TransformComponent& enemyTransform = registry.transforms.get(enemy);
-		if (abs(playerTransform.position.x - enemyTransform.position.x) < 128 && abs(playerTransform.position.y - enemyTransform.position.y) < 128) {
+		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
 			Physics(enemy, deltaTime);
 			Pathfind(enemy);
 		}
@@ -62,7 +62,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 	bool bGrounded = false;
 	bool bStillLaddered = false;
 	bool bCollidedDirectlyAbove = false;
-	MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
+	MotionComponent enemyMotion = registry.motions.get(enemy_entity);
 
 
 	std::vector<CollisionEvent> relevantCollisions;
@@ -78,7 +78,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
-		if (entity.GetTag() != enemy_entity.GetTag())
+		if (entity != enemy_entity)
 		{
 			continue;
 		}
@@ -151,7 +151,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 	}
 
 	if (bGrounded) {
-		enemyMotion.velocity.y = 0;
+		enemyMotion.velocity.y = 0.f;
 	}
 }
 
@@ -202,6 +202,20 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 	TransformComponent& playerTransformComponent = registry.transforms.get(player_entity);
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
 	MotionComponent& enemyMotionComponent = registry.motions.get(enemy_entity);
+
+	// TODO(Caleb): Need to set terminalVelocity and y acceleration like this in PatrolBehavior function too
+	enemyMotionComponent.terminalVelocity.x = enemyPathingBehavior.pathSpeed;
+	enemyMotionComponent.terminalVelocity.y = enemyMaxFallSpeed;
+	enemyMotionComponent.acceleration.y = enemyGravity;
+
+	if (playerTransformComponent.position.x > enemyTransformComponent.position.x) 
+	{
+		enemyMotionComponent.acceleration.x = enemyGroundAcceleration;
+	}
+	else 
+	{
+		enemyMotionComponent.acceleration.x = -enemyGroundAcceleration;
+	}
 	if (enemyPathingBehavior.flyingType) {
 		// (goal pos can be adjusted later TODO)
 		//setup your location on grid, goal location on grid
