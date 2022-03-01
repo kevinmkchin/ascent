@@ -278,9 +278,9 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			adjacentSquares.push_back(left );
 			for (vec2 adjacentSquare : adjacentSquares) {
 				if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
-					if (levelTiles[adjacentSquare[0]][adjacentSquare[1]] == 0) {
+					if (levelTiles[(size_t)adjacentSquare[0]][(size_t)adjacentSquare[1]] == 0) {
 						bool inClosedList = false;
-						for (ListEntry& const closedEntry : closedList) {
+						for (const ListEntry& closedEntry : closedList) {
 							vec2 position = closedEntry.position;
 							if (position[0] == adjacentSquare[0] && position[1] == adjacentSquare[1]) {
 								inClosedList = true;

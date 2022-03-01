@@ -29,10 +29,10 @@ explain them where necessary.
 	assuming this is referring to art etc., you can see it in the data section specifically textures
 	
 - Tutorial:
-	its in the ui system primarily, best experienced in game
+	ui_system.cpp line 225
 	
-Sprite batching
-	(Sorry, not sure where this one is mostly implemented. Whoever made it will update it later)
+- Sprite batching
+	render_system.cpp BatchDrawAllSprites line 160
 	
 - Parallax scrolling background:
 	render system and world system
