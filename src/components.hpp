@@ -41,6 +41,11 @@ enum class TEXTURE_ASSET_ID : u16
     FIRE,
     PLAYER,
     SWORD,
+    BG_LAYER1,
+    BG_LAYER2,
+    BG_LAYER3,
+    BG_LAYER4,
+    BG_LAYER5,
 
     TEXTURE_COUNT
 };
@@ -57,7 +62,12 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
         textures_path("player.png"),
-        textures_path("sword.png")
+        textures_path("sword.png"),
+        textures_path("bg_layer1.png"),
+        textures_path("bg_layer2.png"),
+        textures_path("bg_layer3.png"),
+        textures_path("bg_layer4.png"),
+        textures_path("bg_layer5.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
