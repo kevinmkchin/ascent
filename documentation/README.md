@@ -1,22 +1,3 @@
-Provide a README.md providing entry points to each of the implemented features and
-explain them where necessary.
-
-
-# ascent
-
-### CPSC 427 Team 9
-- Sophie Berger 47805361
-- Kevin Chin 88047956
-- Chris Fung 38087904
-- Caleb Kellett 44163533
-- Sara Mohamed 95590519
-- Suzuran Takikawa 79766572
-
-
-Provide a README.md providing entry points to each of the implemented features and
-explain them where necessary.
-
-
 # ascent
 
 ### CPSC 427 Team 9
@@ -32,7 +13,9 @@ explain them where necessary.
 	- We have a system that takes a set of rooms and combines them randomly into a playable level. Implementation found in world_system.cpp and levels.cpp.
 	
 - Sprite sheet animation: 
-	- Render from and generate animations from spritesheets. Implementation found in render system, render system init, sprite system, and player system.
+	- Render from and generate animations from spritesheets.
+	- Implementation
+		- components.hpp (Lines 174 - 211), render_system.cpp (Lines 285 - 325), player_system.cpp (Lines 292-361), sprite_system.cpp
 	- The spritesheet itself is in data/textures
 	
 - Game logic response:
@@ -52,7 +35,8 @@ explain them where necessary.
 	
 - Parallax scrolling background:
 	- Multi-layer background where each background moves at different speeds with player movement.
-	- Implementation found in render system, world system, and background.vert
+	- Implementation
+		- render_system.cpp (Lines 141-158), background.vert
 	
 - Projectile:
 	- visibile in component, collisions, texture
