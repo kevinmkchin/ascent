@@ -64,7 +64,7 @@ public:
     vec2 cameraBoundMax;
 
     // Background texture
-    TEXTURE_ASSET_ID bgTexId = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+    std::vector<TEXTURE_ASSET_ID> bgTexId = { TEXTURE_ASSET_ID::TEXTURE_COUNT };
 
     // UI
     TextureHandle   textLayer1FontAtlas;
@@ -93,7 +93,9 @@ private:
     // BATCH DRAWING
     void BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3& projection);
 
-    void DrawBackground();
+    void DrawBackground(TEXTURE_ASSET_ID texId, float offset);
+
+    void DrawAllBackgrounds();
 
     void DrawUI();
 
