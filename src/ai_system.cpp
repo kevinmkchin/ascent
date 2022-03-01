@@ -2,9 +2,9 @@
 #include "ai_system.hpp"
 
 /* FLOOR-BOUND ENEMY PHYSICS CONFIGURATION */
-INTERNAL float enemyGravity = 500.f;
+INTERNAL float enemyGravity = 400.f;
 INTERNAL float enemyJumpSpeed = 200.f;
-INTERNAL float enemyMaxMoveSpeed = 64.f;
+// INTERNAL float enemyMaxMoveSpeed = 64.f;
 INTERNAL float enemyMaxFallSpeed = 200.f;
 INTERNAL float enemyGroundAcceleration = 700.f;
 INTERNAL float enemyGroundDeceleration = 1000.f;
@@ -76,7 +76,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = colEvent.other;
 
-		if (entity.GetTag() != enemy_entity.GetTag())
+		if (entity != enemy_entity)
 		{
 			continue;
 		}
@@ -149,8 +149,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 	}
 
 	if (bGrounded) {
-		enemyMotion.velocity.y = -2500;
-		printf("%f, %f \n", enemyMotion.velocity.x, enemyMotion.velocity.y);
+		enemyMotion.velocity.y = 0.f;
 	}
 	else {
 	}
@@ -203,11 +202,19 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 	TransformComponent& playerTransformComponent = registry.transforms.get(player_entity);
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
 	MotionComponent& enemyMotionComponent = registry.motions.get(enemy_entity);
-	if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
-		enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+
+	// TODO(Caleb): Need to set terminalVelocity and y acceleration like this in PatrolBehavior function too
+	enemyMotionComponent.terminalVelocity.x = enemyPathingBehavior.pathSpeed;
+	enemyMotionComponent.terminalVelocity.y = enemyMaxFallSpeed;
+	enemyMotionComponent.acceleration.y = enemyGravity;
+
+	if (playerTransformComponent.position.x > enemyTransformComponent.position.x) 
+	{
+		enemyMotionComponent.acceleration.x = enemyGroundAcceleration;
 	}
-	else {
-		enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+	else 
+	{
+		enemyMotionComponent.acceleration.x = -enemyGroundAcceleration;
 	}
 }
 
