@@ -126,9 +126,9 @@ Entity createEnemy(vec2 position)
     collider.collision_neg = dimensions / 2.f;
 
     float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 24, 0 };
+    pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
+    pathingBehavior.flyingType = true;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;

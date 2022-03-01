@@ -195,7 +195,7 @@ void AISystem::PatrolBehavior(Entity enemy_entity) {
 }
 
 // NOTE: rn. all enemy speeds are same as player, so they run pretty fast towards the player. maybe should lower that
-// it might be fine once the enemies actually respect collision
+// TODO fix "forcefield" effect
 void AISystem::PathBehavior(Entity enemy_entity) {
 	PathingBehavior& enemyPathingBehavior = registry.pathingBehaviors.get(enemy_entity);
 	Entity player_entity = registry.players.entities.front();
@@ -204,9 +204,9 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 	MotionComponent& enemyMotionComponent = registry.motions.get(enemy_entity);
 
 	// TODO(Caleb): Need to set terminalVelocity and y acceleration like this in PatrolBehavior function too
+		// TODO this is done every time.. ?
 	enemyMotionComponent.terminalVelocity.x = enemyPathingBehavior.pathSpeed;
 	enemyMotionComponent.terminalVelocity.y = enemyMaxFallSpeed;
-	enemyMotionComponent.acceleration.y = enemyGravity;
 
 	if (playerTransformComponent.position.x > enemyTransformComponent.position.x) 
 	{
@@ -226,10 +226,10 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 		};
 		vec2 goalPos  = { ((int) (playerTransformComponent.position.x / 16)), ((int) (playerTransformComponent.position.y / 16)) };
 		vec2 enemyPos = { ((int) (enemyTransformComponent.position.x / 16)),  ((int) (enemyTransformComponent.position.y / 16)) };
-
-		//find path to goal if not on goal
-		//go first step of that path towards goal tile
-		// ASSUMING 0,0 tile is 0,0 on grid
+		
+		if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
+			return;
+		}
 
 		// form {position, cost, parent(position)}
 		std::vector<ListEntry> openList;
@@ -238,8 +238,13 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 		openList.push_back(startPos);
 
 		// TODO update this to use binary search/insert for speed
+		int maxIter = 100;
+		int currIter = 0;
 		while (!openList.empty()) 
 		{
+			if (maxIter < currIter) {
+				return;
+			}
 			int lowestIndexSoFar = 0;
 			ListEntry currentPos = { enemyPos, NULL, 999 };
 			for (int k = 0; k < openList.size(); k++) {
@@ -252,28 +257,28 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			closedList.push_back(currentPos);
 			if (currentPos.position == goalPos) {
 				// goal found
-				vec2 prevPos;
 				ListEntry currentEntry = currentPos;
-				while (currentEntry.parent) {
+				vec2 prevPos = currentEntry.position;
+				while (currentEntry.position != currentEntry.parent->position) {
 					prevPos = currentEntry.position;
 					currentEntry = *currentEntry.parent;
 				}
-				prevPos -= enemyPos;
-				enemyMotionComponent.velocity = prevPos * 10.f;
+				vec2 direction = prevPos - enemyPos;
+				enemyMotionComponent.velocity = direction * 5.f;
+				return;
 			}
 			std::vector<vec2> adjacentSquares;
 			vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
 			vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
 			vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
 			vec2 left  = { currentPos.position[0] - 1, currentPos.position[1] };
-			printf("%f   %f, %f   %f, %f    %f, %f    %f, %f   %f   \n", above[0], above[1], below[0], below[1], right[0], right[1], left[0], left[1], goalPos[0], goalPos[1]);
 			adjacentSquares.push_back(above);
 			adjacentSquares.push_back(right);
 			adjacentSquares.push_back(below);
 			adjacentSquares.push_back(left );
 			for (vec2 adjacentSquare : adjacentSquares) {
 				if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
-					if (levelTiles[adjacentSquare[0]][adjacentSquare[1]]) {
+					if (levelTiles[adjacentSquare[0]][adjacentSquare[1]] == 0) {
 						bool inClosedList = false;
 						for (ListEntry& const closedEntry : closedList) {
 							vec2 position = closedEntry.position;
@@ -306,10 +311,12 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					}
 				}
 			}
+			currIter++;
 		}
 
 	}
 	else {
+		enemyMotionComponent.acceleration.y = enemyGravity;
 		if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
 			enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
 		}
@@ -337,7 +344,7 @@ void AISystem::Init(std::vector<std::vector<int>> newLevelTiles) {
 	levelTiles = newLevelTiles;
 }
 
-// make DE-INIT
+// make DE-INIT?
 
 // Manhattan distance heuristic for heuristic search
 float AISystem::Heuristic(vec2 startPos, vec2 goalPos) {
