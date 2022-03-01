@@ -123,7 +123,7 @@ Entity createEnemy(vec2 position)
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
-    motion.velocity = { 0.f, 0 };
+    motion.velocity = { 0, 0 };
     float maxMoveSpeed = 64.f;
     float maxFallSpeed = 200.f;
     motion.terminalVelocity = { maxMoveSpeed, maxFallSpeed };
@@ -133,6 +133,7 @@ Entity createEnemy(vec2 position)
 
     pathingBehavior.goalFromPlayer = { 24, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
+    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;

@@ -8,6 +8,7 @@
 #include "common.hpp"
 #include "world_init.hpp"
 #include "physics_system.hpp"
+//#include "levels.cpp"
 
 class AISystem
 {
@@ -19,8 +20,7 @@ public:
 	bool PlayerInAwarenessBubble(Entity enemy_entity);
 	void PathBehavior(Entity enemy_entity);
 	void PatrolBehavior(Entity enemy_entity);
-	//float Heuristic(vec2 pos1, vec2 pos2);
-	//void InitializeAISystem();
-	//void AccessLevelSchematic(float pos);
+	void Init(std::vector<std::vector<int>> levelTiles);
+	float Heuristic(vec2 pos1, vec2 pos2);
 };
 

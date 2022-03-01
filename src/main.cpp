@@ -117,9 +117,8 @@ int main(int argc, char* argv[])
 
 	// Initialize the main systems
     renderer.Init(window, &world);
-	world.init(&renderer, &playerSystem);
+	world.init(&renderer, &playerSystem, &ai);
     ui.Init(&renderer, &world, &playerSystem);
-
 	// Variable timestep loop
 	auto t = Clock::now();
 	while (!world.is_over()) {

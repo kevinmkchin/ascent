@@ -108,6 +108,7 @@ struct Enemy_projectile {
 struct PathingBehavior {
     vec2 goalFromPlayer = { 0.f, 0.f }; // (absolute value?) distance from player enemy would ideally like to be (in (x,y))
     float pathSpeed = 0;
+    bool flyingType = false;
 };
 
 struct PatrollingBehavior {

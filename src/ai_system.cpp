@@ -14,8 +14,10 @@ INTERNAL float enemyAirDeceleration = 500.f;
 INTERNAL float ladderClimbSpeed = 64.f;
 
 static float elapsedTime = 0.0f;
-// BUILD A STATIC REPRESENTATION OF TILES OF LEVEL?
-// int* levelSchematic;
+
+// a representation of pathable tiles
+std::vector<std::vector<int>> levelTiles;
+
 
 void AISystem::Step(float deltaTime)
 {
@@ -33,7 +35,7 @@ void AISystem::Step(float deltaTime)
 	for (Entity& enemy : registry.enemy.entities) {
 		// if entity in range of some amount of player (to reduce issues w/ run time) 
 		TransformComponent& enemyTransform = registry.transforms.get(enemy);
-		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
+		if (abs(playerTransform.position.x - enemyTransform.position.x) < 128 && abs(playerTransform.position.y - enemyTransform.position.y) < 128) {
 			Physics(enemy, deltaTime);
 			Pathfind(enemy);
 		}
@@ -60,7 +62,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 	bool bGrounded = false;
 	bool bStillLaddered = false;
 	bool bCollidedDirectlyAbove = false;
-	MotionComponent enemyMotion = registry.motions.get(enemy_entity);
+	MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
 
 
 	std::vector<CollisionEvent> relevantCollisions;
@@ -149,10 +151,7 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 	}
 
 	if (bGrounded) {
-		enemyMotion.velocity.y = -2500;
-		printf("%f, %f \n", enemyMotion.velocity.x, enemyMotion.velocity.y);
-	}
-	else {
+		enemyMotion.velocity.y = 0;
 	}
 }
 
@@ -203,12 +202,108 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 	TransformComponent& playerTransformComponent = registry.transforms.get(player_entity);
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
 	MotionComponent& enemyMotionComponent = registry.motions.get(enemy_entity);
-	if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
-		enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+	if (enemyPathingBehavior.flyingType) {
+		// (goal pos can be adjusted later TODO)
+		//setup your location on grid, goal location on grid
+		struct ListEntry {
+			vec2 position;
+			ListEntry* parent;
+			int cost;
+		};
+		vec2 goalPos  = { ((int) (playerTransformComponent.position.x / 16)), ((int) (playerTransformComponent.position.y / 16)) };
+		vec2 enemyPos = { ((int) (enemyTransformComponent.position.x / 16)),  ((int) (enemyTransformComponent.position.y / 16)) };
+
+		//find path to goal if not on goal
+		//go first step of that path towards goal tile
+		// ASSUMING 0,0 tile is 0,0 on grid
+
+		// form {position, cost, parent(position)}
+		std::vector<ListEntry> openList;
+		std::vector<ListEntry> closedList;
+		ListEntry startPos = { enemyPos, NULL, 0 };
+		openList.push_back(startPos);
+
+		// TODO update this to use binary search/insert for speed
+		while (!openList.empty()) 
+		{
+			int lowestIndexSoFar = 0;
+			ListEntry currentPos = { enemyPos, NULL, 999 };
+			for (int k = 0; k < openList.size(); k++) {
+				if (openList[k].cost + Heuristic(openList[k].position, goalPos) < currentPos.cost + Heuristic(currentPos.position, goalPos)) {
+					currentPos = openList[k];
+					lowestIndexSoFar = k;
+				}
+			}
+			openList.erase(openList.begin() + lowestIndexSoFar);
+			closedList.push_back(currentPos);
+			if (currentPos.position == goalPos) {
+				// goal found
+				vec2 prevPos;
+				ListEntry currentEntry = currentPos;
+				while (currentEntry.parent) {
+					prevPos = currentEntry.position;
+					currentEntry = *currentEntry.parent;
+				}
+				prevPos -= enemyPos;
+				enemyMotionComponent.velocity = prevPos * 10.f;
+			}
+			std::vector<vec2> adjacentSquares;
+			vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
+			vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
+			vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
+			vec2 left  = { currentPos.position[0] - 1, currentPos.position[1] };
+			printf("%f   %f, %f   %f, %f    %f, %f    %f, %f   %f   \n", above[0], above[1], below[0], below[1], right[0], right[1], left[0], left[1], goalPos[0], goalPos[1]);
+			adjacentSquares.push_back(above);
+			adjacentSquares.push_back(right);
+			adjacentSquares.push_back(below);
+			adjacentSquares.push_back(left );
+			for (vec2 adjacentSquare : adjacentSquares) {
+				if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
+					if (levelTiles[adjacentSquare[0]][adjacentSquare[1]]) {
+						bool inClosedList = false;
+						for (ListEntry& const closedEntry : closedList) {
+							vec2 position = closedEntry.position;
+							if (position[0] == adjacentSquare[0] && position[1] == adjacentSquare[1]) {
+								inClosedList = true;
+								break;
+							}
+						}
+						if (inClosedList) {
+							continue;
+						}
+						bool inOpenList = false;
+						ListEntry* openListVersion;
+						for (ListEntry listEntry : openList) {
+							if (listEntry.position[0] == adjacentSquare[0] && listEntry.position[1] == adjacentSquare[1]) {
+								inClosedList = true;
+								openListVersion = &listEntry;
+								break;
+							}
+						}
+						if (inOpenList) {
+							if (currentPos.cost + 1 < openListVersion->cost) {
+								openListVersion->parent = &currentPos;
+							}
+						}
+						else {
+							ListEntry addEntry = { adjacentSquare, &currentPos, currentPos.cost + 1 };
+							openList.push_back(addEntry);
+						}
+					}
+				}
+			}
+		}
+
 	}
 	else {
-		enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+		if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
+			enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+		}
+		else {
+			enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+		}
 	}
+
 }
 
 bool AISystem::PlayerInAwarenessBubble(Entity enemy_entity) {
@@ -224,27 +319,14 @@ bool AISystem::PlayerInAwarenessBubble(Entity enemy_entity) {
 	return false;
 }
 
-
-/*
-* this is for actual pathfinding, blocked for now
-void AISystem::InitializeAISystem() {
-	levelSchematic = new int[NUMTILESWIDE * NUMTILESTALL]; // TODO write something that deletes this in de-initialize etc.
-	for (int i = 0; i < NUMTILESWIDE; i++) {
-		for (int j = 0; j < NUMTILESTALL; j++) {
-			levelSchematic[i * NUMTILESTALL + j] = (levelTiles[i][j] != 0) ? 1 : 0;
-		}
-	}
+void AISystem::Init(std::vector<std::vector<int>> newLevelTiles) {
+	levelTiles = newLevelTiles;
 }
+
+// make DE-INIT
 
 // Manhattan distance heuristic for heuristic search
-float AISystem::Heuristic(vec2 enemyPos, vec2 goalPos) {
-	return abs(enemyPos[0] - goalPos[0]) + abs(enemyPos[0] - goalPos[0]);
+float AISystem::Heuristic(vec2 startPos, vec2 goalPos) {
+	return abs(startPos[0] - goalPos[0]) + abs(startPos[1] - goalPos[1]);
 }
-
-void AISystem::AccessLevelSchematic(float pos) {
-	int i = 0;
-	j = 0;
-	levelSchematic[i * NUMTILESTALL + j];
-}
-*/
 
