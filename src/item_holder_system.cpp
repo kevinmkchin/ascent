@@ -13,7 +13,9 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
     if(holderComponent.want_to_pick_up && holderComponent.held_weapon.GetTagAndID() == 0 && holderComponent.near_weapon.GetTagAndID() != 0)
     {
         holderComponent.held_weapon = holderComponent.near_weapon;
-        registry.items.get(holderComponent.held_weapon).collidableWithEnvironment = false;
+        Item& item = registry.items.get(holderComponent.held_weapon);
+        item.collidableWithEnvironment = false;
+        item.thrown = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
         motion.velocity = {0.f, 0.f};
@@ -25,7 +27,9 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
 {
     if(holderComponent.want_to_drop && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        registry.items.get(holderComponent.held_weapon).collidableWithEnvironment = true;
+        Item& item = registry.items.get(holderComponent.held_weapon);
+        item.collidableWithEnvironment = true;
+        item.thrown = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
         motion.acceleration.y = itemGravity;
@@ -38,7 +42,9 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 {
     if(holderComponent.want_to_throw && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        registry.items.get(holderComponent.held_weapon).collidableWithEnvironment = true;
+        Item& item = registry.items.get(holderComponent.held_weapon);
+        item.collidableWithEnvironment = true;
+        item.thrown = true;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
         motion.acceleration.y = itemGravity;
