@@ -59,7 +59,7 @@ WorldSystem::WorldSystem()
     });
 
     allPossibleMutations.push_back({
-        "Bull Rage",
+        "Raging Bull",
         "Faster movement speed and increased attack power",
         SpriteComponent(),
         [](Entity mutatedEntity){

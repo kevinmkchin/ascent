@@ -26,47 +26,9 @@ INTERNAL u8 GetShaderIDFromRenderState(u32 state)
     return (state & 0x000000FF);
 }
 
-// Using counting sort to sort the elements in the basis of significant places
-INTERNAL void countingSort(std::vector<SpriteTransformPair>& array, int size, int place) {
-    const int max = 10;
-    std::vector<SpriteTransformPair> output(size);
-    int count[max];
-
-    for (int i = 0; i < max; ++i)
-        count[i] = 0;
-
-    // Calculate count of elements
-    for (int i = 0; i < size; i++)
-        count[(array[i].renderState / place) % 10]++;
-
-    // Calculate cumulative count
-    for (int i = 1; i < max; i++)
-        count[i] += count[i - 1];
-
-    // Place the elements in sorted order
-    for (int i = size - 1; i >= 0; i--) {
-        output[count[(array[i].renderState / place) % 10] - 1] = array[i];
-        count[(array[i].renderState / place) % 10]--;
-    }
-
-    for (int i = 0; i < size; i++)
-        array[i] = output[i];
-}
-
-// Main function to implement radix sort
-INTERNAL void radixSort(std::vector<SpriteTransformPair>& array)
+INTERNAL bool SpriteTransformPairSorter(SpriteTransformPair const& lhs, SpriteTransformPair const& rhs) 
 {
-    int size = (int) array.size();
-
-    // Get maximum element
-    u32 max = array[0].renderState;
-    for (int i = 1; i < size; i++)
-        if (array[i].renderState > max)
-            max = array[i].renderState;
-
-    // Apply counting sort to sort elements based on place value.
-    for (int place = 1; max / place > 0; place *= 10)
-        countingSort(array, size, place);
+    return lhs.renderState < rhs.renderState;
 }
 
 void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
@@ -394,7 +356,7 @@ void RenderSystem::Draw()
     {
         // SORTING FOR BATCH DRAWING
         std::vector<SpriteTransformPair> sortedSpriteArray(registry.sprites.size());
-        for(u32 i = 0; i < registry.sprites.size(); ++i)
+        for(size_t i = 0; i < registry.sprites.size(); ++i)
         {
             SpriteTransformPair s;
             s.spritePtr = &registry.sprites.components[i];
@@ -402,7 +364,10 @@ void RenderSystem::Draw()
             s.transform = registry.transforms.get(registry.sprites.entities[i]);
             sortedSpriteArray[i] = s;
         }
-        radixSort(sortedSpriteArray);
+
+        // SORT
+        std::sort(sortedSpriteArray.begin(), sortedSpriteArray.end(), &SpriteTransformPairSorter);
+
         // BATCH DRAW
         BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
