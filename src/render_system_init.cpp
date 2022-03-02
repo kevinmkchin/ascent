@@ -59,6 +59,7 @@ void RenderSystem::InitializeUIStuff()
 {
     CreateMeshVertexArray(textLayer1VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
     CreateMeshVertexArray(textLayer2VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
+    CreateMeshVertexArray(textLayer3VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
 
     u32 expProgressBarIndices[6] = {
         0, 1, 3,
@@ -72,6 +73,54 @@ void RenderSystem::InitializeUIStuff()
          1.f, -1.f, 1.f, 1.f
     };
     CreateMeshVertexArray(expProgressBar, expProgressBarVertices, expProgressBarIndices, 16, 6, 2, 2, 0, GL_STATIC_DRAW);
+
+
+    u32 mutationSelectBorderIndices[24] = {
+        0, 1, 3,
+        0, 3, 2,
+		4, 5, 7,
+        4, 7, 6,
+		8, 9, 11,
+        8, 11, 10,
+		12, 13, 15,
+        12, 15, 14
+    };
+    float mutationSelectBorderVertices[64] = {
+        //  x   y    u    v
+        -0.24f,  0.5f, 0.f, 0.f,
+         0.24f,  0.5f, 0.f, 0.f,
+        -0.24f, 0.46f, 0.f, 0.f,
+         0.24f, 0.46f, 0.f, 0.f,
+
+        -0.24f,  -0.46f, 0.f, 0.f,
+         0.24f,  -0.46f, 0.f, 0.f,
+        -0.24f, -0.5f, 0.f, 0.f,
+         0.24f, -0.5f, 0.f, 0.f,
+
+		-0.27f,  0.5f, 0.f, 0.f,
+        -0.24f,  0.5f, 0.f, 0.f,
+        -0.27f, -0.5f, 0.f, 0.f,
+        -0.24f, -0.5f, 0.f, 0.f,
+
+		0.27f,  0.5f, 0.f, 0.f,
+        0.24f,  0.5f, 0.f, 0.f,
+        0.27f, -0.5f, 0.f, 0.f,
+        0.24f, -0.5f, 0.f, 0.f
+    };
+    CreateMeshVertexArray(mutationSelectBorder, mutationSelectBorderVertices, mutationSelectBorderIndices, 64, 24, 2, 2, 0, GL_STATIC_DRAW);
+
+    u32 mutationSelectBoxIndices[6] = {
+        0, 1, 3,
+        0, 3, 2
+    };
+    float mutationSelectBoxVertices[16] = {
+        //  x   y    u    v
+        -0.25f,  0.48f, 0.f, 0.f,
+         0.25f,  0.48f, 1.f, 0.f,
+        -0.25f, -0.48f, 0.f, 1.f,
+         0.25f, -0.48f, 1.f, 1.f
+    };
+    CreateMeshVertexArray(mutationSelectBox, mutationSelectBoxVertices, mutationSelectBoxIndices, 16, 6, 2, 2, 0, GL_STATIC_DRAW);    
 }
 
 void RenderSystem::InitializeGlTextures()

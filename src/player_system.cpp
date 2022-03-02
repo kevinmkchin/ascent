@@ -3,11 +3,19 @@
 #include "player_system.hpp"
 #include "physics_system.hpp"
 #include "world_system.hpp"
+#include "ui_system.hpp"
 
 
 PlayerSystem::PlayerSystem()
 {
 
+}
+
+
+void PlayerSystem::Init(WorldSystem* world_sys_arg, UISystem* ui_sys_arg)
+{
+    world = world_sys_arg;
+    ui = ui_sys_arg;
 }
 
 #pragma region PLAYER_MOVEMENT
@@ -281,6 +289,10 @@ void PlayerSystem::CheckIfLevelUp()
         ++playerComponent.level;
         bLeveledUpLastFrame = true;
         printf("LEVEL UP!\n");
+        if(Mix_PlayChannel(-1, world->player_levelup_sound, 0) == -1) 
+        {
+            printf("Mix_PlayChannel: %s\n",Mix_GetError());
+        }
     }
 
     if(Input::IsKeyPressed(SDL_SCANCODE_T))
@@ -460,6 +472,11 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
                     TEXTURE_ASSET_ID::BOX
             }
         );
+
+        if(Mix_PlayChannel(-1, world->sword_sound, 0) == -1) 
+        {
+            printf("Mix_PlayChannel: %s\n",Mix_GetError());
+        }
     }
 }
 

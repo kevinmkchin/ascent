@@ -63,8 +63,7 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
-	// Handle player mutations
-	void handle_mutations(Mutation currentMutation);
+	void HandleMutations();
 
     // Handle input events
     void SDLProcessEvents();
@@ -79,6 +78,21 @@ public:
     float* GlobalPauseForSeconds = nullptr;
     bool darkenGameFrame = false;
     bool gamePaused = false;
+
+    std::vector<Mutation> allPossibleMutations;
+
+	// music references
+	Mix_Music* background_music;
+	Mix_Chunk* chicken_dead_sound;
+	Mix_Chunk* chicken_eat_sound;
+	Mix_Chunk* sword_sound;
+	Mix_Chunk* monster_hurt_sound;
+	Mix_Chunk* monster_death_sound;
+	Mix_Chunk* player_hurt_sound;
+	Mix_Chunk* player_death_sound;
+	Mix_Chunk* gain_mutation_sound;
+	Mix_Chunk* player_levelup_sound;
+	Mix_Chunk* blip_select_sound;
 
 private:
     void loadAllContent();
@@ -104,15 +118,6 @@ private:
 	PlayerSystem* playerSystem;
 	AISystem* aiSystem;
 	Entity player;
-
-	// music references
-	Mix_Music* background_music;
-	Mix_Chunk* chicken_dead_sound;
-	Mix_Chunk* chicken_eat_sound;
-	Mix_Chunk* sword_sound;
-	Mix_Chunk* monster_hit_sound;
-	Mix_Chunk* player_hurt_sound;
-	Mix_Chunk* player_death_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

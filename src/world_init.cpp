@@ -46,6 +46,7 @@ Entity createPlayer(vec2 position)
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
     registry.players.emplace(entity);
+    registry.mutations.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
     hb.health = 100.f;
     hb.maxHealth = 100.f;

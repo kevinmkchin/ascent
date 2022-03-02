@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
     world.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     ui.Init(&renderer, &world, &playerSystem);
     ui.GlobalPauseForSeconds = &GlobalPauseForSeconds;
+    playerSystem.Init(&world, &ui);
 
 	// Variable timestep loop
 	auto t = Clock::now();
@@ -134,10 +135,12 @@ int main(int argc, char* argv[])
 
 		// Calculating elapsed times in milliseconds from the previous iteration
 		auto now = Clock::now();
-		float elapsed_ms = (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
+		float elapsed_ms = (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000.f;
 		t = now;
         float deltaTime = elapsed_ms / 1000.f; // elapsed time in SECONDS
         if(deltaTime > 0.1f) { continue; } // if delta time is too large, will cause glitches
+        float currentTimeInSeconds = (float)(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() / 1000.0);
+        renderer.currentTimeInSeconds = currentTimeInSeconds;
 
         if(GlobalPauseForSeconds > 0.f || world.gamePaused)
         {
@@ -151,6 +154,7 @@ int main(int argc, char* argv[])
             //printf("world.Step: %f seconds\n", timer::timestamp());
             if(world.GetCurrentMode() == MODE_INGAME)
             {   
+                world.HandleMutations();
                 playerSystem.PrePhysicsStep(deltaTime);
                 physics.step(deltaTime);
                 //printf("physics.Step: %f seconds\n", timer::timestamp());

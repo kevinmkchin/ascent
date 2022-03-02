@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
+#include <functional>
 #include <stb_image.h>
 
 /**
@@ -77,6 +78,7 @@ enum class EFFECT_ASSET_ID : u8
     BACKGROUND,
     TEXT,
     EXP_UI,
+    MUTATION_SELECT_UI,
 
     EFFECT_COUNT
 };
@@ -89,6 +91,7 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("background"),
         shader_path("text_ui"),
         shader_path("exp_ui"),
+        shader_path("mutation_select_ui"),
 };
 
 /**
@@ -104,7 +107,9 @@ struct Player
     u8  level = 1;
     float experience = 0.f;
 
+    float movementSpeed = 64.f;
     i32 attackPower = 30;
+    i32 attackVariance = 10;
     float playerMeleeAttackCooldown = 0.2f;//0.8f; //TODO: maybe make this a percentage decrease than a flat number?
 };
 const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
@@ -231,16 +236,18 @@ struct CollisionEvent
 	CollisionEvent(Entity& other) { this->other = other; };
 };
 
-struct Mutation {
+struct Mutation 
+{
     std::string name;
-    int velocityEffect;
-    int attackPowerEffect;
-    int healthEffect;
+    std::string description;
     SpriteComponent sprite;
+    std::function<void(Entity)> effect; // mutation effect function
+    bool bTriggered = false;
 };
 
-struct MutationComponent {
-    Mutation* currentActiveMutations [5] = {};
+struct ActiveMutationsComponent 
+{
+    std::vector<Mutation> mutations; // the active mutations of a given entity
 };
 
 // Data structure for toggling debug mode
@@ -260,6 +267,15 @@ struct HealthBar
 {
 	float health = 100.f;
     float maxHealth = 100.f;
+
+    float TakeDamage(float base, float variance = 0.f)
+    {
+        float low = base - variance;
+        float high = base + variance;
+        float actualDamage = low + static_cast<float>(rand())/(static_cast<float>(RAND_MAX/(high-low)));
+        health -= actualDamage;
+        return actualDamage;
+    }
 };
 
 enum GAMETAGS : u8

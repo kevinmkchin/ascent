@@ -21,13 +21,78 @@ WorldSystem::WorldSystem()
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 
-    Mutation fastFeet = Mutation{"fastFeet", 5, 0, 0, SpriteComponent()};
-    Mutation powerfulHands = Mutation{"powerfulHands", 0, 5, 0, SpriteComponent()};
-    Mutation heartOfSteel = Mutation{"heartOfSteel", 0, 0, 5, SpriteComponent()};
-    Mutation bullPower = Mutation{"rage", 3, 3, 0, SpriteComponent()};
-    Mutation invisibleShield = Mutation{"ironDefence", 3, 0, 3, SpriteComponent()};
-    Mutation allPossibleMutations [5] = {fastFeet, powerfulHands, heartOfSteel, bullPower, invisibleShield};
+    allPossibleMutations.push_back({
+        "Fast Feet",
+        "Faster movement speed",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.movementSpeed += 16.f;
+            }
+        }
+    });
 
+    allPossibleMutations.push_back({
+        "Heart of Steel",
+        "Increased health",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            HealthBar& entityHealthComponent = registry.healthBar.get(mutatedEntity);
+            entityHealthComponent.health += 30.f;
+            entityHealthComponent.maxHealth += 30.f;
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Powerful Hands",
+        "More powerful attacks",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.attackPower += 15;
+            }
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Bull Power",
+        "Faster movement speed and increased attack power.",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.movementSpeed += 10.f;
+                playerComponent.attackPower += 10;
+            }
+        }
+    });
+
+}
+
+void WorldSystem::HandleMutations()
+{
+    for(size_t i = 0; i < registry.mutations.size(); ++i)
+    {
+        std::vector<Mutation>& activeMutations = registry.mutations.components[i].mutations;
+        const Entity& mutatedEntity = registry.mutations.entities[i];
+        for(Mutation& mutation : activeMutations)
+        {
+            if(mutation.bTriggered == false)
+            {
+                mutation.effect(mutatedEntity);
+                mutation.bTriggered = true;
+                if(Mix_PlayChannel(-1, gain_mutation_sound, 0) == -1) 
+                {
+                    printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                }
+            }
+        }
+    }
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg, AISystem* ai_sys_arg)
@@ -53,9 +118,6 @@ void WorldSystem::cleanUp()
 void WorldSystem::StartNewRun()
 {
     printf("Starting new run.\n");
-
-    // REINSTANTIATE SOME THINGS
-    *playerSystem = PlayerSystem();
 
     // ENTER THE GAME MODE
     SetCurrentMode(MODE_INGAME);
@@ -125,15 +187,23 @@ void WorldSystem::loadAllContent()
     chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
     chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
     sword_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
-    monster_hit_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
+    monster_hurt_sound = Mix_LoadWAV(audio_path("monster_hurt.wav").c_str());
+    monster_death_sound = Mix_LoadWAV(audio_path("monster_death.wav").c_str());
     player_hurt_sound = Mix_LoadWAV(audio_path("player_hurt.wav").c_str());
     player_death_sound = Mix_LoadWAV(audio_path("death_effect.wav").c_str());
+    gain_mutation_sound = Mix_LoadWAV(audio_path("mutation.wav").c_str());
+    player_levelup_sound = Mix_LoadWAV(audio_path("levelup.wav").c_str());
+    blip_select_sound = Mix_LoadWAV(audio_path("blip_select.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
         || sword_sound == nullptr
-        || monster_hit_sound == nullptr
+        || monster_hurt_sound == nullptr
+        || monster_death_sound == nullptr
         || player_hurt_sound == nullptr
-        || player_death_sound == nullptr) {
+        || player_death_sound == nullptr
+        || gain_mutation_sound == nullptr
+        || player_levelup_sound == nullptr
+        || blip_select_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
@@ -151,12 +221,20 @@ void WorldSystem::unloadAllContent()
         Mix_FreeChunk(chicken_eat_sound);
     if (sword_sound != nullptr)
         Mix_FreeChunk(sword_sound);
-    if (monster_hit_sound != nullptr)
-        Mix_FreeChunk(monster_hit_sound);
+    if (monster_hurt_sound != nullptr)
+        Mix_FreeChunk(monster_hurt_sound);
+    if (monster_death_sound != nullptr)
+        Mix_FreeChunk(monster_death_sound);
     if (player_hurt_sound != nullptr)
         Mix_FreeChunk(player_hurt_sound);
     if (player_death_sound != nullptr)
         Mix_FreeChunk(player_death_sound);
+    if (gain_mutation_sound != nullptr)
+        Mix_FreeChunk(gain_mutation_sound);
+    if (player_levelup_sound != nullptr)
+        Mix_FreeChunk(player_levelup_sound);
+    if (blip_select_sound != nullptr)
+        Mix_FreeChunk(blip_select_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -214,6 +292,7 @@ bool WorldSystem::step(float deltaTime) {
 	while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+    // Check if player dead and if run should end
     if(registry.players.size() > 0)
     {      
         Player playerComponent = registry.players.components[0];
@@ -223,6 +302,11 @@ bool WorldSystem::step(float deltaTime) {
             playerComponent.bDead = false;
             StartNewStage(END_THE_GAME);
         }
+    }
+
+    if(Input::HasKeyBeenPressed(SDL_SCANCODE_U))
+    {
+        registry.mutations.get(registry.players.entities[0]).mutations.push_back(allPossibleMutations[1]);
     }
 
 //  float min_counter_ms = 3000.f;
@@ -266,13 +350,8 @@ void WorldSystem::handle_collisions()
         {
             if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK)
             {
-                if(Mix_PlayChannel(-1, monster_hit_sound, 0) == -1) 
-                {
-                    printf("Mix_PlayChannel: %s\n",Mix_GetError());
-                }
-
                 HealthBar& enemyHealth = registry.healthBar.get(entity);
-                enemyHealth.health -= playerComponent.attackPower;
+                enemyHealth.TakeDamage((float) playerComponent.attackPower, (float) playerComponent.attackVariance);
 
                 // Move the player a little bit - its more fun 
                 if(playerSystem->lastAttackDirection == 3)
@@ -292,6 +371,17 @@ void WorldSystem::handle_collisions()
                 {
                     registry.remove_all_components_of(entity);
                     playerComponent.experience += 40.f;
+                    if(Mix_PlayChannel(-1, monster_death_sound, 0) == -1) 
+                    {
+                        printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                    }
+                }
+                else
+                {
+                    if(Mix_PlayChannel(-1, monster_hurt_sound, 0) == -1) 
+                    {
+                        printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                    }
                 }
 
                 *GlobalPauseForSeconds = 0.1f;
@@ -320,7 +410,7 @@ void WorldSystem::handle_collisions()
 				if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0) 
                 {
                     enemy.playerHurtCooldown = 2.f;
-                    playerHealth.health -= 10;
+                    playerHealth.TakeDamage(8, 5);
                     if(Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) 
                     {
                         printf("Mix_PlayChannel: %s\n",Mix_GetError());
@@ -332,7 +422,7 @@ void WorldSystem::handle_collisions()
             {
                 if (playerHealth.health > 0)
                 {
-                    playerHealth.health -= 15;
+                    playerHealth.TakeDamage(10, 5);
                     if(Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) 
                     {
                         printf("Mix_PlayChannel: %s\n",Mix_GetError());
@@ -434,31 +524,6 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
         }
     }
 }
-
-void WorldSystem::handle_mutations(Mutation currentMutation) {
-    auto& mutationRegistry = registry.mutationComponent;
-    for (uint i = 0; i < mutationRegistry.components.size(); i++) {
-        const MutationComponent mutComp = mutationRegistry.components[i];
-        Entity entity = mutationRegistry.entities[i];
-
-        if (registry.players.has(entity)) {
-            Player& player = registry.players.get(entity);
-            TransformComponent& playerTransform = registry.transforms.get(entity);
-            MotionComponent& playerMotion = registry.motions.get(entity);
-            CollisionComponent& playerCollider = registry.colliders.get(entity);
-            HealthBar& playerHealth = registry.healthBar.get(entity);
-
-            playerHealth.health += currentMutation.healthEffect;
-            player.attackPower += currentMutation.attackPowerEffect;
-
-            printf("Mutation selected");
-            printf("Changed player health by: %d. Current player health is: %f \n", currentMutation.healthEffect, playerHealth.health);
-            printf("Changed player attackPower by: %d. Current player attackPower is: %d \n", currentMutation.attackPowerEffect, player.attackPower);
-
-        }
-    }
-}
-
 
 // Should the game be over ?
 bool WorldSystem::is_over() const {
