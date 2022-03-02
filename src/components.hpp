@@ -148,6 +148,7 @@ struct Item
     // When player is holding an item, we don't want to have it colliding with the floor/ceiling etc
     // When item is on the floor, we want it to be colliding with the floor
     bool collidableWithEnvironment = true;
+    bool thrown = false;
 };
 
 struct TransformComponent

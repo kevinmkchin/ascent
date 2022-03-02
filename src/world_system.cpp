@@ -444,7 +444,7 @@ void WorldSystem::handle_collisions()
 
         if (registry.enemy.has(entity))
         {
-            if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK)
+            if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK || (registry.items.has(entity_other) && registry.items.get(entity_other).thrown))
             {
                 HealthBar& enemyHealth = registry.healthBar.get(entity);
                 enemyHealth.TakeDamage((float) playerComponent.attackPower, (float) playerComponent.attackVariance);
