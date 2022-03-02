@@ -8,7 +8,9 @@ Entity createBox(vec2 position);
 
 Entity createPlayer(vec2 position);
 
-Entity createEnemy(vec2 position);
+Entity CreateBatEnemy(vec2 position);
+
+Entity CreateKnightEnemy(vec2 position);
 
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy);
 

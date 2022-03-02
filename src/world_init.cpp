@@ -105,7 +105,54 @@ Entity createPlayer(vec2 position)
     return entity;
 }
 
-Entity createEnemy(vec2 position)
+Entity CreateBatEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    hb.health = 20.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxMoveSpeed = 128.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+    pathingBehavior.flyingType = true;
+
+    patrollingBehavior.patrolDistance = 48.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.standStill = false;
+
+    visualComponent.sightRadius = 256.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::FIRE
+        }
+    );
+
+    return entity;
+}
+
+Entity CreateKnightEnemy(vec2 position)
 {
     auto entity = Entity::CreateEntity();
 
@@ -131,7 +178,7 @@ Entity createEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = true;
+    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;

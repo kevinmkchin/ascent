@@ -24,15 +24,17 @@ void AISystem::Step(float deltaTime)
 	elapsedTime += deltaTime * 1000.0f;
 	Entity playerEntity = registry.players.entities[0];
 	TransformComponent& playerTransform = registry.transforms.get(playerEntity);
-	if (elapsedTime >= 2000.0f) {
-		for (Entity& enemy : registry.enemy.entities) {
-			// MotionComponent& enemyMotion = registry.motions.get(enemy);
-			// enemyMotion.velocity.x *= -1.f;
+	if (elapsedTime >= 2000.0f) 
+	{
+		for (Entity& enemy : registry.enemy.entities) 
+		{
 			EnemyAttack(enemy);
 		}
 		elapsedTime = 0.0f;
 	}
-	for (int i = 0; i < registry.enemy.size(); ++i) {
+
+	for (int i = 0; i < registry.enemy.size(); ++i) 
+	{
 		Enemy& enemyComponent = registry.enemy.components[i];
 		const Entity& enemy = registry.enemy.entities[i];
 		if(enemyComponent.playerHurtCooldown > 0.f)
@@ -50,6 +52,17 @@ void AISystem::Step(float deltaTime)
 }
 
 void AISystem::EnemyAttack(Entity enemy_entity) {
+	// TODO This projectile attack should be made into a "ProjectileAttackBehaviour" Component.
+	// then only enemies that have that behaviour component can perform this attack whereas right now
+	// every single enemy can perform this projectile attack
+
+	// temporary check to prevent flying enemies from using projectile attack. remove later.
+	PathingBehavior& enemyPathingBehavior = registry.pathingBehaviors.get(enemy_entity);
+	if(enemyPathingBehavior.flyingType)
+	{
+		return;
+	}
+
 	Enemy& enemy = registry.enemy.get(enemy_entity);
 	MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
 	Entity playerEntity = registry.players.entities.front();
