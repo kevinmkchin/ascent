@@ -47,7 +47,8 @@ Entity createPlayer(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.players.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
-    hb.health = 2000.f;
+    hb.health = 100.f;
+    hb.maxHealth = 100.f;
     registry.holders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };

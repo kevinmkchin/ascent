@@ -100,6 +100,7 @@ const std::array<std::string, effect_count> effect_paths = {
 // Player component
 struct Player
 {
+    bool bDead = false;
     u8  level = 1;
     float experience = 0.f;
 
@@ -111,6 +112,7 @@ const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f
 struct Enemy
 {
     float projectile_speed = 120.f;
+    float playerHurtCooldown = 0.f;
 };
 
 struct Enemy_projectile {
@@ -243,8 +245,8 @@ struct MutationComponent {
 
 // Data structure for toggling debug mode
 struct Debug {
-	bool in_debug_mode = 0;
-	bool in_freeze_mode = 0;
+	bool in_debug_mode = false;
+	bool in_freeze_mode = false;
 };
 extern Debug debugging;
 
@@ -256,7 +258,8 @@ struct DebugComponent
 
 struct HealthBar
 {
-	float health = 0;
+	float health = 100.f;
+    float maxHealth = 100.f;
 };
 
 enum GAMETAGS : u8

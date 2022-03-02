@@ -41,7 +41,7 @@ void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg,
     SetCurrentMode(MODE_MAINMENU);
 
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+	//Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 }
 
@@ -126,10 +126,14 @@ void WorldSystem::loadAllContent()
     chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
     sword_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
     monster_hit_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
+    player_hurt_sound = Mix_LoadWAV(audio_path("player_hurt.wav").c_str());
+    player_death_sound = Mix_LoadWAV(audio_path("death_effect.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
         || sword_sound == nullptr
-        || monster_hit_sound == nullptr) {
+        || monster_hit_sound == nullptr
+        || player_hurt_sound == nullptr
+        || player_death_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
@@ -149,6 +153,10 @@ void WorldSystem::unloadAllContent()
         Mix_FreeChunk(sword_sound);
     if (monster_hit_sound != nullptr)
         Mix_FreeChunk(monster_hit_sound);
+    if (player_hurt_sound != nullptr)
+        Mix_FreeChunk(player_hurt_sound);
+    if (player_death_sound != nullptr)
+        Mix_FreeChunk(player_death_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -206,6 +214,17 @@ bool WorldSystem::step(float deltaTime) {
 	while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+    if(registry.players.size() > 0)
+    {      
+        Player playerComponent = registry.players.components[0];
+        if(playerComponent.bDead)
+        {
+            darkenGameFrame = false;
+            playerComponent.bDead = false;
+            StartNewStage(END_THE_GAME);
+        }
+    }
+
 //  float min_counter_ms = 3000.f;
 //	for (Entity entity : registry.deathTimers.entities) {
 //		// progress timer
@@ -227,7 +246,13 @@ bool WorldSystem::step(float deltaTime) {
 }
 
 // Compute collisions between entities
-void WorldSystem::handle_collisions() {
+void WorldSystem::handle_collisions() 
+{
+    Player& playerComponent = registry.players.get(player);
+    TransformComponent& playerTransform = registry.transforms.get(player);
+    MotionComponent& playerMotion = registry.motions.get(player);
+    CollisionComponent& playerCollider = registry.colliders.get(player);
+    HealthBar& playerHealth = registry.healthBar.get(player);
 
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisionEvents;
@@ -247,7 +272,6 @@ void WorldSystem::handle_collisions() {
                 }
 
                 HealthBar& enemyHealth = registry.healthBar.get(entity);
-                Player& playerComponent = registry.players.get(player);
                 enemyHealth.health -= playerComponent.attackPower;
 
                 // Move the player a little bit - its more fun 
@@ -274,37 +298,45 @@ void WorldSystem::handle_collisions() {
             }
         }
 
-		if (registry.players.has(entity)) {
-            Player& player = registry.players.get(entity);
-            TransformComponent& playerTransform = registry.transforms.get(entity);
-            MotionComponent& playerMotion = registry.motions.get(entity);
-            CollisionComponent& playerCollider = registry.colliders.get(entity);
-			HealthBar& playerHealth = registry.healthBar.get(entity);
-
+		if (registry.players.has(entity)) 
+        {
             CheckCollisionWithBlockable(entity, entity_other);
 
             if (entity_other.GetTag() == TAG_SPIKE)
             {
                 if (playerHealth.health > 0)
                 {
-                    playerHealth.health -= 100;
+                    playerHealth.health = -9999.f;
+                    if(Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) 
+                    {
+                        printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                    }
                 }
             }
 
 			if (registry.enemy.has(entity_other)) 
             {
-				if (playerHealth.health > 0) 
+                Enemy& enemy = registry.enemy.get(entity_other);
+				if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0) 
                 {
-                    playerHealth.health -= 20;
+                    enemy.playerHurtCooldown = 2.f;
+                    playerHealth.health -= 10;
+                    if(Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) 
+                    {
+                        printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                    }
 				}
 			}
 
             if (registry.enemyprojectile.has(entity_other))
             {
-
                 if (playerHealth.health > 0)
                 {
-                        playerHealth.health -= 40;
+                    playerHealth.health -= 15;
+                    if(Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) 
+                    {
+                        printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                    }
                 }
 
                 auto& enemyprojectileRegistry = registry.enemyprojectile;
@@ -356,6 +388,19 @@ void WorldSystem::handle_collisions() {
 	}
 	// Remove all collisions from this simulation Step
 	registry.collisionEvents.clear();
+
+
+    if(playerHealth.health <= 0.f && !playerComponent.bDead)
+    {
+        // DEAD
+        if(Mix_PlayChannel(-1, player_death_sound, 0) == -1) 
+        {
+            printf("Mix_PlayChannel: %s\n",Mix_GetError());
+        }
+        playerComponent.bDead = true;
+        darkenGameFrame = true;
+        *GlobalPauseForSeconds = 3.f;
+    }
 }
 
 void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other)
