@@ -60,11 +60,11 @@ bool gl_has_errors()
 void PickThreeRandomInts(int* x, int* y, int* z, int cap)
 {
 	assert(cap >= 3);
-    *x = 1+rand()%cap;
+    *x = rand()%cap;
     do {
-        *y = 1+rand()%cap;
+        *y = rand()%cap;
     } while(*y == *x);
     do {
-        *z = 1+rand()%cap;
+        *z = rand()%cap;
     } while(*z == *x || *z == *y);
 }

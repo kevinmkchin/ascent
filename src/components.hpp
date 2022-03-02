@@ -110,7 +110,9 @@ struct Player
     float movementSpeed = 64.f;
     i32 attackPower = 30;
     i32 attackVariance = 10;
-    float playerMeleeAttackCooldown = 0.2f;//0.8f; //TODO: maybe make this a percentage decrease than a flat number?
+    i16 meleeAttackRange = 16;
+    i16 meleeAttackArc = 12;
+    float meleeAttackCooldown = 0.8f;   // TODO: maybe make this a percentage decrease than a flat number?
 };
 const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
 

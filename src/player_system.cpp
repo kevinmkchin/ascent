@@ -22,7 +22,7 @@ void PlayerSystem::Init(WorldSystem* world_sys_arg, UISystem* ui_sys_arg)
 /* PLAYER CONTROLLER CONFIGURATION */
 INTERNAL float playerGravity = 500.f;
 INTERNAL float playerJumpSpeed = 200.f;
-INTERNAL float playerMaxMoveSpeed = 64.f;
+// NO LONGER IN USE!!! movementSpeed comes from PlayerComponent!!! INTERNAL float playerMaxMoveSpeed = 64.f;
 INTERNAL float playerMaxFallSpeed = 200.f;
 INTERNAL float playerGroundAcceleration = 700.f;
 INTERNAL float playerGroundDeceleration = 1000.f;
@@ -49,7 +49,7 @@ INTERNAL bool bFaceRight = false; // facing right previously
 INTERNAL float time_in_animation = 0.f;
 INTERNAL int player_animation_state = 6;
 
-INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
+INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion, Player& playerComponent)
 {
     const bool bLeftKeyPressed = Input::GameLeftIsPressed();
     const bool bRightKeyPressed = Input::GameRightIsPressed();
@@ -103,12 +103,8 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion)
     }
 
     playerMotion.acceleration.y = playerGravity;
-    playerMotion.terminalVelocity.x = playerMaxMoveSpeed;
+    playerMotion.terminalVelocity.x = playerComponent.movementSpeed;
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
-
-    // playerMotion.velocity.x = playerMotion.velocity.x >= 0.f ?
-    //     min(abs(playerMotion.velocity.x), playerMotion.playerMaxMoveSpeed) : 
-    //     -min(abs(playerMotion.velocity.x), playerMotion.playerMaxMoveSpeed);
 }
 
 INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion)
@@ -283,10 +279,9 @@ INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
 
 void PlayerSystem::CheckIfLevelUp()
 {
-    Player& playerComponent = registry.players.get(playerEntity);
-    if(playerComponent.experience > PLAYER_EXP_THRESHOLDS_ARRAY[playerComponent.level])
+    if(playerComponentPtr->experience > PLAYER_EXP_THRESHOLDS_ARRAY[playerComponentPtr->level])
     {
-        ++playerComponent.level;
+        ++(playerComponentPtr->level);
         bLeveledUpLastFrame = true;
         printf("LEVEL UP!\n");
         if(Mix_PlayChannel(-1, world->player_levelup_sound, 0) == -1) 
@@ -297,7 +292,7 @@ void PlayerSystem::CheckIfLevelUp()
 
     if(Input::IsKeyPressed(SDL_SCANCODE_T))
     {
-        playerComponent.experience += 1.f;
+        playerComponentPtr->experience += 1.f;
     }
 }
 
@@ -374,7 +369,6 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
 
 void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
 {
-    Player& playerComponent = registry.players.get(playerEntity);
     TransformComponent& playerTransform = registry.transforms.get(playerEntity);
 
     if(playerMeleeAttackCooldownTimer > 0.f)
@@ -384,7 +378,16 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
 
     if(playerMeleeAttackEntity != 0)
     {
-        registry.remove_all_components_of(playerMeleeAttackEntity);
+        playerMeleeAttackLengthTimer -= deltaTime;
+        auto& transform = registry.transforms.get(playerMeleeAttackEntity);
+        // WE DELETE COLLIDER RIGHT FIRST FRAME auto& collider = registry.colliders.get(playerMeleeAttackEntity);
+        transform.position = playerTransform.position + playerMeleeAttackPositionOffsetFromPlayer;
+        // WE DELETE COLLIDER RIGHT FIRST FRAME collider.collider_position = transform.position;
+        if(playerMeleeAttackLengthTimer <= 0.f)
+        {
+            registry.remove_all_components_of(playerMeleeAttackEntity);
+            playerMeleeAttackEntity = Entity();
+        }
     }
 
     if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed())
@@ -415,53 +418,58 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
 
         lastAttackDirection = attackDir;
 
-        playerMeleeAttackCooldownTimer = playerComponent.playerMeleeAttackCooldown; // reset timer
+        playerMeleeAttackCooldownTimer = playerComponentPtr->meleeAttackCooldown; // reset timer
+        playerMeleeAttackLengthTimer = 0.03f;     // reset timer
 
         playerMeleeAttackEntity = Entity::CreateEntity(TAG_PLAYERMELEEATTACK);
         auto& transform = registry.transforms.emplace(playerMeleeAttackEntity);
         auto& collider = registry.colliders.emplace(playerMeleeAttackEntity);
+
+        i16 meleeBoxWidth = playerComponentPtr->meleeAttackRange;
+        i16 meleeBoxHeight = playerComponentPtr->meleeAttackArc;
 
         vec2 dimensions;
         if(attackDir == 0)
         {
             transform.position.x = playerTransform.position.x - 8;
             transform.position.y = playerTransform.position.y;
-            dimensions = { 24, 16 };
-            transform.center = { 24, 8 };
+            dimensions = { meleeBoxWidth, meleeBoxHeight };
+            transform.center = { meleeBoxWidth, meleeBoxHeight/2 };
             collider.collider_position = transform.position;
-            collider.collision_pos = { 0, 8 };
-            collider.collision_neg = { 24, 8 };
+            collider.collision_pos = { 0, meleeBoxHeight/2 };
+            collider.collision_neg = { meleeBoxWidth, meleeBoxHeight/2 };
         }
         else if(attackDir == 1)
         {
             transform.position.x = playerTransform.position.x + 8;
             transform.position.y = playerTransform.position.y;
-            dimensions = { 24, 16 };
-            transform.center = { 0, 8 };
+            dimensions = { meleeBoxWidth, meleeBoxHeight };
+            transform.center = { 0, meleeBoxHeight/2 };
             collider.collider_position = transform.position;
-            collider.collision_pos = { 24, 8 };
-            collider.collision_neg = { 0, 8 };
+            collider.collision_pos = { meleeBoxWidth, meleeBoxHeight/2 };
+            collider.collision_neg = { 0, meleeBoxHeight/2 };
         }
         else if(attackDir == 2)
         {
             transform.position.x = playerTransform.position.x;
             transform.position.y = playerTransform.position.y - 11;
-            dimensions = { 16, 24 };
-            transform.center = { 8, 24 };
+            dimensions = { meleeBoxHeight, meleeBoxWidth };
+            transform.center = { meleeBoxHeight/2, meleeBoxWidth };
             collider.collider_position = transform.position;
-            collider.collision_pos = { 8, 0 };
-            collider.collision_neg = { 8, 24 };
+            collider.collision_pos = { meleeBoxHeight/2, 0 };
+            collider.collision_neg = { meleeBoxHeight/2, meleeBoxWidth };
         }
         else if(attackDir == 3)
         {
             transform.position.x = playerTransform.position.x;
             transform.position.y = playerTransform.position.y + 11;
-            dimensions = { 16, 24 };
-            transform.center = { 8, 0 };
+            dimensions = { meleeBoxHeight, meleeBoxWidth };
+            transform.center = { meleeBoxHeight/2, 0 };
             collider.collider_position = transform.position;
-            collider.collision_pos = { 8, 24 };
-            collider.collision_neg = { 8, 0 };
+            collider.collision_pos = { meleeBoxHeight/2, meleeBoxWidth };
+            collider.collision_neg = { meleeBoxHeight/2, 0 };
         }
+        playerMeleeAttackPositionOffsetFromPlayer = transform.position - playerTransform.position;
 
         registry.sprites.insert(
             playerMeleeAttackEntity,
@@ -497,6 +505,7 @@ void PlayerSystem::PrePhysicsStep(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
     playerEntity = registry.players.entities[0];
+    playerComponentPtr = &registry.players.components[0];
 
     PlayerAttackPrePhysicsStep(deltaTime);
 }
@@ -505,7 +514,6 @@ void PlayerSystem::Step(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
 
-    Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
     SpriteComponent& playerSprite = registry.sprites.get(playerEntity);
     TransformComponent& playerTransform = registry.transforms.get(playerEntity);
@@ -515,7 +523,7 @@ void PlayerSystem::Step(float deltaTime)
 
     PlayerAttackStep();
 
-    HandleBasicMovementInput(playerMotion);
+    HandleBasicMovementInput(playerMotion, *playerComponentPtr);
     HandleItemInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion);
     HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
