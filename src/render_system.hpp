@@ -73,9 +73,19 @@ public:
     TextureHandle   textLayer2FontAtlas;
     vec4            textLayer2Colour = vec4(1.f,1.f,1.f,1.f);
     MeshHandle      textLayer2VAO;
+    TextureHandle   textLayer3FontAtlas;
+    vec4            textLayer3Colour = vec4(1.f,1.f,1.f,1.f);
+    MeshHandle      textLayer3VAO;
 
     MeshHandle      expProgressBar;
     float           expProgressNormalized = 0.f; // range 0 to 1
+
+    MeshHandle      mutationSelectBorder;
+    MeshHandle      mutationSelectBox;
+    bool            showMutationSelect = false;
+    i8              mutationSelectionIndex = 1;
+
+    float           currentTimeInSeconds = 0.f;
 
 private:
     void InitializeGlTextures();

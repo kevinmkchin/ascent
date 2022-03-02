@@ -121,24 +121,6 @@ void UISystem::UpdateTextUI(float dt)
                 vtxt_append_line("PAUSED", &font_c64, 32);
             }
 
-            LOCAL_PERSIST float levelUpTextTimer = 0.f;
-            if(playerSystem->bLeveledUpLastFrame)
-            {
-                levelUpTextTimer = 1.0f;
-                *GlobalPauseForSeconds = 1.0f;
-            }
-
-            if(levelUpTextTimer > 0.f)
-            {
-                if(!world->gamePaused)
-                {
-                    levelUpTextTimer -= dt;
-                }
-
-                vtxt_move_cursor(450, 580);
-                vtxt_append_line("Level Up!", &font_c64, 80);
-            }
-
             if(registry.players.size() > 0)
             {      
                 Player playerComponent = registry.players.components[0];
@@ -285,6 +267,152 @@ void UISystem::UpdateTextUI(float dt)
         RebindMeshBufferObjects(renderer->textLayer1VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
     }
 }
+
+void UISystem::UpdateLevelUpUI(float dt)
+{
+    vtxt_clear_buffer();
+
+    renderer->showMutationSelect = false;
+
+    switch(world->GetCurrentMode())
+    {
+        case MODE_INGAME:
+        {
+            Entity playerEntity = registry.players.entities[0];
+
+            LOCAL_PERSIST float levelUpTextTimer = 0.f;
+            LOCAL_PERSIST bool pickThreeMutations = false;
+            LOCAL_PERSIST Mutation mutationOptions[3];
+            if(playerSystem->bLeveledUpLastFrame)
+            {
+                levelUpTextTimer = 100000.0f;
+                *GlobalPauseForSeconds = 100000.0f;
+                pickThreeMutations = true;
+            }
+
+            if(levelUpTextTimer > 0.f)
+            {
+                if(!world->gamePaused)
+                {
+                    levelUpTextTimer -= dt;
+                }
+
+                if(levelUpTextTimer > 99999.f)
+                {
+                    vtxt_move_cursor(450, 580);
+                    vtxt_append_line("Level Up!", &font_c64, 80);
+                }
+                else
+                {
+                    if(pickThreeMutations)
+                    {
+                        std::vector<Mutation> mutations = world->allPossibleMutations;
+                        // TODO(Kevin): remove mutations that player already has
+                        int mut1;
+                        int mut2;
+                        int mut3;
+                        PickThreeRandomInts(&mut1, &mut2, &mut3, (int)mutations.size()-1);
+                        mutationOptions[0] = mutations[mut1];
+                        mutationOptions[1] = mutations[mut2];
+                        mutationOptions[2] = mutations[mut3];
+                        pickThreeMutations = false;
+                    }
+
+                    // mutationOptions
+                    vtxt_move_cursor(121, 350);
+                    vtxt_append_line(mutationOptions[0].name.c_str(), &font_c64, 28);
+                    vtxt_move_cursor(551, 350);
+                    vtxt_append_line(mutationOptions[1].name.c_str(), &font_c64, 28);
+                    vtxt_move_cursor(983, 350);
+                    vtxt_append_line(mutationOptions[2].name.c_str(), &font_c64, 28);
+
+                    // 19 char wide
+                    std::string mut1desc = mutationOptions[0].description;
+                    std::string mut2desc = mutationOptions[1].description;
+                    std::string mut3desc = mutationOptions[2].description;
+                    int descCursorY = 500;
+                    while(mut1desc.length() > 0)
+                    {
+                        std::string toPrint = mut1desc.substr(0, 19);
+                        mut1desc = mut1desc.erase(0, 19);
+                        vtxt_move_cursor(121, descCursorY);
+                        descCursorY += 25;
+                        vtxt_append_line(toPrint.c_str(), &font_c64, 20);
+                    }
+
+                    descCursorY = 500;
+                    while(mut2desc.length() > 0)
+                    {
+                        std::string toPrint = mut2desc.substr(0, 19);
+                        mut2desc = mut2desc.erase(0, 19);
+                        vtxt_move_cursor(551, descCursorY);
+                        descCursorY += 25;
+                        vtxt_append_line(toPrint.c_str(), &font_c64, 20);
+                    }
+
+                    descCursorY = 500;
+                    while(mut3desc.length() > 0)
+                    {
+                        std::string toPrint = mut3desc.substr(0, 19);
+                        mut3desc = mut3desc.erase(0, 19);
+                        vtxt_move_cursor(983, descCursorY);
+                        descCursorY += 25;
+                        vtxt_append_line(toPrint.c_str(), &font_c64, 20);
+                    }
+
+                    vtxt_move_cursor(333, 900);
+                    if(Input::GetGamepad(0).isConnected)
+                    {
+                        vtxt_append_line("Press A to select mutation...", &font_c64, 32);
+                    }
+                    else
+                    {
+                        vtxt_append_line("Press J to select mutation...", &font_c64, 32);
+                    }
+
+                    if(Input::GameLeftHasBeenPressed())
+                    {
+                        --(renderer->mutationSelectionIndex);
+                        if(Mix_PlayChannel(-1, world->blip_select_sound, 0) == -1) 
+                        {
+                            printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                        }
+                    }
+                    if(Input::GameRightHasBeenPressed())
+                    {
+                        ++(renderer->mutationSelectionIndex);
+                        if(Mix_PlayChannel(-1, world->blip_select_sound, 0) == -1) 
+                        {
+                            printf("Mix_PlayChannel: %s\n",Mix_GetError());
+                        }
+                    }
+                    renderer->mutationSelectionIndex = (renderer->mutationSelectionIndex + 3) % 3;
+                    renderer->showMutationSelect = true;
+
+                    if(Input::GameJumpHasBeenPressed())
+                    {
+                        Mutation mutationToAdd = mutationOptions[renderer->mutationSelectionIndex];
+                        ActiveMutationsComponent& playerActiveMutations = registry.mutations.get(playerEntity);
+                        playerActiveMutations.mutations.push_back(mutationToAdd);
+
+                        renderer->mutationSelectionIndex = 1;
+                        levelUpTextTimer = -1.f;
+                        *GlobalPauseForSeconds = 0.0f;
+                    }
+                }
+            }
+
+        }break;
+        default:
+        {}break;
+    }
+
+    vtxt_vertex_buffer vb = vtxt_grab_buffer();
+    renderer->textLayer3FontAtlas = texture_c64;
+    renderer->textLayer3Colour = vec4(1.f,1.f,1.f,1.0f);
+    RebindMeshBufferObjects(renderer->textLayer3VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);  
+}
+
 #pragma warning(pop)
 
 void UISystem::Step(float deltaTime)
@@ -308,4 +436,5 @@ void UISystem::Step(float deltaTime)
 
     UpdateExpUI(deltaTime);
     UpdateTextUI(deltaTime);
+    UpdateLevelUpUI(deltaTime);
 }

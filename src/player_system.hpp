@@ -6,10 +6,15 @@
 #include "tiny_ecs_registry.hpp"
 #include "input.hpp"
 
+class UISystem;
+class WorldSystem;
+
 class PlayerSystem
 {
 public:
 	PlayerSystem();
+
+	void Init(WorldSystem* world_sys_arg, UISystem* ui_sys_arg);
 
 	void PausedStep(float deltaTime);
 
@@ -32,4 +37,7 @@ private:
 	float playerMeleeAttackCooldownTimer = -1.f;
 	void PlayerAttackPrePhysicsStep(float deltaTime);
 	void PlayerAttackStep();
+
+	WorldSystem* world;
+	UISystem* ui;
 };

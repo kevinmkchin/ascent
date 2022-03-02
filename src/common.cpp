@@ -56,3 +56,15 @@ bool gl_has_errors()
 
 	return true;
 }
+
+void PickThreeRandomInts(int* x, int* y, int* z, int cap)
+{
+	assert(cap >= 3);
+    *x = 1+rand()%cap;
+    do {
+        *y = 1+rand()%cap;
+    } while(*y == *x);
+    do {
+        *z = 1+rand()%cap;
+    } while(*z == *x || *z == *y);
+}

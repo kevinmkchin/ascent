@@ -20,6 +20,8 @@ private:
     void UpdateExpUI(float dt);
 
     void UpdateTextUI(float dt);
+    
+    void UpdateLevelUpUI(float dt);
 
     RenderSystem* renderer;
     WorldSystem* world;
