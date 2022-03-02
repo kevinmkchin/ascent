@@ -123,7 +123,7 @@ INTERNAL Entity CreateSpikeTile(i32 col, i32 row)
     );
 
     auto& collider = registry.colliders.emplace(entity); // TODO
-    collider.collider_position = transform.position + transform.center;
+    collider.collider_position = transform.position;
     collider.collision_neg = { 0, 0 };
     collider.collision_pos = { 6, 8 };
 

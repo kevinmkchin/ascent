@@ -311,7 +311,7 @@ void UISystem::UpdateLevelUpUI(float dt)
                         int mut1;
                         int mut2;
                         int mut3;
-                        PickThreeRandomInts(&mut1, &mut2, &mut3, (int)mutations.size()-1);
+                        PickThreeRandomInts(&mut1, &mut2, &mut3, (int)mutations.size());
                         mutationOptions[0] = mutations[mut1];
                         mutationOptions[1] = mutations[mut2];
                         mutationOptions[2] = mutations[mut3];

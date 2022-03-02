@@ -45,11 +45,6 @@ Entity createPlayer(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
-    registry.players.emplace(entity);
-    registry.mutations.emplace(entity);
-    auto& hb = registry.healthBar.emplace(entity);
-    hb.health = 100.f;
-    hb.maxHealth = 100.f;
     registry.holders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
@@ -100,6 +95,12 @@ Entity createPlayer(vec2 position)
             },
         }
     );
+
+    registry.players.emplace(entity);
+    registry.mutations.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    hb.health = 100.f;
+    hb.maxHealth = 100.f;
 
     return entity;
 }

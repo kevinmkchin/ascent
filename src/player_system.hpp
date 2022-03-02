@@ -32,9 +32,12 @@ private:
 	void CheckIfLevelUp();
 
 	Entity playerEntity;
+	Player* playerComponentPtr;
 
 	Entity playerMeleeAttackEntity;
+	vec2 playerMeleeAttackPositionOffsetFromPlayer;
 	float playerMeleeAttackCooldownTimer = -1.f;
+	float playerMeleeAttackLengthTimer = -1.f;
 	void PlayerAttackPrePhysicsStep(float deltaTime);
 	void PlayerAttackStep();
 

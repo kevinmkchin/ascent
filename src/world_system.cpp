@@ -46,7 +46,7 @@ WorldSystem::WorldSystem()
     });
 
     allPossibleMutations.push_back({
-        "Powerful Hands",
+        "Wolfsbane",
         "More powerful attacks",
         SpriteComponent(),
         [](Entity mutatedEntity){
@@ -59,8 +59,8 @@ WorldSystem::WorldSystem()
     });
 
     allPossibleMutations.push_back({
-        "Bull Power",
-        "Faster movement speed and increased attack power.",
+        "Bull Rage",
+        "Faster movement speed and increased attack power",
         SpriteComponent(),
         [](Entity mutatedEntity){
             if(registry.players.has(mutatedEntity))
@@ -68,6 +68,81 @@ WorldSystem::WorldSystem()
                 Player& playerComponent = registry.players.get(mutatedEntity);
                 playerComponent.movementSpeed += 10.f;
                 playerComponent.attackPower += 10;
+            }
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Oil of Vitriol",
+        "Lose health in exchange for strength",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            HealthBar& entityHealthComponent = registry.healthBar.get(mutatedEntity);
+            entityHealthComponent.maxHealth -= 50.f;
+            if(entityHealthComponent.health > entityHealthComponent.maxHealth)
+            {
+                entityHealthComponent.health = entityHealthComponent.maxHealth;
+            }
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.movementSpeed += 7.f;
+                playerComponent.attackPower += 10;
+                playerComponent.meleeAttackCooldown *= 0.6f;
+            }
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Shinobi's Blood",
+        "Faster attack speed",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.movementSpeed += 5.f;
+                playerComponent.meleeAttackCooldown *= 0.5f;
+            }
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Flexible Joints",
+        "Wider attack arc",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.meleeAttackArc += 8;
+            }
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Longer Arms",
+        "Increased attack range",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.meleeAttackRange += 10;
+            }
+        }
+    });
+
+    allPossibleMutations.push_back({
+        "Warrior Spirit",
+        "Larger attack arc and range",
+        SpriteComponent(),
+        [](Entity mutatedEntity){
+            if(registry.players.has(mutatedEntity))
+            {
+                Player& playerComponent = registry.players.get(mutatedEntity);
+                playerComponent.meleeAttackArc += 4;
+                playerComponent.meleeAttackRange += 6;
             }
         }
     });
@@ -132,6 +207,16 @@ void WorldSystem::StartNewRun()
 
 void WorldSystem::StartNewStage(GAMELEVELENUM stage)
 {
+// SAVE PLAYER DATA
+    auto playerPlayerComponent = Player();
+    auto playerHealthComponent = HealthBar();
+    auto playerActiveMutationsComponent = ActiveMutationsComponent();
+    if(stage != CHAPTER_ONE_STAGE_ONE)
+    {  
+        playerPlayerComponent = registry.players.get(player);
+        playerHealthComponent = registry.healthBar.get(player);
+        playerActiveMutationsComponent = registry.mutations.get(player);
+    }
 
 // CLEAR STUFF FROM LAST STAGE
     // registry.list_all_components(); // Debugging for memory/component leaks
@@ -139,7 +224,6 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     while (registry.transforms.entities.size() > 0)
         registry.remove_all_components_of(registry.transforms.entities.back());
     // registry.list_all_components(); // Debugging for memory/component leaks
-    player = Entity();
 
 // CHECK IF GAME SHOULD END
     if(stage == END_THE_GAME)
@@ -159,6 +243,14 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage)
     renderer->cameraBoundMin = currentLevelData.cameraBoundMin;
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
     SpawnLevelEntities();
+
+// LOAD PLAYER DATA
+    if(stage != CHAPTER_ONE_STAGE_ONE)
+    {  
+        registry.players.get(player) = playerPlayerComponent;
+        registry.healthBar.get(player) = playerHealthComponent;
+        registry.mutations.get(player) = playerActiveMutationsComponent;
+    }
 }
 
 void WorldSystem::SpawnLevelEntities()
@@ -394,7 +486,7 @@ void WorldSystem::handle_collisions()
 
             if (entity_other.GetTag() == TAG_SPIKE)
             {
-                if (playerHealth.health > 0)
+                if (playerMotion.velocity.y > 0.f) // only hurt when falling on spikes
                 {
                     playerHealth.health = -9999.f;
                     if(Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) 
