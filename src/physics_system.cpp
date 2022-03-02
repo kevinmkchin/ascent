@@ -102,9 +102,6 @@ INTERNAL void CheckAllCollisions()
     std::vector<Entity> enemies = registry.enemy.entities;
     entitiesToCheck.insert(entitiesToCheck.end(), enemies.begin(), enemies.end());
 
-    std::vector<Entity> enemyVisionBoxes = registry.visionComponents.entities;
-    entitiesToCheck.insert(entitiesToCheck.end(), enemyVisionBoxes.begin(), enemyVisionBoxes.end());
-
     std::vector<ColEventWrapper> colEventSortingVector;
 
     for(auto entity : entitiesToCheck)
@@ -117,7 +114,7 @@ INTERNAL void CheckAllCollisions()
             if(e == entity) { continue; }
             CollisionComponent otherCollider = registry.colliders.components[i];
 
-            if(length(entityCollider.collider_position - otherCollider.collider_position) > 128.f) 
+            if(length(entityCollider.collider_position - otherCollider.collider_position) > 64.f) 
             {
                 continue; // if distance b/w is big then don't check
             }
