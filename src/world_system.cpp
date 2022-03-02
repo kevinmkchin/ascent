@@ -22,7 +22,7 @@ WorldSystem::WorldSystem()
 	rng = std::default_random_engine(std::random_device()());
 
     allPossibleMutations.push_back({
-        "Fast Feet",
+        "Quick Feet",
         "Faster movement speed",
         SpriteComponent(),
         [](Entity mutatedEntity){
@@ -108,27 +108,27 @@ WorldSystem::WorldSystem()
     });
 
     allPossibleMutations.push_back({
-        "Flexible Joints",
+        "Windblade",
         "Wider attack arc",
         SpriteComponent(),
         [](Entity mutatedEntity){
             if(registry.players.has(mutatedEntity))
             {
                 Player& playerComponent = registry.players.get(mutatedEntity);
-                playerComponent.meleeAttackArc += 8;
+                playerComponent.meleeAttackArc += 16;
             }
         }
     });
 
     allPossibleMutations.push_back({
-        "Longer Arms",
+        "Long Arms",
         "Increased attack range",
         SpriteComponent(),
         [](Entity mutatedEntity){
             if(registry.players.has(mutatedEntity))
             {
                 Player& playerComponent = registry.players.get(mutatedEntity);
-                playerComponent.meleeAttackRange += 10;
+                playerComponent.meleeAttackRange += 14;
             }
         }
     });
@@ -181,7 +181,7 @@ void WorldSystem::init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg,
     SetCurrentMode(MODE_MAINMENU);
 
 	// Playing background music indefinitely
-	//Mix_PlayMusic(background_music, -1);
+	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 }
 
@@ -261,9 +261,13 @@ void WorldSystem::SpawnLevelEntities()
     createSword(currentLevelData.playerStart);
 
     // Create enemies
-    for(vec2 enemySpawn : currentLevelData.monsterSpawns)
+    for(vec2 groundEnemySpawn : currentLevelData.groundMonsterSpawns)
     {
-        createEnemy(enemySpawn);
+        CreateKnightEnemy(groundEnemySpawn);
+    }
+    for(vec2 flyingEnemySpawn : currentLevelData.flyingMonsterSpawns)
+    {
+        CreateBatEnemy(flyingEnemySpawn);
     }
 
     // Create shop items

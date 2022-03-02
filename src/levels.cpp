@@ -245,7 +245,8 @@ struct CurrentLevelData
     vec2 cameraBoundMax;
 
     vec2 playerStart;
-    std::vector<vec2> monsterSpawns;
+    std::vector<vec2> groundMonsterSpawns;
+    std::vector<vec2> flyingMonsterSpawns;
     std::vector<vec2> treasureSpawns;
     std::vector<vec2> shopItemSpawns;
 };
@@ -256,7 +257,8 @@ INTERNAL Entity levelTiles[NUMTILESWIDE][NUMTILESTALL];
 INTERNAL void ClearCurrentLevelData()
 {
     currentLevelData.playerStart = vec2(0.f, 0.f);
-    currentLevelData.monsterSpawns.clear();
+    currentLevelData.groundMonsterSpawns.clear();
+    currentLevelData.flyingMonsterSpawns.clear();
     currentLevelData.treasureSpawns.clear();
     currentLevelData.shopItemSpawns.clear();
 }
@@ -307,7 +309,11 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
             }break;
 
             case 'M': {
-                currentLevelData.monsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                currentLevelData.groundMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                                 roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
+            }break;
+            case 'N': {
+                currentLevelData.flyingMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                                  roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
             }break;
 
