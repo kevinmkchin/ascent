@@ -111,6 +111,8 @@ private:
 	Mix_Chunk* chicken_eat_sound;
 	Mix_Chunk* sword_sound;
 	Mix_Chunk* monster_hit_sound;
+	Mix_Chunk* player_hurt_sound;
+	Mix_Chunk* player_death_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

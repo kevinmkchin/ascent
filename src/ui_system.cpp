@@ -98,7 +98,7 @@ void UISystem::UpdateTextUI(float dt)
 
             char textBuffer[128];
 
-            sprintf(textBuffer, "Health: %d", (int) playerHealth.health);
+            sprintf(textBuffer, "HP: %d/%d", (int) playerHealth.health, (int) playerHealth.maxHealth);
             vtxt_move_cursor(20, 60);
             vtxt_append_line(textBuffer, &font_c64, 40);
 
@@ -139,6 +139,15 @@ void UISystem::UpdateTextUI(float dt)
                 vtxt_append_line("Level Up!", &font_c64, 80);
             }
 
+            if(registry.players.size() > 0)
+            {      
+                Player playerComponent = registry.players.components[0];
+                if(playerComponent.bDead)
+                {
+                    vtxt_move_cursor(420, 580);
+                    vtxt_append_line("GAME OVER", &font_c64, 64);
+                }
+            }
 
         }break;
     }

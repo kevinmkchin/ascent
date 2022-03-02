@@ -32,7 +32,14 @@ void AISystem::Step(float deltaTime)
 		}
 		elapsedTime = 0.0f;
 	}
-	for (Entity& enemy : registry.enemy.entities) {
+	for (int i = 0; i < registry.enemy.size(); ++i) {
+		Enemy& enemyComponent = registry.enemy.components[i];
+		const Entity& enemy = registry.enemy.entities[i];
+		if(enemyComponent.playerHurtCooldown > 0.f)
+		{
+			enemyComponent.playerHurtCooldown -= deltaTime;
+		} 
+
 		// if entity in range of some amount of player (to reduce issues w/ run time) 
 		TransformComponent& enemyTransform = registry.transforms.get(enemy);
 		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
