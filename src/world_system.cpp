@@ -444,7 +444,12 @@ void WorldSystem::handle_collisions()
 
         if (registry.enemy.has(entity))
         {
-            if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK || (registry.items.has(entity_other) && registry.items.get(entity_other).thrown))
+            bool is_thrown_weapon = registry.items.has(entity_other)
+                    && registry.items.get(entity_other).thrown
+                    && registry.motions.has(entity_other)
+                    && abs(registry.motions.get(entity_other).velocity.x) > 0;
+
+            if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK || is_thrown_weapon)
             {
                 HealthBar& enemyHealth = registry.healthBar.get(entity);
                 enemyHealth.TakeDamage((float) playerComponent.attackPower, (float) playerComponent.attackVariance);
@@ -569,6 +574,16 @@ void WorldSystem::handle_collisions()
             if(registry.items.get(entity).collidableWithEnvironment)
             {
                 CheckCollisionWithBlockable(entity, entity_other);
+
+                MotionComponent& itemMotion = registry.motions.get(entity);
+                float deceleration = 3.f;
+                deceleration = min(deceleration, abs(itemMotion.velocity.x));
+
+                if (itemMotion.velocity.x > 0) {
+                    itemMotion.velocity.x -= deceleration;
+                } else if (itemMotion.velocity.x < 0) {
+                    itemMotion.velocity.x += deceleration;
+                }
             }
         }
 	}
