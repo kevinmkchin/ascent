@@ -28,6 +28,7 @@ public:
 	ComponentContainer<PathingBehavior> pathingBehaviors;
 	ComponentContainer<PatrollingBehavior> patrollingBehaviors;
 	ComponentContainer<VisionComponent> visionComponents;
+	ComponentContainer<DeathTimer> deathTimers;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -50,6 +51,7 @@ public:
 		registry_list.push_back(&pathingBehaviors);
 		registry_list.push_back(&patrollingBehaviors);
 		registry_list.push_back(&visionComponents);
+		registry_list.push_back(&deathTimers);
 	}
 
 	void clear_all_components() {
