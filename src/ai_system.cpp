@@ -300,8 +300,11 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				vec2 prevPos = currentEntry.position;
 				currentEntry.parent = currentPos.parent;
 				while (currentEntry.position != entriesSoFar[currentEntry.parent].position) {
+				//printf("%f  %f  %f  %f\n", currentEntry.position.x, currentEntry.position.y, currentEntry.parent->position.x, currentEntry.parent->position.y);
+				while (currentEntry.position != currentEntry.parent->position) {
 					prevPos = currentEntry.position;
 					currentEntry = entriesSoFar[currentEntry.parent];
+					i++;
 				}
 				vec2 direction = prevPos - enemyPos;
 				//printf("direction x: %f, direction y: %f\n", direction.x, direction.y);
