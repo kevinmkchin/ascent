@@ -263,7 +263,7 @@ void WorldSystem::SpawnLevelEntities()
     // Create enemies
     for(vec2 groundEnemySpawn : currentLevelData.groundMonsterSpawns)
     {
-        CreateKnightEnemy(groundEnemySpawn);
+        CreateGoblinEnemy(groundEnemySpawn);
     }
     for(vec2 flyingEnemySpawn : currentLevelData.flyingMonsterSpawns)
     {
@@ -468,9 +468,13 @@ void WorldSystem::handle_collisions()
                     playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
                 }
 
-                if(enemyHealth.health <= 0.f) // TODO: Remove from here and probably move to ai systems
+                if(enemyHealth.health <= 0.f && !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
                 {
-                    registry.remove_all_components_of(entity);
+                    registry.deathTimers.emplace(entity);
+                    MotionComponent& motion = registry.motions.get(entity);
+                    motion.acceleration = { 0.f, 0.f };
+                    motion.velocity = { 0.f, 0.f };
+
                     playerComponent.experience += 40.f;
                     if(Mix_PlayChannel(-1, monster_death_sound, 0) == -1) 
                     {
