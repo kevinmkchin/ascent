@@ -74,6 +74,16 @@ INTERNAL void MoveEntities(float deltaTime)
         {
             registry.colliders.get(e).collider_position = registry.transforms.get(e).position;
         }
+
+        Entity& entity = motion_registry.entities[i];
+        if (!registry.players.has(entity)) {
+            if (motion.velocity.x > 0.f) {
+                motion.facingRight = true;
+            }
+            else if (motion.velocity.y < 0.f) {
+                motion.facingRight = false;
+            }
+        }
     }
 }
 
