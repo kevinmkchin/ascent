@@ -14,6 +14,7 @@ INTERNAL float enemyAirDeceleration = 500.f;
 INTERNAL float ladderClimbSpeed = 64.f;
 
 static float elapsedTime = 0.0f;
+float elapsedAICycleTime = 0.0f;
 
 // a representation of pathable tiles
 std::vector<std::vector<int>> levelTiles;
@@ -22,6 +23,7 @@ std::vector<std::vector<int>> levelTiles;
 void AISystem::Step(float deltaTime)
 {
 	elapsedTime += deltaTime * 1000.0f;
+	elapsedAICycleTime += deltaTime * 1000.0f;
 	Entity playerEntity = registry.players.entities[0];
 	TransformComponent& playerTransform = registry.transforms.get(playerEntity);
 	if (elapsedTime >= 2000.0f) 
@@ -33,22 +35,36 @@ void AISystem::Step(float deltaTime)
 		elapsedTime = 0.0f;
 	}
 
-	for (int i = 0; i < registry.enemy.size(); ++i) 
+	if (elapsedAICycleTime >= 20.0f) {
+		for (int i = 0; i < registry.enemy.size(); ++i)
+		{
+			Enemy& enemyComponent = registry.enemy.components[i];
+			const Entity& enemy = registry.enemy.entities[i];
+			// if entity in range of some amount of player (to reduce issues w/ run time) 
+			TransformComponent& enemyTransform = registry.transforms.get(enemy);
+			if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
+				Pathfind(enemy);
+				MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
+				//printf("Enemy motion x : %f, enemy motion y: %f \n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
+			}
+			elapsedAICycleTime = 0.f;
+		}
+	}
+
+	for (int i = 0; i < registry.enemy.size(); ++i)
 	{
 		Enemy& enemyComponent = registry.enemy.components[i];
 		const Entity& enemy = registry.enemy.entities[i];
-		if(enemyComponent.playerHurtCooldown > 0.f)
+		if (enemyComponent.playerHurtCooldown > 0.f)
 		{
 			enemyComponent.playerHurtCooldown -= deltaTime;
-		} 
-
-		// if entity in range of some amount of player (to reduce issues w/ run time) 
+		}
 		TransformComponent& enemyTransform = registry.transforms.get(enemy);
 		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
 			Physics(enemy, deltaTime);
-			Pathfind(enemy);
 		}
 	}
+
 }
 
 void AISystem::EnemyAttack(Entity enemy_entity) {
@@ -177,11 +193,11 @@ void AISystem::Physics(Entity enemy_entity, float deltaTime) {
 
 // TODO
 	// GOALS:
-	// make work when there's no path to player
-	// make work when there's multiple spots the enemy would be ok with going
+	// make work when there's no path to player (CHECK FOR FLYING)
+	// make work when there's multiple spots the enemy would be ok with going ( NOT CHECK )
 		// probably do this by finding list of desirable spots then going to closest one
-	// make this work with close-to ideal goal spots not just ideal
-	// make this run NOT every frame, maybe every 15 (?)
+	// make this work with close-to ideal goal spots not just ideal (probably do this by doing the multiple spot searching above? maybe if max iter fails for goal, go to OK spot
+	// make this run NOT every frame, maybe every 15 (this is done by elapsed ms rn)
 void AISystem::Pathfind(Entity enemy_entity) {
 	bool isPlayerInAwarenessBubble = PlayerInAwarenessBubble(enemy_entity);
 	if (!isPlayerInAwarenessBubble) {
@@ -215,7 +231,6 @@ void AISystem::PatrolBehavior(Entity enemy_entity) {
 }
 
 // NOTE: rn. all enemy speeds are same as player, so they run pretty fast towards the player. maybe should lower that
-// TODO fix "forcefield" effect
 void AISystem::PathBehavior(Entity enemy_entity) {
 	PathingBehavior& enemyPathingBehavior = registry.pathingBehaviors.get(enemy_entity);
 	Entity player_entity = registry.players.entities.front();
@@ -238,20 +253,22 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 	}
 	if (enemyPathingBehavior.flyingType) {
 		// (goal pos can be adjusted later TODO)
-		//setup your location on grid, goal location on grid
 		struct ListEntry {
 			vec2 position;
-			ListEntry* parent;
+			int parent;
 			int cost;
 		};
-		vec2 goalPos  = { ((int) (playerTransformComponent.position.x / 16)), ((int) (playerTransformComponent.position.y / 16)) };
-		vec2 enemyPos = { ((int) (enemyTransformComponent.position.x / 16)),  ((int) (enemyTransformComponent.position.y / 16)) };
-		
+
+		vec2 goalPos   = { (int) (playerTransformComponent.position.x / 16), (int) (playerTransformComponent.position.y / 16) };
+		vec2 enemyPos  = { (int) (enemyTransformComponent.position.x  / 16), (int) (enemyTransformComponent.position.y  / 16) };
+
+		//printf("%f %f enemypos\n", enemyPos.x, enemyPos.y);
+		//printf("%f %f goalPos\n", goalPos.x, goalPos.y);
+
 		if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 			return;
 		}
 
-		// form {position, cost, parent(position)}
 		std::vector<ListEntry> openList;
 		std::vector<ListEntry> closedList;
 		ListEntry startPos = { enemyPos, NULL, 0 };
@@ -260,6 +277,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 		// TODO update this to use binary search/insert for speed
 		int maxIter = 100;
 		int currIter = 0;
+		std::vector<ListEntry> entriesSoFar;
 		while (!openList.empty()) 
 		{
 			if (maxIter < currIter) {
@@ -273,18 +291,50 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					lowestIndexSoFar = k;
 				}
 			}
+			entriesSoFar.push_back(currentPos);
 			openList.erase(openList.begin() + lowestIndexSoFar);
 			closedList.push_back(currentPos);
 			if (currentPos.position == goalPos) {
 				// goal found
 				ListEntry currentEntry = currentPos;
 				vec2 prevPos = currentEntry.position;
-				while (currentEntry.position != currentEntry.parent->position) {
+				currentEntry.parent = currentPos.parent;
+				while (currentEntry.position != entriesSoFar[currentEntry.parent].position) {
 					prevPos = currentEntry.position;
-					currentEntry = *currentEntry.parent;
+					currentEntry = entriesSoFar[currentEntry.parent];
 				}
 				vec2 direction = prevPos - enemyPos;
-				enemyMotionComponent.velocity = direction * 5.f;
+				//printf("direction x: %f, direction y: %f\n", direction.x, direction.y);
+				// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
+				enemyMotionComponent.velocity = direction * 10.f; // (enemyMotionComponent.velocity / vec2{ 8, 8 }) +
+				auto& enemyCollider = registry.colliders.get(enemy_entity);
+				float spriteWidth  = enemyCollider.collision_pos.x;
+				float spriteHeight = enemyCollider.collision_pos.y;
+				vec2 enemyPosR = { ((int)((enemyTransformComponent.position.x + spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
+				vec2 enemyPosL = { ((int)((enemyTransformComponent.position.x - spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
+				vec2 enemyPosB = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y + spriteHeight) / 16)) };
+				vec2 enemyPosA = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y - spriteHeight) / 16)) };
+				bool isClippingTLL = direction.x < 0 && enemyPosA.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingTLU = direction.y < 0 && enemyPosL.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingTRR = direction.x > 0 && enemyPosA.y != enemyPos.y && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingTRU = direction.y < 0 && enemyPosR.y != enemyPos.y && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingBLL = direction.x < 0 && enemyPosB.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingBLD = direction.y > 0 && enemyPosL.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingBRR = direction.x > 0 && enemyPosB.y != enemyPos.y && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingBRD = direction.y > 0 && enemyPosR.x != enemyPos.x && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+				if (isClippingBRD || isClippingTRU) {
+					enemyMotionComponent.velocity.x = -5;
+				}
+				else if (isClippingBLD || isClippingTLU) {
+					enemyMotionComponent.velocity.x = 5;
+				}
+				else if (isClippingBRR || isClippingBLL) {
+					enemyMotionComponent.velocity.y = -5;
+				}
+				else if (isClippingTRR || isClippingTLL) {
+					enemyMotionComponent.velocity.y = 5;
+				}
+				//printf("enemyMotionComponent x: %f, enemyMotionComponent y: %f\n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
 				return;
 			}
 			std::vector<vec2> adjacentSquares;
@@ -321,11 +371,11 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 						}
 						if (inOpenList) {
 							if (currentPos.cost + 1 < openListVersion->cost) {
-								openListVersion->parent = &currentPos;
+								openListVersion->parent = currIter;
 							}
 						}
 						else {
-							ListEntry addEntry = { adjacentSquare, &currentPos, currentPos.cost + 1 };
+							ListEntry addEntry = { adjacentSquare, currIter, currentPos.cost + 1 };
 							openList.push_back(addEntry);
 						}
 					}
