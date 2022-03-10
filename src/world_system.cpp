@@ -614,29 +614,32 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
 {
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
     {
-        CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
-        CollisionComponent& otherCollider = registry.colliders.get(entity_other);
-
-        /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
-         *  by moving entities around, the initial collection of collision events may become outdated.
-         *  Checking that the two entities are still colliding is not a perfect solution (if there
-         *  even is one), but it should be good enough... We can revisit this and attempt other
-         *  solutions down the line if needed. */
-        CollisionInfo collisionCheckAgain = CheckCollision(resolverCollider, otherCollider);
-        if(collisionCheckAgain.collides)
+        if (registry.colliders.has(entity_resolver) && registry.colliders.has(entity_other))
         {
-            TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
-            if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
+            CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
+            CollisionComponent& otherCollider = registry.colliders.get(entity_other);
+
+            /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
+             *  by moving entities around, the initial collection of collision events may become outdated.
+             *  Checking that the two entities are still colliding is not a perfect solution (if there
+             *  even is one), but it should be good enough... We can revisit this and attempt other
+             *  solutions down the line if needed. */
+            CollisionInfo collisionCheckAgain = CheckCollision(resolverCollider, otherCollider);
+            if (collisionCheckAgain.collides)
             {
-                MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
-                resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
-                resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
-                resolverMotion.velocity.x = 0.f;
-            }
-            else
-            {
-                resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
-                resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+                TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
+                if (abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
+                {
+                    MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
+                    resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
+                    resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
+                    resolverMotion.velocity.x = 0.f;
+                }
+                else
+                {
+                    resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
+                    resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+                }
             }
         }
     }
