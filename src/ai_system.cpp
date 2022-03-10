@@ -35,22 +35,6 @@ void AISystem::Step(float deltaTime)
 		elapsedTime = 0.0f;
 	}
 
-	if (elapsedAICycleTime >= 20.0f) {
-		for (int i = 0; i < registry.enemy.size(); ++i)
-		{
-			Enemy& enemyComponent = registry.enemy.components[i];
-			const Entity& enemy = registry.enemy.entities[i];
-			// if entity in range of some amount of player (to reduce issues w/ run time) 
-			TransformComponent& enemyTransform = registry.transforms.get(enemy);
-			if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
-				Pathfind(enemy);
-				MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
-				//printf("Enemy motion x : %f, enemy motion y: %f \n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
-			}
-			elapsedAICycleTime = 0.f;
-		}
-	}
-
 	for (int i = 0; i < registry.enemy.size(); ++i)
 	{
 		Enemy& enemyComponent = registry.enemy.components[i];
@@ -64,6 +48,22 @@ void AISystem::Step(float deltaTime)
 			Physics(enemy, deltaTime);
 		}
 	}
+
+	//	if (elapsedAICycleTime >= 20.0f) {
+	for (int i = 0; i < registry.enemy.size(); ++i)
+	{
+		Enemy& enemyComponent = registry.enemy.components[i];
+		const Entity& enemy = registry.enemy.entities[i];
+		// if entity in range of some amount of player (to reduce issues w/ run time) 
+		TransformComponent& enemyTransform = registry.transforms.get(enemy);
+		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
+			Pathfind(enemy);
+			MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
+			("Enemy motion x : %f, enemy motion y: %f \n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
+		}
+		elapsedAICycleTime = 0.f;
+	}
+	//}
 
 }
 
@@ -259,11 +259,11 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			int cost;
 		};
 
-		vec2 goalPos   = { (int) (playerTransformComponent.position.x / 16), (int) (playerTransformComponent.position.y / 16) };
-		vec2 enemyPos  = { (int) (enemyTransformComponent.position.x  / 16), (int) (enemyTransformComponent.position.y  / 16) };
+		vec2 goalPos   = { (int) ((playerTransformComponent.position.x + 1) / 16), (int) ((playerTransformComponent.position.y + 1) / 16) };
+		vec2 enemyPos  = { (int) ((enemyTransformComponent.position.x + 1)  / 16), (int) ((enemyTransformComponent.position.y + 1)  / 16) };
 
 		//printf("%f %f enemypos\n", enemyPos.x, enemyPos.y);
-		//printf("%f %f goalPos\n", goalPos.x, goalPos.y);
+		////printf("%f %f goalPos\n", goalPos.x, goalPos.y);
 
 		if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 			return;
@@ -300,16 +300,13 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				vec2 prevPos = currentEntry.position;
 				currentEntry.parent = currentPos.parent;
 				while (currentEntry.position != entriesSoFar[currentEntry.parent].position) {
-				//printf("%f  %f  %f  %f\n", currentEntry.position.x, currentEntry.position.y, currentEntry.parent->position.x, currentEntry.parent->position.y);
-				while (currentEntry.position != currentEntry.parent->position) {
 					prevPos = currentEntry.position;
 					currentEntry = entriesSoFar[currentEntry.parent];
-					i++;
 				}
 				vec2 direction = prevPos - enemyPos;
 				//printf("direction x: %f, direction y: %f\n", direction.x, direction.y);
 				// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
-				enemyMotionComponent.velocity = direction * 10.f; // (enemyMotionComponent.velocity / vec2{ 8, 8 }) +
+				enemyMotionComponent.velocity = direction * 25.f; // (enemyMotionComponent.velocity / vec2{ 8, 8 }) +
 				auto& enemyCollider = registry.colliders.get(enemy_entity);
 				float spriteWidth  = enemyCollider.collision_pos.x;
 				float spriteHeight = enemyCollider.collision_pos.y;
@@ -317,27 +314,33 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				vec2 enemyPosL = { ((int)((enemyTransformComponent.position.x - spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
 				vec2 enemyPosB = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y + spriteHeight) / 16)) };
 				vec2 enemyPosA = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y - spriteHeight) / 16)) };
-				bool isClippingTLL = direction.x < 0 && enemyPosA.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
-				bool isClippingTLU = direction.y < 0 && enemyPosL.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
-				bool isClippingTRR = direction.x > 0 && enemyPosA.y != enemyPos.y && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
-				bool isClippingTRU = direction.y < 0 && enemyPosR.y != enemyPos.y && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
-				bool isClippingBLL = direction.x < 0 && enemyPosB.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
-				bool isClippingBLD = direction.y > 0 && enemyPosL.y != enemyPos.y && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
-				bool isClippingBRR = direction.x > 0 && enemyPosB.y != enemyPos.y && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
-				bool isClippingBRD = direction.y > 0 && enemyPosR.x != enemyPos.x && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingTLL = direction.x < 0 && enemyPosA != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingTLU = direction.y < 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingTRR = direction.x > 0 && enemyPosA != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingTRU = direction.y < 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
+				bool isClippingBLL = direction.x < 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingBLD = direction.y > 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingBRR = direction.x > 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+				bool isClippingBRD = direction.y > 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
 				if (isClippingBRD || isClippingTRU) {
-					enemyMotionComponent.velocity.x = -5;
+					printf("clip\n");
+					enemyMotionComponent.velocity.x = -20;
 				}
 				else if (isClippingBLD || isClippingTLU) {
-					enemyMotionComponent.velocity.x = 5;
+					printf("clip\n");
+					enemyMotionComponent.velocity.x = 20;
 				}
 				else if (isClippingBRR || isClippingBLL) {
-					enemyMotionComponent.velocity.y = -5;
+					printf("clip\n");
+					enemyMotionComponent.velocity.y = -20;
 				}
 				else if (isClippingTRR || isClippingTLL) {
-					enemyMotionComponent.velocity.y = 5;
+					printf("clip\n");
+					enemyMotionComponent.velocity.y = 20;
 				}
-				//printf("enemyMotionComponent x: %f, enemyMotionComponent y: %f\n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
+				enemyMotionComponent.acceleration.x = 0;
+				enemyMotionComponent.acceleration.y = 0;
+				printf("ai:\n enemyMotionComponent x: %f, enemyMotionComponent y: %f, tag: %i\n done\n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y, enemy_entity.GetTagAndID());
 				return;
 			}
 			std::vector<vec2> adjacentSquares;
