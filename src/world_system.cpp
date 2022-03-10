@@ -471,6 +471,8 @@ void WorldSystem::handle_collisions()
                 if(enemyHealth.health <= 0.f && !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
                 {
                     registry.deathTimers.emplace(entity);
+                    registry.colliders.remove(entity);
+                    registry.collisionEvents.remove(entity);
                     MotionComponent& motion = registry.motions.get(entity);
                     motion.acceleration = { 0.f, 0.f };
                     motion.velocity = { 0.f, 0.f };

@@ -116,30 +116,32 @@ INTERNAL void CheckAllCollisions()
 
     for(auto entity : entitiesToCheck)
     {
-        CollisionComponent entityCollider = registry.colliders.get(entity);
+        if (registry.colliders.has(entity)) {
+            CollisionComponent entityCollider = registry.colliders.get(entity);
 
-        for(int i = 0; i < registry.colliders.size(); ++i)
-        {
-            auto e = registry.colliders.entities[i];
-            if(e == entity) { continue; }
-            CollisionComponent otherCollider = registry.colliders.components[i];
-
-            if(length(entityCollider.collider_position - otherCollider.collider_position) > 64.f) 
+            for (int i = 0; i < registry.colliders.size(); ++i)
             {
-                continue; // if distance b/w is big then don't check
-            }
+                auto e = registry.colliders.entities[i];
+                if (e == entity) { continue; }
+                CollisionComponent otherCollider = registry.colliders.components[i];
 
-            CollisionInfo colInfo = CheckCollision(entityCollider, otherCollider);
-            if (colInfo.collides)
-            {
-                CollisionEvent colEventAgainstOther(e);
-                CollisionEvent colEventAgainstEntity(entity);
+                if (length(entityCollider.collider_position - otherCollider.collider_position) > 64.f)
+                {
+                    continue; // if distance b/w is big then don't check
+                }
 
-                colEventAgainstOther.collision_overlap = colInfo.collision_overlap;
-                colEventAgainstEntity.collision_overlap = -colInfo.collision_overlap;
+                CollisionInfo colInfo = CheckCollision(entityCollider, otherCollider);
+                if (colInfo.collides)
+                {
+                    CollisionEvent colEventAgainstOther(e);
+                    CollisionEvent colEventAgainstEntity(entity);
 
-                colEventSortingVector.push_back({ entity, colEventAgainstOther });
-                colEventSortingVector.push_back({ e, colEventAgainstEntity });
+                    colEventAgainstOther.collision_overlap = colInfo.collision_overlap;
+                    colEventAgainstEntity.collision_overlap = -colInfo.collision_overlap;
+
+                    colEventSortingVector.push_back({ entity, colEventAgainstOther });
+                    colEventSortingVector.push_back({ e, colEventAgainstEntity });
+                }
             }
         }
     }
