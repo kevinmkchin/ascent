@@ -80,7 +80,7 @@ INTERNAL void MoveEntities(float deltaTime)
             if (motion.velocity.x > 0.f) {
                 motion.facingRight = true;
             }
-            else if (motion.velocity.y < 0.f) {
+            else if (motion.velocity.x < 0.f) {
                 motion.facingRight = false;
             }
         }
