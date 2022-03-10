@@ -120,7 +120,7 @@ Entity CreateBatEnemy(vec2 position)
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
 
-    vec2 dimensions = { 16, 16 };
+    vec2 dimensions = { 12, 12 };
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
@@ -137,7 +137,7 @@ Entity CreateBatEnemy(vec2 position)
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
     patrollingBehavior.standStill = false;
 
-    visualComponent.sightRadius = 256.f;
+    visualComponent.sightRadius = 96.f;
 
     registry.sprites.insert(
         entity,
