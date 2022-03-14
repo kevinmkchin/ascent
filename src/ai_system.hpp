@@ -14,6 +14,7 @@ class AISystem
 {
 public:
 	void Step(float deltaTime);
+	void HandleSpriteSheetFrame(float deltaTime);
 	void EnemyAttack(Entity enemy_entity);
 	void Pathfind(Entity enemy_entity);
 	void Physics(Entity enemy_entity, float deltaTime);

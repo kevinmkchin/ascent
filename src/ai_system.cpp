@@ -23,14 +23,17 @@ std::vector<std::vector<int>> levelTiles;
 void AISystem::Step(float deltaTime)
 {
 	elapsedTime += deltaTime * 1000.0f;
+	HandleSpriteSheetFrame(deltaTime);
 	elapsedAICycleTime += deltaTime * 1000.0f;
 	Entity playerEntity = registry.players.entities[0];
 	TransformComponent& playerTransform = registry.transforms.get(playerEntity);
-	if (elapsedTime >= 2000.0f) 
+	if (elapsedTime >= 2000.0f) // TODO: Should probably handle each enemy separately for attack frequency
 	{
-		for (Entity& enemy : registry.enemy.entities) 
+		for (Entity& enemy : registry.enemy.entities)
 		{
-			EnemyAttack(enemy);
+			if (!registry.deathTimers.has(enemy)) {
+				EnemyAttack(enemy);
+			}
 		}
 		elapsedTime = 0.0f;
 	}
@@ -39,13 +42,25 @@ void AISystem::Step(float deltaTime)
 	{
 		Enemy& enemyComponent = registry.enemy.components[i];
 		const Entity& enemy = registry.enemy.entities[i];
-		if (enemyComponent.playerHurtCooldown > 0.f)
-		{
-			enemyComponent.playerHurtCooldown -= deltaTime;
+
+		if (registry.deathTimers.has(enemy)) {
+			DeathTimer& time = registry.deathTimers.get(enemy);
+			time.elapsed_ms -= deltaTime * 1000.f;
+			enemyComponent.playerHurtCooldown = time.elapsed_ms;
+			if (time.elapsed_ms <= 0.f) {
+				registry.remove_all_components_of(enemy);
+			}
 		}
-		TransformComponent& enemyTransform = registry.transforms.get(enemy);
-		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
-			Physics(enemy, deltaTime);
+		else {
+			if (enemyComponent.playerHurtCooldown > 0.f)
+			{
+				enemyComponent.playerHurtCooldown -= deltaTime;
+			}
+
+			TransformComponent& enemyTransform = registry.transforms.get(enemy);
+			if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
+				Physics(enemy, deltaTime);
+			}
 		}
 	}
 
@@ -55,16 +70,52 @@ void AISystem::Step(float deltaTime)
 		Enemy& enemyComponent = registry.enemy.components[i];
 		const Entity& enemy = registry.enemy.entities[i];
 		// if entity in range of some amount of player (to reduce issues w/ run time) 
-		TransformComponent& enemyTransform = registry.transforms.get(enemy);
-		if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
-			Pathfind(enemy);
-			MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
-			("Enemy motion x : %f, enemy motion y: %f \n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
-		}
-		elapsedAICycleTime = 0.f;
-	}
-	//}
 
+		if (!registry.deathTimers.has(enemy)) {
+			TransformComponent& enemyTransform = registry.transforms.get(enemy);
+			if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
+				Pathfind(enemy);
+				MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
+				("Enemy motion x : %f, enemy motion y: %f \n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
+			}
+			elapsedAICycleTime = 0.f;
+		}
+	}
+}
+
+void AISystem::HandleSpriteSheetFrame(float deltaTime)
+{
+	for (int i = 0; i < registry.sprites.size(); i++) {
+		SpriteComponent& sprite = registry.sprites.components[i];
+		Entity& entity = registry.sprites.entities[i];
+
+		if (registry.enemy.has(entity) && sprite.sprite_sheet) {
+			MotionComponent& motion = registry.motions.get(entity);
+
+			float x_velocity = motion.velocity.x;
+			bool faceRight = motion.facingRight;
+			bool reversed = sprite.reverse;
+			int prev_state = sprite.selected_animation;
+
+			if (registry.deathTimers.has(entity)) {
+				// death
+				sprite.selected_animation = 2;
+			}
+			else if (x_velocity != 0.f) {
+				// run
+				sprite.selected_animation = 1;
+			}
+			else {
+				// idle
+				sprite.selected_animation = 0;
+			}
+
+			sprite.current_frame = ((faceRight != reversed) && prev_state == sprite.selected_animation)
+				? sprite.current_frame : 0;
+
+			sprite.reverse = faceRight ? false : true;
+		}
+	}
 }
 
 void AISystem::EnemyAttack(Entity enemy_entity) {

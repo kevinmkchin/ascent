@@ -263,7 +263,7 @@ void WorldSystem::SpawnLevelEntities()
     // Create enemies
     for(vec2 groundEnemySpawn : currentLevelData.groundMonsterSpawns)
     {
-        CreateKnightEnemy(groundEnemySpawn);
+        CreateGoblinEnemy(groundEnemySpawn);
     }
     for(vec2 flyingEnemySpawn : currentLevelData.flyingMonsterSpawns)
     {
@@ -468,9 +468,15 @@ void WorldSystem::handle_collisions()
                     playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
                 }
 
-                if(enemyHealth.health <= 0.f) // TODO: Remove from here and probably move to ai systems
+                if(enemyHealth.health <= 0.f && !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
                 {
-                    registry.remove_all_components_of(entity);
+                    registry.deathTimers.emplace(entity);
+                    registry.colliders.remove(entity);
+                    registry.collisionEvents.remove(entity);
+                    MotionComponent& motion = registry.motions.get(entity);
+                    motion.acceleration = { 0.f, 0.f };
+                    motion.velocity = { 0.f, 0.f };
+
                     playerComponent.experience += 40.f;
                     if(Mix_PlayChannel(-1, monster_death_sound, 0) == -1) 
                     {
@@ -608,29 +614,32 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
 {
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
     {
-        CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
-        CollisionComponent& otherCollider = registry.colliders.get(entity_other);
-
-        /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
-         *  by moving entities around, the initial collection of collision events may become outdated.
-         *  Checking that the two entities are still colliding is not a perfect solution (if there
-         *  even is one), but it should be good enough... We can revisit this and attempt other
-         *  solutions down the line if needed. */
-        CollisionInfo collisionCheckAgain = CheckCollision(resolverCollider, otherCollider);
-        if(collisionCheckAgain.collides)
+        if (registry.colliders.has(entity_resolver) && registry.colliders.has(entity_other))
         {
-            TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
-            if(abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
+            CollisionComponent& resolverCollider = registry.colliders.get(entity_resolver);
+            CollisionComponent& otherCollider = registry.colliders.get(entity_other);
+
+            /** Note(Kevin): This collisionCheckAgain is required because as we resolve collisions
+             *  by moving entities around, the initial collection of collision events may become outdated.
+             *  Checking that the two entities are still colliding is not a perfect solution (if there
+             *  even is one), but it should be good enough... We can revisit this and attempt other
+             *  solutions down the line if needed. */
+            CollisionInfo collisionCheckAgain = CheckCollision(resolverCollider, otherCollider);
+            if (collisionCheckAgain.collides)
             {
-                MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
-                resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
-                resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
-                resolverMotion.velocity.x = 0.f;
-            }
-            else
-            {
-                resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
-                resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+                TransformComponent& resolverTransform = registry.transforms.get(entity_resolver);
+                if (abs(collisionCheckAgain.collision_overlap.x) < abs(collisionCheckAgain.collision_overlap.y))
+                {
+                    MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
+                    resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
+                    resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
+                    resolverMotion.velocity.x = 0.f;
+                }
+                else
+                {
+                    resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
+                    resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+                }
             }
         }
     }
