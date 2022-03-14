@@ -47,6 +47,7 @@ enum class TEXTURE_ASSET_ID : u16
     BG_LAYER3,
     BG_LAYER4,
     BG_LAYER5,
+    GOBLIN,
 
     TEXTURE_COUNT
 };
@@ -68,7 +69,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bg_layer2.png"),
         textures_path("bg_layer3.png"),
         textures_path("bg_layer4.png"),
-        textures_path("bg_layer5.png")
+        textures_path("bg_layer5.png"),
+        textures_path("goblin.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -218,6 +220,11 @@ struct SpriteComponent
     {
         return animations[selected_animation].start_frame;
     }
+};
+
+struct DeathTimer 
+{
+    float elapsed_ms = 550.f;
 };
 
 //For entities that can hold items
