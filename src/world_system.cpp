@@ -260,6 +260,8 @@ void WorldSystem::SpawnLevelEntities()
 
     createSword(currentLevelData.playerStart);
 
+    createBow(currentLevelData.playerStart + vec2({10.f, 0}));
+
     // Create enemies
     for(vec2 groundEnemySpawn : currentLevelData.groundMonsterSpawns)
     {
@@ -403,6 +405,16 @@ bool WorldSystem::step(float deltaTime) {
     if(Input::HasKeyBeenPressed(SDL_SCANCODE_U))
     {
         registry.mutations.get(registry.players.entities[0]).mutations.push_back(allPossibleMutations[1]);
+    }
+
+    auto& playerProjectileRegistry = registry.playerProjectiles;
+    for(int i = 0; i < playerProjectileRegistry.size(); i++)
+    {
+        playerProjectileRegistry.components[i].elapsed_time += deltaTime;
+
+        if (playerProjectileRegistry.components[i].elapsed_time > 5) {
+            registry.remove_all_components_of(playerProjectileRegistry.entities[i]);
+        }
     }
 
 //  float min_counter_ms = 3000.f;
