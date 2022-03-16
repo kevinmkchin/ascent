@@ -151,6 +151,7 @@ struct Item
     // When item is on the floor, we want it to be colliding with the floor
     bool collidableWithEnvironment = true;
     bool thrown = false;
+    bool grounded = true;
 };
 
 struct TransformComponent
