@@ -578,7 +578,7 @@ void WorldSystem::handle_collisions()
         {
             HolderComponent& holder = registry.holders.get(entity);
 
-            if (registry.items.has(entity_other))
+            if (registry.items.has(entity_other) && !registry.playerProjectiles.has(entity_other))
             {
                 holder.near_weapon = entity_other;
             }
