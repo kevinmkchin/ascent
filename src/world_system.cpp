@@ -453,18 +453,21 @@ void WorldSystem::handle_collisions()
                 HealthBar& enemyHealth = registry.healthBar.get(entity);
                 enemyHealth.TakeDamage((float) playerComponent.attackPower, (float) playerComponent.attackVariance);
 
-                // Move the player a little bit - its more fun 
-                if(playerSystem->lastAttackDirection == 3)
+                if (entity_other.GetTag() == TAG_PLAYERMELEEATTACK)
                 {
-                    auto& playerMotion = registry.motions.get(player);
-                    playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
-                    playerMotion.velocity.x *= 1.7f;
-                }
-                else if(playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1)
-                {
-                    auto& playerMotion = registry.motions.get(player);
-                    float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
-                    playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
+                    // Move the player a little bit - its more fun
+                    if(playerSystem->lastAttackDirection == 3)
+                    {
+                        auto& playerMotion = registry.motions.get(player);
+                        playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
+                        playerMotion.velocity.x *= 1.7f;
+                    }
+                    else if(playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1)
+                    {
+                        auto& playerMotion = registry.motions.get(player);
+                        float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
+                        playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
+                    }
                 }
 
                 if(enemyHealth.health <= 0.f && !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
