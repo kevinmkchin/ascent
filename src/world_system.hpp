@@ -105,7 +105,7 @@ private:
 
     void SetCurrentMode(GAMEMODE mode);
 
-    void CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other);
+    void CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other, bool bounce_x = false, bool is_item = false);
 
 	// OpenGL window handle
 	SDL_Window* window;

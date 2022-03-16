@@ -446,26 +446,28 @@ void WorldSystem::handle_collisions()
         {
             bool is_thrown_weapon = registry.items.has(entity_other)
                     && registry.items.get(entity_other).thrown
-                    && registry.motions.has(entity_other)
-                    && abs(registry.motions.get(entity_other).velocity.x) > 0;
+                    && (!registry.items.get(entity_other).grounded || abs(registry.motions.get(entity_other).velocity.x) > 0);
 
             if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK || is_thrown_weapon)
             {
                 HealthBar& enemyHealth = registry.healthBar.get(entity);
                 enemyHealth.TakeDamage((float) playerComponent.attackPower, (float) playerComponent.attackVariance);
 
-                // Move the player a little bit - its more fun 
-                if(playerSystem->lastAttackDirection == 3)
+                if (entity_other.GetTag() == TAG_PLAYERMELEEATTACK)
                 {
-                    auto& playerMotion = registry.motions.get(player);
-                    playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
-                    playerMotion.velocity.x *= 1.7f;
-                }
-                else if(playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1)
-                {
-                    auto& playerMotion = registry.motions.get(player);
-                    float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
-                    playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
+                    // Move the player a little bit - its more fun
+                    if(playerSystem->lastAttackDirection == 3)
+                    {
+                        auto& playerMotion = registry.motions.get(player);
+                        playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
+                        playerMotion.velocity.x *= 1.7f;
+                    }
+                    else if(playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1)
+                    {
+                        auto& playerMotion = registry.motions.get(player);
+                        float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
+                        playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
+                    }
                 }
 
                 if(enemyHealth.health <= 0.f && !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
@@ -579,7 +581,7 @@ void WorldSystem::handle_collisions()
         {
             if(registry.items.get(entity).collidableWithEnvironment)
             {
-                CheckCollisionWithBlockable(entity, entity_other);
+                CheckCollisionWithBlockable(entity, entity_other, true, true);
 
                 MotionComponent& itemMotion = registry.motions.get(entity);
                 float deceleration = 3.f;
@@ -610,7 +612,7 @@ void WorldSystem::handle_collisions()
     }
 }
 
-void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other)
+void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other, bool bounce_x, bool is_item)
 {
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
     {
@@ -633,12 +635,24 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
                     MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
                     resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
                     resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
-                    resolverMotion.velocity.x = 0.f;
+
+                    if (bounce_x)
+                    {
+                        resolverMotion.velocity.x = 0.25f * -resolverMotion.velocity.x;
+                    } else
+                    {
+                        resolverMotion.velocity.x = 0.f;
+                    }
                 }
                 else
                 {
                     resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
                     resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+
+                    if (is_item && collisionCheckAgain.collision_overlap.y > 0)
+                    {
+                        registry.items.get(entity_resolver).grounded = true;
+                    }
                 }
             }
         }
