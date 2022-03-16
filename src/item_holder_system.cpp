@@ -4,9 +4,60 @@
 INTERNAL float itemGravity = 500.f;
 INTERNAL float itemThrowUpwardVelocity = -125.f;
 INTERNAL float itemThrowSideVelocity = 150.f;
+INTERNAL float itemShootSideVelocity = 250.f;
 
 ItemHolderSystem::ItemHolderSystem()
 = default;
+
+INTERNAL Entity createArrow(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.items.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    registry.playerProjectiles.emplace(entity);
+
+    registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    15,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::BOW_AND_ARROW,
+                    true,
+                    false,
+                    48,
+                    48,
+                    0,
+                    0,
+                    0.f,
+                    {
+                            { // idle
+                        1,
+                        2,
+                        0.f
+                            }
+                    },
+            }
+    );
+
+    return entity;
+}
+
 
 INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
 {
@@ -65,6 +116,45 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
     }
 }
 
+INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
+{
+    if(holderComponent.want_to_shoot && holderComponent.held_weapon.GetTagAndID() != 0)
+    {
+        Entity projectile;
+
+        switch (holderComponent.held_weapon.GetTag()) {
+            case (TAG_BOW):
+            {
+                projectile = createArrow(holderTransform.position);
+                break;
+            }
+            default:
+            {
+                return;
+            }
+        }
+
+        Item& item = registry.items.get(projectile);
+        item.collidableWithEnvironment = true;
+        item.thrown = true;
+        item.grounded = false;
+
+        MotionComponent& motion = registry.motions.get(projectile);
+        motion.acceleration.y = itemGravity;
+
+        if(holderMotion.facingRight)
+        {
+            motion.velocity = {itemShootSideVelocity, itemThrowUpwardVelocity};
+            registry.sprites.get(projectile).reverse = false;
+        }
+        else
+        {
+            motion.velocity = {-itemShootSideVelocity, itemThrowUpwardVelocity};
+            registry.sprites.get(projectile).reverse = true;
+        }
+    }
+}
+
 INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
 {
     Entity weapon = holderComponent.held_weapon;
@@ -75,10 +165,12 @@ INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionCompon
         if(holderMotion.facingRight)
         {
             weaponTransform.position.x = holderTransform.position.x + holderTransform.center.x;
+            registry.sprites.get(weapon).reverse = false;
         }
         else
         {
             weaponTransform.position.x = holderTransform.position.x - holderTransform.center.x;
+            registry.sprites.get(weapon).reverse = true;
         }
     }
 }
@@ -94,6 +186,7 @@ void ItemHolderSystem::Step(float deltaTime)
 
         ResolvePickUp(holderComponent);
         ResolveDrop(holderComponent);
+        ResolveShoot(holderComponent, holderMotion, holderTransform);
         ResolveThrow(holderComponent, holderMotion);
         ResolveItemMovement(holderComponent, holderMotion, holderTransform);
     }
