@@ -16,6 +16,7 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
         Item& item = registry.items.get(holderComponent.held_weapon);
         item.collidableWithEnvironment = false;
         item.thrown = false;
+        item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
         motion.velocity = {0.f, 0.f};
@@ -29,7 +30,8 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
     {
         Item& item = registry.items.get(holderComponent.held_weapon);
         item.collidableWithEnvironment = true;
-        item.thrown = false;
+        item.thrown = true;
+        item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
         motion.acceleration.y = itemGravity;
@@ -45,6 +47,7 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
         Item& item = registry.items.get(holderComponent.held_weapon);
         item.collidableWithEnvironment = true;
         item.thrown = true;
+        item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
         motion.acceleration.y = itemGravity;

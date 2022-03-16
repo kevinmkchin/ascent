@@ -446,8 +446,7 @@ void WorldSystem::handle_collisions()
         {
             bool is_thrown_weapon = registry.items.has(entity_other)
                     && registry.items.get(entity_other).thrown
-                    && registry.motions.has(entity_other)
-                    && abs(registry.motions.get(entity_other).velocity.x) > 0;
+                    && (!registry.items.get(entity_other).grounded || abs(registry.motions.get(entity_other).velocity.x) > 0);
 
             if(entity_other.GetTag() == TAG_PLAYERMELEEATTACK || is_thrown_weapon)
             {
@@ -579,7 +578,7 @@ void WorldSystem::handle_collisions()
         {
             if(registry.items.get(entity).collidableWithEnvironment)
             {
-                CheckCollisionWithBlockable(entity, entity_other);
+                CheckCollisionWithBlockable(entity, entity_other, true, true);
 
                 MotionComponent& itemMotion = registry.motions.get(entity);
                 float deceleration = 3.f;
@@ -610,7 +609,7 @@ void WorldSystem::handle_collisions()
     }
 }
 
-void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other)
+void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other, bool bounce_x, bool is_item)
 {
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
     {
@@ -633,12 +632,24 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
                     MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
                     resolverTransform.position.x += collisionCheckAgain.collision_overlap.x;
                     resolverCollider.collider_position.x += collisionCheckAgain.collision_overlap.x;
-                    resolverMotion.velocity.x = 0.f;
+
+                    if (bounce_x)
+                    {
+                        resolverMotion.velocity.x = 0.25f * -resolverMotion.velocity.x;
+                    } else
+                    {
+                        resolverMotion.velocity.x = 0.f;
+                    }
                 }
                 else
                 {
                     resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
                     resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+
+                    if (is_item && collisionCheckAgain.collision_overlap.y > 0)
+                    {
+                        registry.items.get(entity_resolver).grounded = true;
+                    }
                 }
             }
         }
