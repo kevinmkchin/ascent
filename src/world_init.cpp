@@ -311,6 +311,53 @@ Entity createSword(vec2 position)
     return entity;
 }
 
+Entity createBow(vec2 position)
+{
+    auto entity = Entity::CreateEntity(TAG_BOW);
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.items.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    15,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::BOW_AND_ARROW,
+                    true,
+                    false,
+                    48,
+                    48,
+                    0,
+                    0,
+                    0.f,
+                    {
+                        { // idle
+                            1,
+                            0,
+                            0
+                        }
+                    },
+            }
+    );
+
+    return entity;
+}
+
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
     auto entity = Entity::CreateEntity();
 

@@ -270,10 +270,12 @@ INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
     const bool bThrowKeyPressed = playerHolder.held_weapon != 0 ? Input::GamePickUpHasBeenPressed() : false;
     const bool bPickUpKeyPressed = playerHolder.held_weapon == 0 ? Input::GamePickUpHasBeenPressed() : false;
     const bool bDropKeyPressed = playerHolder.held_weapon != 0 && Input::GamePickUpHasBeenPressed() && Input::GameDownIsPressed();
+    const bool bAttackKeyPressed = playerHolder.held_weapon != 0 && Input::GameAttackHasBeenPressed();
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;
     playerHolder.want_to_throw = bThrowKeyPressed;
+    playerHolder.want_to_shoot = bAttackKeyPressed;
 }
 #pragma endregion
 
