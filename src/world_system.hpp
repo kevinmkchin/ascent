@@ -93,6 +93,7 @@ public:
 	Mix_Chunk* gain_mutation_sound;
 	Mix_Chunk* player_levelup_sound;
 	Mix_Chunk* blip_select_sound;
+    Mix_Chunk* player_jump_on_enemy_sound;
 
 private:
     void loadAllContent();

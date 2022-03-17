@@ -438,8 +438,8 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             dimensions = { meleeBoxWidth, meleeBoxHeight };
             transform.center = { meleeBoxWidth, meleeBoxHeight/2 };
             collider.collider_position = transform.position;
-            collider.collision_pos = { 0, meleeBoxHeight/2 };
-            collider.collision_neg = { meleeBoxWidth, meleeBoxHeight/2 };
+            collider.collision_pos = { 0, (i16)(meleeBoxHeight/2) };
+            collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight/2) };
         }
         else if(attackDir == 1)
         {
@@ -448,8 +448,8 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             dimensions = { meleeBoxWidth, meleeBoxHeight };
             transform.center = { 0, meleeBoxHeight/2 };
             collider.collider_position = transform.position;
-            collider.collision_pos = { meleeBoxWidth, meleeBoxHeight/2 };
-            collider.collision_neg = { 0, meleeBoxHeight/2 };
+            collider.collision_pos = { meleeBoxWidth, (i16)(meleeBoxHeight/2) };
+            collider.collision_neg = { 0, (i16)(meleeBoxHeight/2) };
         }
         else if(attackDir == 2)
         {
@@ -458,8 +458,8 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             dimensions = { meleeBoxHeight, meleeBoxWidth };
             transform.center = { meleeBoxHeight/2, meleeBoxWidth };
             collider.collider_position = transform.position;
-            collider.collision_pos = { meleeBoxHeight/2, 0 };
-            collider.collision_neg = { meleeBoxHeight/2, meleeBoxWidth };
+            collider.collision_pos = { (i16)(meleeBoxHeight/2), 0 };
+            collider.collision_neg = { (i16)(meleeBoxHeight/2), meleeBoxWidth };
         }
         else if(attackDir == 3)
         {
@@ -468,8 +468,8 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             dimensions = { meleeBoxHeight, meleeBoxWidth };
             transform.center = { meleeBoxHeight/2, 0 };
             collider.collider_position = transform.position;
-            collider.collision_pos = { meleeBoxHeight/2, meleeBoxWidth };
-            collider.collision_neg = { meleeBoxHeight/2, 0 };
+            collider.collision_pos = { (i16)(meleeBoxHeight/2), meleeBoxWidth };
+            collider.collision_neg = { (i16)(meleeBoxHeight/2), 0 };
         }
         playerMeleeAttackPositionOffsetFromPlayer = transform.position - playerTransform.position;
 
