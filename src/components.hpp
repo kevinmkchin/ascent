@@ -159,6 +159,8 @@ struct Item
 struct PlayerProjectile
 {
     float elapsed_time = 0.f;
+    float minTravelTime = 0.4f; // projectile keeps moving regardless of friction for at least this duration
+    bool bHitWall = false;
 };
 
 struct TransformComponent

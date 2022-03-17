@@ -593,16 +593,43 @@ void WorldSystem::handle_collisions()
         {
             if(registry.items.get(entity).collidableWithEnvironment)
             {
-                CheckCollisionWithBlockable(entity, entity_other, true, true);
+                if(!registry.playerProjectiles.has(entity) || registry.playerProjectiles.get(entity).elapsed_time > 0.01f)
+                {
+                    CheckCollisionWithBlockable(entity, entity_other, true, true);
+                }
 
-                MotionComponent& itemMotion = registry.motions.get(entity);
-                float deceleration = 3.f;
-                deceleration = min(deceleration, abs(itemMotion.velocity.x));
+                if(entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+                {
+                    MotionComponent& itemMotion = registry.motions.get(entity);
+                    float deceleration = 3.f;
+                    deceleration = min(deceleration, abs(itemMotion.velocity.x));
 
-                if (itemMotion.velocity.x > 0) {
-                    itemMotion.velocity.x -= deceleration;
-                } else if (itemMotion.velocity.x < 0) {
-                    itemMotion.velocity.x += deceleration;
+                    if(registry.playerProjectiles.has(entity))
+                    {
+                        auto& _proj = registry.playerProjectiles.get(entity);
+                        if(_proj.bHitWall || _proj.elapsed_time >= _proj.minTravelTime)
+                        {
+                            if(itemMotion.velocity.x > 0) 
+                            {
+                                itemMotion.velocity.x -= deceleration;
+                            } 
+                            else if(itemMotion.velocity.x < 0) 
+                            {
+                                itemMotion.velocity.x += deceleration;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(itemMotion.velocity.x > 0) 
+                        {
+                            itemMotion.velocity.x -= deceleration;
+                        } 
+                        else if(itemMotion.velocity.x < 0) 
+                        {
+                            itemMotion.velocity.x += deceleration;
+                        }
+                    }
                 }
             }
         }
@@ -651,9 +678,19 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
                     if (bounce_x)
                     {
                         resolverMotion.velocity.x = 0.25f * -resolverMotion.velocity.x;
-                    } else
+                    } 
+                    else
                     {
                         resolverMotion.velocity.x = 0.f;
+                    }
+
+                    if(is_item)
+                    {
+                        if(registry.playerProjectiles.has(entity_resolver))
+                        {
+                            auto& _proj = registry.playerProjectiles.get(entity_resolver);
+                            _proj.bHitWall = true;
+                        }
                     }
                 }
                 else

@@ -18,13 +18,12 @@ INTERNAL Entity createArrow(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.items.emplace(entity);
 
-    vec2 dimensions = { 16, 16 };
     transform.position = position;
     transform.rotation = 0.f;
-    transform.center = dimensions / 2.f;
+    transform.center = {8, 8};
 
-    collider.collision_pos = dimensions / 2.f;
-    collider.collision_neg = dimensions / 2.f;
+    collider.collision_pos = vec2(16.f, 8.f) / 2.f;
+    collider.collision_neg = vec2(16.f, 8.f) / 2.f;
 
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;
@@ -34,7 +33,7 @@ INTERNAL Entity createArrow(vec2 position)
     registry.sprites.insert(
             entity,
             {
-                    dimensions,
+                    {16, 16},
                     15,
                     EFFECT_ASSET_ID::SPRITE,
                     TEXTURE_ASSET_ID::BOW_AND_ARROW,
