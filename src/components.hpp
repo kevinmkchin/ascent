@@ -48,6 +48,7 @@ enum class TEXTURE_ASSET_ID : u16
     BG_LAYER4,
     BG_LAYER5,
     GOBLIN,
+    BOW_AND_ARROW,
 
     TEXTURE_COUNT
 };
@@ -70,7 +71,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bg_layer3.png"),
         textures_path("bg_layer4.png"),
         textures_path("bg_layer5.png"),
-        textures_path("goblin.png")
+        textures_path("goblin.png"),
+        textures_path("bow_and_arrow.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -152,6 +154,13 @@ struct Item
     bool collidableWithEnvironment = true;
     bool thrown = false;
     bool grounded = true;
+};
+
+struct PlayerProjectile
+{
+    float elapsed_time = 0.f;
+    float minTravelTime = 0.4f; // projectile keeps moving regardless of friction for at least this duration
+    bool bHitWall = false;
 };
 
 struct TransformComponent
@@ -236,6 +245,7 @@ struct HolderComponent
     bool want_to_pick_up = false;
     bool want_to_drop = false;
     bool want_to_throw = false;
+    bool want_to_shoot = false;
 };
 
 struct CollisionEvent
@@ -297,5 +307,6 @@ enum GAMETAGS : u8
     TAG_LADDER,
     TAG_SPIKE,
     TAG_PLAYERBLOCKABLE,
-    TAG_PLAYERMELEEATTACK
+    TAG_PLAYERMELEEATTACK,
+    TAG_BOW,
 };

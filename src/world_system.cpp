@@ -234,6 +234,8 @@ void WorldSystem::SpawnLevelEntities() {
 
     createSword(currentLevelData.playerStart);
 
+    createBow(currentLevelData.playerStart + vec2({10.f, 0}));
+
     // Create enemies
     for (vec2 groundEnemySpawn: currentLevelData.groundMonsterSpawns) {
         CreateGoblinEnemy(groundEnemySpawn);
@@ -370,6 +372,16 @@ bool WorldSystem::step(float deltaTime) {
 
     if (Input::HasKeyBeenPressed(SDL_SCANCODE_U)) {
         registry.mutations.get(registry.players.entities[0]).mutations.push_back(allPossibleMutations[1]);
+    }
+
+    auto& playerProjectileRegistry = registry.playerProjectiles;
+    for(int i = 0; i < playerProjectileRegistry.size(); i++)
+    {
+        playerProjectileRegistry.components[i].elapsed_time += deltaTime;
+
+        if (playerProjectileRegistry.components[i].elapsed_time > 5) {
+            registry.remove_all_components_of(playerProjectileRegistry.entities[i]);
+        }
     }
 
 //  float min_counter_ms = 3000.f;
@@ -523,7 +535,8 @@ void WorldSystem::handle_collisions() {
         if (registry.holders.has(entity)) {
             HolderComponent &holder = registry.holders.get(entity);
 
-            if (registry.items.has(entity_other)) {
+            if (registry.items.has(entity_other) && !registry.playerProjectiles.has(entity_other))
+            {
                 holder.near_weapon = entity_other;
             } else {
                 // Assign to fake entity
@@ -531,18 +544,47 @@ void WorldSystem::handle_collisions() {
             }
         }
 
-        if (registry.items.has(entity)) {
-            if (registry.items.get(entity).collidableWithEnvironment) {
-                CheckCollisionWithBlockable(entity, entity_other, true, true);
+        if(registry.items.has(entity))
+        {
+            if(registry.items.get(entity).collidableWithEnvironment)
+            {
+                if(!registry.playerProjectiles.has(entity) || registry.playerProjectiles.get(entity).elapsed_time > 0.01f)
+                {
+                    CheckCollisionWithBlockable(entity, entity_other, true, true);
+                }
 
-                MotionComponent &itemMotion = registry.motions.get(entity);
-                float deceleration = 3.f;
-                deceleration = min(deceleration, abs(itemMotion.velocity.x));
+                if(entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+                {
+                    MotionComponent& itemMotion = registry.motions.get(entity);
+                    float deceleration = 3.f;
+                    deceleration = min(deceleration, abs(itemMotion.velocity.x));
 
-                if (itemMotion.velocity.x > 0) {
-                    itemMotion.velocity.x -= deceleration;
-                } else if (itemMotion.velocity.x < 0) {
-                    itemMotion.velocity.x += deceleration;
+                    if(registry.playerProjectiles.has(entity))
+                    {
+                        auto& _proj = registry.playerProjectiles.get(entity);
+                        if(_proj.bHitWall || _proj.elapsed_time >= _proj.minTravelTime)
+                        {
+                            if(itemMotion.velocity.x > 0) 
+                            {
+                                itemMotion.velocity.x -= deceleration;
+                            } 
+                            else if(itemMotion.velocity.x < 0) 
+                            {
+                                itemMotion.velocity.x += deceleration;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(itemMotion.velocity.x > 0) 
+                        {
+                            itemMotion.velocity.x -= deceleration;
+                        } 
+                        else if(itemMotion.velocity.x < 0) 
+                        {
+                            itemMotion.velocity.x += deceleration;
+                        }
+                    }
                 }
             }
         }
@@ -584,10 +626,23 @@ WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_o
 
                     if (bounce_x) {
                         resolverMotion.velocity.x = 0.25f * -resolverMotion.velocity.x;
-                    } else {
+                    } 
+                    else
+                    {
                         resolverMotion.velocity.x = 0.f;
                     }
-                } else {
+
+                    if(is_item)
+                    {
+                        if(registry.playerProjectiles.has(entity_resolver))
+                        {
+                            auto& _proj = registry.playerProjectiles.get(entity_resolver);
+                            _proj.bHitWall = true;
+                        }
+                    }
+                }
+                else
+                {
                     resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
                     resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
 
