@@ -356,8 +356,6 @@ void WorldSystem::UpdateMode() {
         if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
             StartNewRun();
         }
-
-        // TODO: Check for button clicks instead
     }
 }
 
@@ -489,14 +487,12 @@ void WorldSystem::handle_collisions() {
             }
 
             if (registry.enemy.has(entity_other)) {
-                // TODO: Make player bounce off of enemy when colliding from above (player takes no damage)
                 Enemy &enemy = registry.enemy.get(entity_other);
 
                 // Check if player is moving vertically downwards
                 if (playerMotion.velocity.y > 0.f) {
                     // player does not take damage & just bounces off
                     playerMotion.velocity = {0.f, -playerMotion.velocity.y};
-                    printf("Player jumping on enemy!!");
                     if (Mix_PlayChannel(-1, player_jump_on_enemy_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }

@@ -168,6 +168,14 @@ int main(int argc, char* argv[])
                 //printf("spriteSystem.Step: %f seconds\n", timer::timestamp());
                 world.handle_collisions();
                 //printf("handle_collisions: %f seconds\n", timer::timestamp());
+            } else if (Input::HasKeyBeenPressed(SDL_SCANCODE_Q)){
+                world.cleanUp();
+                renderer.CleanUp();
+
+                SDL_DestroyWindow(window);
+                SDL_GL_DeleteContext(openglContext);
+                SDL_Quit();
+                return EXIT_SUCCESS;
             }
         }
 

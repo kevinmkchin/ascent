@@ -86,11 +86,9 @@ void UISystem::UpdateTextUI(float dt)
             vtxt_move_cursor(350, 440);
             vtxt_append_line("ASCENT", &font_c64, 72);
             vtxt_move_cursor(350, 600);
-            vtxt_append_line("Press ENTER to play", &font_c64, 48);
-            vtxt_move_cursor(350, 800);
-            vtxt_append_line("PLAY", &font_c64, 48);
-            vtxt_move_cursor(850, 800);
-            vtxt_append_line("EXIT", &font_c64, 48);
+            vtxt_append_line("PLAY (ENTER)", &font_c64, 48);
+            vtxt_move_cursor(350, 760);
+            vtxt_append_line("EXIT (Q)", &font_c64, 48);
         }break;
         case MODE_INGAME:
         {
