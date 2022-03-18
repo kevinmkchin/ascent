@@ -49,6 +49,7 @@ enum class TEXTURE_ASSET_ID : u16
     BG_LAYER5,
     GOBLIN,
     BOW_AND_ARROW,
+    FLYING_ENEMY,
 
     TEXTURE_COUNT
 };
@@ -72,7 +73,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("bg_layer4.png"),
         textures_path("bg_layer5.png"),
         textures_path("goblin.png"),
-        textures_path("bow_and_arrow.png")
+        textures_path("bow_and_arrow.png"),
+        textures_path("batEnemy.png")
 };
 
 enum class EFFECT_ASSET_ID : u8

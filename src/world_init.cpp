@@ -120,7 +120,7 @@ Entity CreateBatEnemy(vec2 position)
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
 
-    vec2 dimensions = { 12, 12 };
+    vec2 dimensions = { 16, 16 };
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
@@ -140,13 +140,44 @@ Entity CreateBatEnemy(vec2 position)
     visualComponent.sightRadius = 96.f;
 
     registry.sprites.insert(
-        entity,
-        {
-                dimensions,
-                0,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::FIRE
-        }
+            entity,
+            {
+                    dimensions,
+                    0,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::FLYING_ENEMY,
+                    true,
+                    false,
+                    32,
+                    32,
+                    0,
+                    0,
+                    0.f,
+                    {
+
+                            // idle
+                            {
+                                    8,
+                                    18,
+                                    100.f * 4.f
+                            },
+
+                            // run
+                            {
+                                    8,
+                                    0,
+                                    100.f * 6.f
+                            },
+
+                            // death
+                            {
+                                    8,
+                                    6,
+                                    100.f * 6.f
+                            },
+
+                    },
+            }
     );
 
     return entity;
