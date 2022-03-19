@@ -308,6 +308,319 @@ Entity CreateGoblinEnemy(vec2 position)
     return entity;
 }
 
+Entity CreateGoblinBomberEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    hb.health = 50.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    // TODO: Change Goblin Bomber behavior
+    float maxMoveSpeed = 64.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+    pathingBehavior.flyingType = false;
+
+    patrollingBehavior.patrolDistance = 48.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.standStill = false;
+
+    visualComponent.sightRadius = 64.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::GOBLIN_BOMBER,
+                true,
+                false,
+                96,
+                64,
+                0,
+                0,
+                0.f,
+                {
+
+                // idle
+                {
+                    4,
+                    12,
+                    100.f * 4.f
+                },
+
+                // run (no run so same as idle)
+                {
+                    4,
+                    12,
+                    100.f * 4.f
+                },
+
+                // death
+                {
+                    6,
+                    6,
+                    100.f * 6.f
+                },
+
+            },
+        }
+    );
+
+    return entity;
+}
+
+Entity CreateMushroomEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    hb.health = 50.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxMoveSpeed = 64.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+    pathingBehavior.flyingType = false;
+
+    patrollingBehavior.patrolDistance = 48.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.standStill = false;
+
+    visualComponent.sightRadius = 64.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::MUSHROOM,
+                true,
+                false,
+                128,
+                64,
+                0,
+                0,
+                0.f,
+                {
+
+                // idle
+                {
+                    6,
+                    8,
+                    100.f * 6.f
+                },
+
+                // run
+                {
+                    8,
+                    0,
+                    100.f * 8.f
+                },
+
+                // death
+                {
+                    6,
+                    16,
+                    100.f * 6.f
+                },
+
+            },  
+        }
+    );
+
+    return entity;
+}
+
+Entity CreateSlimeEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    hb.health = 50.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxMoveSpeed = 64.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+    pathingBehavior.flyingType = false;
+
+    patrollingBehavior.patrolDistance = 48.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.standStill = false;
+
+    visualComponent.sightRadius = 64.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::SLIME,
+                true,
+                false,
+                240,
+                80,
+                0,
+                0,
+                0.f,
+                {
+
+                // idle
+                {
+                    5,
+                    45,
+                    100.f * 5.f
+                },
+
+                // run
+                {
+                    15,
+                    15,
+                    100.f * 15.f
+                },
+
+                // death
+                {
+                    6,
+                    30,
+                    100.f * 6.f
+                },
+
+            },
+        }
+    );
+
+    return entity;
+}
+
+Entity CreateWormEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    hb.health = 50.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 8 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+
+    float maxMoveSpeed = 64.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+    pathingBehavior.flyingType = false;
+
+    patrollingBehavior.patrolDistance = 48.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.standStill = false;
+
+    visualComponent.sightRadius = 64.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::WORM,
+                true,
+                false,
+                96,
+                24,
+                0,
+                0,
+                0.f,
+                {
+
+                // idle
+                {
+                    6,
+                    0,
+                    100.f * 6.f
+                },
+
+                // run
+                {
+                    6,
+                    0,
+                    100.f * 6.f
+                },
+
+                // death
+                {
+                    6,
+                    6,
+                    100.f * 6.f
+                },
+
+            },
+        }
+    );
+
+    return entity;
+}
+
 Entity createSword(vec2 position)
 {
     auto entity = Entity::CreateEntity();
