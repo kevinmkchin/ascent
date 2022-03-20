@@ -39,6 +39,7 @@ INTERNAL Entity createArrow(vec2 position)
                     TEXTURE_ASSET_ID::BOW_AND_ARROW,
                     true,
                     false,
+                    true,
                     48,
                     48,
                     0,
@@ -47,7 +48,7 @@ INTERNAL Entity createArrow(vec2 position)
                     {
                             { // idle
                         1,
-                        2,
+                        8,
                         0.f
                             }
                     },
@@ -125,6 +126,9 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
             case (TAG_BOW):
             {
                 projectile = createArrow(holderTransform.position);
+                SpriteComponent& sprite = registry.sprites.get(holderComponent.held_weapon);
+                sprite.selected_animation = 0;
+                sprite.animations[0].played = false;
                 break;
             }
             default:
