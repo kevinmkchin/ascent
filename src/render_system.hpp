@@ -47,6 +47,8 @@ class RenderSystem {
     std::array<GLuint, effect_count> effects;
 
 public:
+
+    float elapsedTime = 0;
 	// Initialize the window
 	bool Init(SDL_Window* window, WorldSystem* world_sys_arg);
 
@@ -54,7 +56,7 @@ public:
     void CleanUp();
 
 	// Draw all entities
-	void Draw();
+	void Draw(float elapsed_ms);
 
     // Call this when the display resolution (i.e. the window size) changes
     void UpdateBackBufferSize();
@@ -105,7 +107,7 @@ private:
 
     void DrawBackground(TEXTURE_ASSET_ID texId, float offset);
 
-    void DrawAllBackgrounds();
+    void DrawAllBackgrounds(float elapsed_ms);
 
     void DrawUI();
 

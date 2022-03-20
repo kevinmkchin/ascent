@@ -1,9 +1,11 @@
 // internal
+#include <chrono>
 #include "render_system.hpp"
 #include "world_system.hpp"
 
 #include "tiny_ecs_registry.hpp"
 
+using Clock = std::chrono::high_resolution_clock;
 INTERNAL u32 GetRenderState(const SpriteComponent& sprite)
 {
     u32 state = 0;
@@ -100,10 +102,14 @@ void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
     gl_has_errors();
 }
 
-void RenderSystem::DrawAllBackgrounds()
+void RenderSystem::DrawAllBackgrounds(float elapsed_ms)
 {
+    elapsedTime += elapsed_ms;
     float offset = 0.f;
-    if (registry.players.size() > 0 && bgTexId.size() > 1) {
+    if (world->GetCurrentMode() == MODE_MAINMENU) {
+        offset = elapsedTime / ((float) bgTexId.size());
+        offset *= 0.00005f; // Constant to slow down movement
+    } else if (registry.players.size() > 0 && bgTexId.size() > 1) {
         Entity player = registry.players.entities[0];
         TransformComponent& playerTransform = registry.transforms.get(player);
         float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
@@ -328,9 +334,9 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::Draw()
+void RenderSystem::Draw(float elapsed_ms)
 {
-	// First render to the custom framebuffer
+    // First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, gameFrameBuffer);
 	gl_has_errors();
 	// Clearing backbuffer
@@ -349,7 +355,7 @@ void RenderSystem::Draw()
 	mat3 projection_2D = CreateGameProjectionMatrix();
 
     // DRAW BACKGROUND
-    DrawAllBackgrounds();
+    DrawAllBackgrounds(elapsed_ms);
 
     // DRAW SPRITES
     if(registry.sprites.size() > 0)
