@@ -14,6 +14,14 @@ Entity CreateKnightEnemy(vec2 position);
 
 Entity CreateGoblinEnemy(vec2 position);
 
+Entity CreateGoblinBomberEnemy(vec2 position);
+
+Entity CreateMushroomEnemy(vec2 position);
+
+Entity CreateSlimeEnemy(vec2 position);
+
+Entity CreateWormEnemy(vec2 position);
+
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy);
 
 Entity createSword(vec2 position);

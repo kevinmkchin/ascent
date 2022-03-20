@@ -490,7 +490,7 @@ void WorldSystem::handle_collisions() {
                 Enemy &enemy = registry.enemy.get(entity_other);
 
                 // Check if player is moving vertically downwards
-                if (playerMotion.velocity.y > 0.f && registry.pathingBehaviors.get(entity_other).flyingType == false) {
+                if (playerMotion.velocity.y > 100.f && registry.pathingBehaviors.get(entity_other).flyingType == false) {
                     // player does not take damage & just bounces off
                     playerMotion.velocity = {0.f, -playerMotion.velocity.y};
                     if (Mix_PlayChannel(-1, player_jump_on_enemy_sound, 0) == -1) {
