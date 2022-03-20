@@ -21,9 +21,12 @@ void SpriteSystem::Step(float deltaTime) {
 
         if (sprite.elapsed_time >= (current_anim.animation_duration / current_anim.num_frames)) {
             sprite.elapsed_time = 0.f;
-            sprite.current_frame++;
+            if (!current_anim.played || current_anim.replay) {
+                sprite.current_frame++;
+            }
             if (sprite.current_frame >= current_anim.num_frames) {
                 sprite.current_frame = 0;
+                current_anim.played = true;
             }
         }
     }
