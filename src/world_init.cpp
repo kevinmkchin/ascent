@@ -698,10 +698,17 @@ Entity createBow(vec2 position)
                     0,
                     0.f,
                     {
-                        { // idle
-                            1,
+//                        { // idle
+//                            1,
+//                            0,
+//                            0
+//                        },
+                        {
+                            3,
                             0,
-                            0
+                            300.f,
+                            false,
+                            true
                         }
                     },
             }

@@ -208,6 +208,8 @@ struct Animation // NOT A COMPONENT
     u16 num_frames = 1;
     u16 start_frame = 0;
     float animation_duration = 0.f;
+    bool replay = true;
+    bool played = false;
 };
 
 struct SpriteComponent
