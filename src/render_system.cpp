@@ -6,7 +6,6 @@
 #include "tiny_ecs_registry.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
-
 INTERNAL u32 GetRenderState(const SpriteComponent& sprite)
 {
     u32 state = 0;
@@ -103,21 +102,13 @@ void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
     gl_has_errors();
 }
 
-void RenderSystem::DrawAllBackgrounds()
+void RenderSystem::DrawAllBackgrounds(float elapsed_ms)
 {
-    auto t = Clock::now();
+    elapsedTime += elapsed_ms;
     float offset = 0.f;
     if (world->GetCurrentMode() == MODE_MAINMENU) {
-        auto now = Clock::now();
-        float elapsed_ms =
-                (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
-        t = now;
-        elapsed_ms = elapsed_ms + 2000;
-//        printf("%f",elapsed_ms);
-        offset = elapsed_ms / ((float) bgTexId.size());
-//        offset = offset/1000.0f;
-        offset *= 0.5f; // Constant to slow down movement
-        printf("%f",offset);
+        offset = elapsedTime / ((float) bgTexId.size());
+        offset *= 0.00005f; // Constant to slow down movement
     } else if (registry.players.size() > 0 && bgTexId.size() > 1) {
         Entity player = registry.players.entities[0];
         TransformComponent& playerTransform = registry.transforms.get(player);
@@ -343,7 +334,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::Draw()
+void RenderSystem::Draw(float elapsed_ms)
 {
     // First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, gameFrameBuffer);
@@ -364,7 +355,7 @@ void RenderSystem::Draw()
 	mat3 projection_2D = CreateGameProjectionMatrix();
 
     // DRAW BACKGROUND
-    DrawAllBackgrounds();
+    DrawAllBackgrounds(elapsed_ms);
 
     // DRAW SPRITES
     if(registry.sprites.size() > 0)
