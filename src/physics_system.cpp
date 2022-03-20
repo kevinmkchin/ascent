@@ -52,6 +52,7 @@ INTERNAL void MoveEntities(float deltaTime)
     for(u32 i = 0; i< motion_registry.size(); i++)
     {
         MotionComponent& motion = motion_registry.components[i];
+        vec2 old_velocity = motion.velocity;
         if(std::abs(motion.velocity.x) > std::abs(motion.terminalVelocity.x))
         {
             motion.velocity.x -= (motion.velocity.x/abs(motion.velocity.x)) * max(abs(motion.acceleration.x), 800.f) * deltaTime;
@@ -69,7 +70,7 @@ INTERNAL void MoveEntities(float deltaTime)
             motion.velocity.y += motion.acceleration.y * deltaTime;
         }
         Entity e = motion_registry.entities[i];
-        registry.transforms.get(e).position += motion.velocity * deltaTime;
+        registry.transforms.get(e).position += ((float)0.5 * (motion.velocity + old_velocity)) * deltaTime;
         if(registry.colliders.has(e))
         {
             registry.colliders.get(e).collider_position = registry.transforms.get(e).position;
