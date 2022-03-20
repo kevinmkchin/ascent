@@ -81,7 +81,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("batEnemy.png"),
         textures_path("goblin_bomber.png"),
         textures_path("mushroom.png"),
-        textures_path("slime.png"),
+        textures_path("slime_fixed.png"),
         textures_path("worm.png")
 };
 
@@ -221,6 +221,7 @@ struct SpriteComponent
     // SPRITESHEET / ANIMATION DATA
     bool sprite_sheet = false;
     bool reverse = false;
+    bool faceRight = true; // if sprite facing right, true
 
     u16 sheetSizeX = 16;
     u16 sheetSizeY = 16;
