@@ -39,6 +39,7 @@ INTERNAL Entity createArrow(vec2 position)
                     TEXTURE_ASSET_ID::BOW_AND_ARROW,
                     true,
                     false,
+                    true,
                     48,
                     48,
                     0,
