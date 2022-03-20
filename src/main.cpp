@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
         Input::ResetControllerStates();
         Input::ResetKeyboardStates();
 
-        renderer.Draw();
+        renderer.Draw(elapsed_ms);
         //printf("Draw: %f seconds\n", timer::timestamp());
         //float fps = 1 / deltaTime;
         //printf("%f DELTA TIME \n", fps);
