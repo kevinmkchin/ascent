@@ -110,10 +110,11 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 				sprite.selected_animation = 0;
 			}
 
-			sprite.current_frame = ((faceRight != reversed) && prev_state == sprite.selected_animation)
+			bool aligned = sprite.faceRight ? (faceRight != reversed) : (faceRight == reversed);
+			sprite.current_frame = (aligned && prev_state == sprite.selected_animation)
 				? sprite.current_frame : 0;
 
-			sprite.reverse = faceRight ? false : true;
+			sprite.reverse = sprite.faceRight ? !faceRight : faceRight;
 		}
 	}
 }
