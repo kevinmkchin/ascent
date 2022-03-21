@@ -117,6 +117,8 @@ Entity CreateBatEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& flyingBehavior = registry.flyingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 20.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -132,7 +134,6 @@ Entity CreateBatEnemy(vec2 position)
     float maxMoveSpeed = 128.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = true;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -196,6 +197,9 @@ Entity CreateKnightEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -211,7 +215,6 @@ Entity CreateKnightEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -243,6 +246,8 @@ Entity CreateGoblinEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -258,7 +263,6 @@ Entity CreateGoblinEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -322,6 +326,8 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -338,7 +344,6 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -402,6 +407,8 @@ Entity CreateMushroomEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -417,7 +424,6 @@ Entity CreateMushroomEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -481,6 +487,8 @@ Entity CreateSlimeEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -496,7 +504,6 @@ Entity CreateSlimeEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -560,6 +567,8 @@ Entity CreateWormEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -575,7 +584,6 @@ Entity CreateWormEnemy(vec2 position)
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-    pathingBehavior.flyingType = false;
 
     patrollingBehavior.patrolDistance = 48.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
@@ -719,10 +727,10 @@ Entity createBow(vec2 position)
 
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
     auto entity = Entity::CreateEntity();
-
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
+    auto& rangedBehavior = registry.rangedBehaviors.get(enemy);
     vec2 dimensions = { 16, 16 };
     transform.position = position;
     transform.rotation = 0.f;
@@ -732,7 +740,8 @@ Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
 
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
-    auto& projectile = registry.enemyprojectile.emplace(entity);
+    auto& projectile = registry.enemyProjectiles.emplace(entity);
+    projectile.attackPower = rangedBehavior.attackPower;
     projectile.enemy_projectile = enemy;
     registry.sprites.insert(
         entity,
