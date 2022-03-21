@@ -102,26 +102,38 @@ void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
     gl_has_errors();
 }
 
+void RenderSystem::DrawMainMenuBackground(float elapsed_ms) {
+    elapsedTime += elapsed_ms / 1000.f;
+
+    // TODO: Add a way to specify offset differences for background without manually doing it
+    DrawBackground(bgTexId[0], (elapsedTime / 800.0f) * 1.5f);
+    DrawBackground(bgTexId[1], (elapsedTime / 200.0f) * 1.5f);
+    DrawBackground(bgTexId[2], (elapsedTime / 150.0f) * 1.5f);
+    DrawBackground(bgTexId[3], (elapsedTime / 100.0f) * 1.5f);
+    DrawBackground(bgTexId[4], (elapsedTime / 50.0f) * 1.5f);
+}
+
 void RenderSystem::DrawAllBackgrounds(float elapsed_ms)
 {
-    elapsedTime += elapsed_ms;
     float offset = 0.f;
     if (world->GetCurrentMode() == MODE_MAINMENU) {
-        offset = elapsedTime / ((float) bgTexId.size());
-        offset *= 0.00005f; // Constant to slow down movement
-    } else if (registry.players.size() > 0 && bgTexId.size() > 1) {
-        Entity player = registry.players.entities[0];
-        TransformComponent& playerTransform = registry.transforms.get(player);
-        float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
-        playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
-        playerPositionX = playerPositionX / GAME_RESOLUTION_WIDTH;
-        offset = playerPositionX / ((float) bgTexId.size());
-        offset *= 0.5f; // Constant to slow down movement
+        DrawMainMenuBackground(elapsed_ms);
     }
+    else {
+        if (registry.players.size() > 0 && bgTexId.size() > 1) {
+            Entity player = registry.players.entities[0];
+            TransformComponent& playerTransform = registry.transforms.get(player);
+            float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
+            playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
+            playerPositionX = playerPositionX / GAME_RESOLUTION_WIDTH;
+            offset = playerPositionX / ((float)bgTexId.size());
+            offset *= 0.5f; // Constant to slow down movement
+        }
 
-    for (int i = 0; i < bgTexId.size(); i++) {
-        DrawBackground(bgTexId[i], offset);
-        offset += offset;
+        for (int i = 0; i < bgTexId.size(); i++) {
+            DrawBackground(bgTexId[i], offset);
+            offset += offset;
+        }
     }
 }
 
