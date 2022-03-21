@@ -439,7 +439,14 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
         i16 meleeBoxWidth = playerComponentPtr->meleeAttackRange;
         i16 meleeBoxHeight = playerComponentPtr->meleeAttackArc;
 
-        vec2 dimensions;
+        SpriteComponent attackBox = {
+            {0,0},
+            20,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::SWORDSWING_LEFT
+        };
+        shortvec2& dimensions = attackBox.dimensions;
+
         if(attackDir == 0)
         {
             transform.position.x = playerTransform.position.x - 8;
@@ -449,6 +456,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { 0, (i16)(meleeBoxHeight/2) };
             collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight/2) };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_LEFT;
         }
         else if(attackDir == 1)
         {
@@ -459,6 +467,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { meleeBoxWidth, (i16)(meleeBoxHeight/2) };
             collider.collision_neg = { 0, (i16)(meleeBoxHeight/2) };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_RIGHT;
         }
         else if(attackDir == 2)
         {
@@ -469,6 +478,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { (i16)(meleeBoxHeight/2), 0 };
             collider.collision_neg = { (i16)(meleeBoxHeight/2), meleeBoxWidth };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_UP;
         }
         else if(attackDir == 3)
         {
@@ -479,17 +489,13 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { (i16)(meleeBoxHeight/2), meleeBoxWidth };
             collider.collision_neg = { (i16)(meleeBoxHeight/2), 0 };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_DOWN;
         }
         playerMeleeAttackPositionOffsetFromPlayer = transform.position - playerTransform.position;
 
         registry.sprites.insert(
             playerMeleeAttackEntity,
-            {
-                    dimensions,
-                    20,
-                    EFFECT_ASSET_ID::SPRITE,
-                    TEXTURE_ASSET_ID::BOX
-            }
+            attackBox
         );
 
         if(Mix_PlayChannel(-1, world->sword_sound, 0) == -1) 

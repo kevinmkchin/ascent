@@ -530,27 +530,6 @@ void WorldSystem::handle_collisions() {
 
                             if (i == 1) {
 
-                                createExp(expPosition);
-                            }
-
-                            if (i == 2) {
-                                vec2 expPosition1 = { expPositionx1, expPosition.y };
-                                createExp(expPosition1);
-                            }
-
-                            else {
-                                vec2 expPosition2 = { expPositionx2, expPosition.y };
-                                createExp(expPosition2);
-                            }
-
-                        }
-                    }
-                    else {
-
-                        for (int i = 1; i <= random_count; i++) {
-
-                            if (i == 1) {
-
                                 createCoins(expPosition);
                             }
 
@@ -562,6 +541,27 @@ void WorldSystem::handle_collisions() {
                             else {
                                 vec2 expPosition2 = { expPositionx2, expPosition.y };
                                 createCoins(expPosition2);
+                            }
+
+                        }
+                    }
+                    else {
+
+                        for (int i = 1; i <= random_count; i++) {
+
+                            if (i == 1) {
+
+                                createExp(expPosition);
+                            }
+
+                            if (i == 2) {
+                                vec2 expPosition1 = { expPositionx1, expPosition.y };
+                                createExp(expPosition1);
+                            }
+
+                            else {
+                                vec2 expPosition2 = { expPositionx2, expPosition.y };
+                                createExp(expPosition2);
                             }
 
                         }
