@@ -651,6 +651,11 @@ WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_o
                 {
                     resolverTransform.position.y += collisionCheckAgain.collision_overlap.y;
                     resolverCollider.collider_position.y += collisionCheckAgain.collision_overlap.y;
+                    if (collisionCheckAgain.collision_overlap.y > 1) {
+                        MotionComponent& resolverMotion = registry.motions.get(entity_resolver);
+                        resolverMotion.velocity.y = 0;
+                    }
+                    
 
                     if (is_item && collisionCheckAgain.collision_overlap.y > 0) {
                         registry.items.get(entity_resolver).grounded = true;
