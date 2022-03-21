@@ -17,7 +17,6 @@ public:
 	void HandleSpriteSheetFrame(float deltaTime);
 	void EnemyAttack(Entity enemy_entity);
 	void Pathfind(Entity enemy_entity);
-	void Physics(Entity enemy_entity, float deltaTime);
 	bool PlayerInAwarenessBubble(Entity enemy_entity);
 	void PathBehavior(Entity enemy_entity);
 	void PatrolBehavior(Entity enemy_entity);

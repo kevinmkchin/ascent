@@ -2,7 +2,7 @@
 #include "ai_system.hpp"
 
 /* FLOOR-BOUND ENEMY PHYSICS CONFIGURATION */
-INTERNAL float enemyGravity = 400.f;
+INTERNAL float enemyGravity = 15.f;
 INTERNAL float enemyJumpSpeed = 200.f;
 // INTERNAL float enemyMaxMoveSpeed = 64.f;
 INTERNAL float enemyMaxFallSpeed = 200.f;
@@ -60,9 +60,6 @@ void AISystem::Step(float deltaTime)
 			}
 
 			TransformComponent& enemyTransform = registry.transforms.get(enemy);
-			if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
-				Physics(enemy, deltaTime);
-			}
 		}
 	}
 
@@ -138,104 +135,7 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 			createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
 		}
 	}
-}
-
-// TODO this duplicates a lot of code from player physics, maybe want to abstract that 
-void AISystem::Physics(Entity enemy_entity, float deltaTime) {
-	bool bGrounded = false;
-	bool bStillLaddered = false;
-	bool bCollidedDirectlyAbove = false;
-	MotionComponent enemyMotion = registry.motions.get(enemy_entity);
-
-
-	std::vector<CollisionEvent> relevantCollisions;
-	std::vector<CollisionEvent> groundableCollisions;
-	std::vector<CollisionEvent> directlyAboveCollisions;
-
-
-	// Check if grounded or colliding above
-	const auto& collisionsRegistry = registry.collisionEvents;
-	for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
-	{
-		const CollisionEvent colEvent = collisionsRegistry.components[i];
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = colEvent.other;
-
-		if (entity != enemy_entity)
-		{
-			continue;
-		}
-
-		if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
-		{
-			relevantCollisions.push_back(colEvent);
-
-			CollisionComponent& enemyCollider = registry.colliders.get(entity);
-
-			// Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
-			CollisionInfo collisionCheck = CheckCollision(enemyCollider, registry.colliders.get(entity_other));
-			if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
-			{
-				if (collisionCheck.collision_overlap.y <= 0.f
-					&& enemyMotion.velocity.y >= 0.f) // check we are not already moving up otherwise glitches.
-				{
-					groundableCollisions.push_back(colEvent);
-					bGrounded = true;
-				}
-				if (collisionCheck.collision_overlap.y > 0.f)
-				{
-					directlyAboveCollisions.push_back(colEvent);
-					bCollidedDirectlyAbove = true;
-				}
-			}
-		}
-
-	}
-
-	// Check if actually grounded
-	if (bGrounded)
-	{
-		for (auto gcol : groundableCollisions)
-		{
-			for (auto rcol : relevantCollisions)
-			{
-				if (gcol.collision_overlap.x == rcol.collision_overlap.x
-					&& gcol.collision_overlap.y != rcol.collision_overlap.y)
-				{
-					/* Check we aren't in a wall */
-					bGrounded = false;
-					break;
-				}
-			}
-		}
-	}
-	// Check if actually hit head
-	if (bCollidedDirectlyAbove)
-	{
-		for (auto acol : directlyAboveCollisions)
-		{
-			for (auto rcol : relevantCollisions)
-			{
-				if (acol.collision_overlap.x == rcol.collision_overlap.x
-					&& acol.collision_overlap.y != rcol.collision_overlap.y)
-				{
-					/* Check we aren't in a wall */
-					bCollidedDirectlyAbove = false;
-					break;
-				}
-			}
-		}
-	}
-
-	if (bCollidedDirectlyAbove)
-	{
-		// Check velocity is negative otherwise we can reset velocity to 0 when already falling
-		if (enemyMotion.velocity.y < 0.f) { enemyMotion.velocity.y = 0.f; }
-	}
-
-	if (bGrounded) {
-		enemyMotion.velocity.y = 0.f;
-	}
+	// TODO implement actual melee attacks from enemies, not just contact damage
 }
 
 // TODO
@@ -279,14 +179,6 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 		enemyMotionComponent.terminalVelocity.x = enemyPathingBehavior.pathSpeed;
 		enemyMotionComponent.terminalVelocity.y = enemyMaxFallSpeed;
 
-		if (playerTransformComponent.position.x > enemyTransformComponent.position.x)
-		{
-			enemyMotionComponent.acceleration.x = enemyGroundAcceleration;
-		}
-		else
-		{
-			enemyMotionComponent.acceleration.x = -enemyGroundAcceleration;
-		}
 		if (registry.flyingBehaviors.has(enemy_entity)) {
 			// (goal pos can be adjusted later TODO)
 			struct ListEntry {
@@ -419,14 +311,28 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			}
 
 		}
-		else {
+		else if (registry.walkingBehaviors.has(enemy_entity)) {
 			enemyMotionComponent.acceleration.y = enemyGravity;
 			if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
-				enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+				// deccelerate faster than accelerate
+				if (enemyMotionComponent.velocity.x > 0) {
+					enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+				}
+				else {
+					enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.25;
+				}
 			}
 			else {
-				enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+				if (enemyMotionComponent.velocity.x < 0) {
+					enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+				}
+				else {
+					enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.25;
+				}
 			}
+		}
+		else {
+			// you can't do any sort of movement but you want to path - you're not set properly.
 		}
 	}
 }
