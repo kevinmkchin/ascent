@@ -134,6 +134,18 @@ WorldSystem::WorldSystem()
                                            }
                                    });
 
+    allPossibleMutations.push_back({
+                                           "Moonspirit Wings",
+                                           "Gain an extra jump",
+                                           SpriteComponent(),
+                                           [](Entity mutatedEntity) {
+                                               if (registry.players.has(mutatedEntity)) {
+                                                   Player &playerComponent = registry.players.get(mutatedEntity);
+                                                   playerComponent.maxJumps++;
+                                               }
+                                           }
+                                   });
+
 }
 
 void WorldSystem::HandleMutations() {
@@ -498,7 +510,7 @@ void WorldSystem::handle_collisions() {
                     }
                 } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f)) {
                     enemy.playerHurtCooldown = 2.f;
-                    playerHealth.TakeDamage(8, 5);
+                    playerHealth.TakeDamage(2, 1);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -507,7 +519,7 @@ void WorldSystem::handle_collisions() {
 
             if (registry.enemyprojectile.has(entity_other)) {
                 if (playerHealth.health > 0) {
-                    playerHealth.TakeDamage(10, 5);
+                    playerHealth.TakeDamage(6, 2);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }

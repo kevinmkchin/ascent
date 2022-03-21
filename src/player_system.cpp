@@ -38,6 +38,7 @@ INTERNAL float percentYVelocityOnJumpRelease = 0.6f;
 // LADDER
 INTERNAL float ladderClimbSpeed = 64.f;
 
+INTERNAL i32 numJumpsPossible = 0;
 INTERNAL bool bGrounded = false;
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
@@ -108,7 +109,7 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion, Player& pl
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
 }
 
-INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion)
+INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion, const Player* playerComponentPtr)
 {
     const bool bLeftKeyPressed = Input::GameLeftIsPressed();
     const bool bRightKeyPressed = Input::GameRightIsPressed();
@@ -236,9 +237,15 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
             playerMotion.velocity.y = 0.f;
         }
         coyoteTimer = coyoteTimeDefaultSeconds;
+        numJumpsPossible = playerComponentPtr->maxJumps;
     }
     else if(!bJumping) // if not grounded and not jumping, then we must be falling
     {
+        if(coyoteTimer == coyoteTimeDefaultSeconds)
+        {
+            // happens once when u fall off a block
+            --numJumpsPossible;
+        }
         coyoteTimer -= deltaTime;
     }
 
@@ -256,8 +263,9 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
         if (jumpBufferTimer > jumpBufferMaxHoldSeconds) { bPendingJump = false; }
 
         // Actually jump
-        if(!bCollidedDirectlyAbove && (bGrounded || (coyoteTimer > 0.f && !bJumping)))
+        if(!bCollidedDirectlyAbove && (numJumpsPossible > 0 || bGrounded || (coyoteTimer > 0.f && !bJumping)))
         {
+            --numJumpsPossible;
             bPendingJump = false;
             bJumping = true;
             bLaddered = false;
@@ -528,6 +536,6 @@ void PlayerSystem::Step(float deltaTime)
 
     HandleBasicMovementInput(playerMotion, *playerComponentPtr);
     HandleItemInteractionInput(playerHolder);
-    ResolveComplexMovement(deltaTime, playerMotion);
+    ResolveComplexMovement(deltaTime, playerMotion, playerComponentPtr);
     HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
 }
