@@ -253,12 +253,13 @@ Entity CreateGoblinEnemy(vec2 position)
     registry.holders.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
+    vec2 collisionDimension = { 12, 16 };
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
-    collider.collision_pos = dimensions / 2.f;
-    collider.collision_neg = dimensions / 2.f;
+    collider.collision_pos = collisionDimension / 2.f;
+    collider.collision_neg = collisionDimension / 2.f;
 
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
@@ -268,7 +269,9 @@ Entity CreateGoblinEnemy(vec2 position)
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
     patrollingBehavior.standStill = false;
 
-    visualComponent.sightRadius = 64.f;
+    walkingBehavior.stupid = false;
+
+    visualComponent.sightRadius = 72.f;
 
     registry.sprites.insert(
         entity,

@@ -2,10 +2,10 @@
 #include "ai_system.hpp"
 
 /* FLOOR-BOUND ENEMY PHYSICS CONFIGURATION */
-INTERNAL float enemyGravity = 15.f;
-INTERNAL float enemyJumpSpeed = 200.f;
+INTERNAL float enemyGravity = 200.f;
+INTERNAL float enemyJumpSpeed = 100.f;
 // INTERNAL float enemyMaxMoveSpeed = 64.f;
-INTERNAL float enemyMaxFallSpeed = 200.f;
+INTERNAL float enemyMaxFallSpeed = 100.f;
 INTERNAL float enemyGroundAcceleration = 700.f;
 INTERNAL float enemyGroundDeceleration = 1000.f;
 INTERNAL float enemyAirAcceleration = 650.f;
@@ -32,6 +32,7 @@ void AISystem::Step(float deltaTime)
 		Enemy& enemyComponent = registry.enemy.components[i];
 		const Entity& enemy = registry.enemy.entities[i];
 
+		// Attacks
 		if (enemyComponent.elapsedTime >= enemyComponent.attackCooldown) {
 			if (!registry.deathTimers.has(enemy)) {
 				EnemyAttack(enemy);
@@ -45,6 +46,7 @@ void AISystem::Step(float deltaTime)
 			}
 		}
 
+		// Dying / colliding with player
 		if (registry.deathTimers.has(enemy)) {
 			DeathTimer& time = registry.deathTimers.get(enemy);
 			time.elapsed_ms -= deltaTime * 1000.f;
@@ -58,11 +60,13 @@ void AISystem::Step(float deltaTime)
 			{
 				enemyComponent.playerHurtCooldown -= deltaTime;
 			}
-
-			TransformComponent& enemyTransform = registry.transforms.get(enemy);
+			if (registry.walkingBehaviors.has(enemy)) {
+				EnemyJumping(enemy, deltaTime);
+			}
 		}
 	}
 
+	// Pathing
 	if (elapsedAICycleTime >= 30.0f) {
 		for (int i = 0; i < registry.enemy.size(); ++i)
 		{
@@ -80,6 +84,7 @@ void AISystem::Step(float deltaTime)
 			}
 		}
 	}
+
 }
 
 void AISystem::HandleSpriteSheetFrame(float deltaTime)
@@ -135,16 +140,13 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 			createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
 		}
 	}
-	// TODO implement actual melee attacks from enemies, not just contact damage
+	// TODO implement actual melee attacks from enemies, not just contact damage (MeleeBehavior component) but thats not for me to do yet
 }
 
 // TODO
-	// GOALS:
-	// make work when there's no path to player (CHECK FOR FLYING)
-	// make work when there's multiple spots the enemy would be ok with going ( NOT CHECK )
+	// make work when there's multiple spots the enemy would be ok with going
 		// probably do this by finding list of desirable spots then going to closest one
-	// make this work with close-to ideal goal spots not just ideal (probably do this by doing the multiple spot searching above? maybe if max iter fails for goal, go to OK spot
-	// make this run NOT every frame, maybe every 15 (this is done by elapsed ms rn)
+	// PATROL BEHAVIOR
 void AISystem::Pathfind(Entity enemy_entity) {
 	bool isPlayerInAwarenessBubble = PlayerInAwarenessBubble(enemy_entity);
 	if (!isPlayerInAwarenessBubble) {
@@ -169,6 +171,7 @@ void AISystem::PatrolBehavior(Entity enemy_entity) {
 }
 
 void AISystem::PathBehavior(Entity enemy_entity) {
+	// TODO abstract this for easier extension (probably focus on the expanding squares option!)
 	if (registry.pathingBehaviors.has(enemy_entity)) {
 		PathingBehavior& enemyPathingBehavior = registry.pathingBehaviors.get(enemy_entity);
 		Entity player_entity = registry.players.entities.front();
@@ -180,15 +183,15 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 		enemyMotionComponent.terminalVelocity.y = enemyMaxFallSpeed;
 
 		if (registry.flyingBehaviors.has(enemy_entity)) {
-			// (goal pos can be adjusted later TODO)
 			struct ListEntry {
 				vec2 position;
 				int parent;
 				int cost;
 			};
 
-			vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
-			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
+			// GOAL POS IS NOT CORRECTLY CONSIDERED HERE! be aware.
+			vec2 goalPos  = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1)  / 16), (int)((enemyTransformComponent.position.y + 1)  / 16) };
 
 			if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 				return;
@@ -199,9 +202,9 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			ListEntry startPos = { enemyPos, NULL, 0 };
 			openList.push_back(startPos);
 
-			// TODO update this to use binary search/insert for speed
-			int maxIter = 100;
-			int currIter = 0;
+			// TODO update this to use binary search/insert for speed if its a problem speed wise
+			uint8 maxIter = 50;
+			uint8 currIter = 0;
 			std::vector<ListEntry> entriesSoFar;
 			while (!openList.empty())
 			{
@@ -221,6 +224,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				closedList.push_back(currentPos);
 				if (currentPos.position == goalPos) {
 					// goal found
+					// go to the start of the path, and set direction as next step to take
 					ListEntry currentEntry = currentPos;
 					vec2 prevPos = currentEntry.position;
 					currentEntry.parent = currentPos.parent;
@@ -228,10 +232,30 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 						prevPos = currentEntry.position;
 						currentEntry = entriesSoFar[currentEntry.parent];
 					}
+					/* TODO make the open air A* feel better
+					desire for A* :
+						if we want to go from Y to A and Z is on the path, and if the tiles to the right and below
+						Y are open, go diagonal. still need to check for clipping. this should go after setting default direction, for elegance sake
+						XXXXX
+						XYXXX
+						XXZXA
+						XXXXX
+					possible solution: draw a line from Y to A, if its not obstructed then perform the optimal.
+					alternate solution: use acceleration. I forsee this breaking tight searching
+					if (currIter >= 2) {
+						vec2 secondLastEntryPosition = entriesSoFar[currIter - 1].position;
+						vec2 thirdLastEntryPosition  = entriesSoFar[currIter - 2].position;
+						// NW on path
+						// SW on path
+						// SE on path
+						// NE on path
+					}
+					*/
+
 					vec2 direction = prevPos - enemyPos;
 
 					// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
-					enemyMotionComponent.velocity = direction * 25.f; // (enemyMotionComponent.velocity / vec2{ 8, 8 }) +
+					enemyMotionComponent.velocity = direction * 25.f; 
 					auto& enemyCollider = registry.colliders.get(enemy_entity);
 					float spriteWidth = enemyCollider.collision_pos.x;
 					float spriteHeight = enemyCollider.collision_pos.y;
@@ -247,33 +271,38 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					bool isClippingBLD = direction.y > 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
 					bool isClippingBRR = direction.x > 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
 					bool isClippingBRD = direction.y > 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+					int clipVelocity = 15;
 					if (isClippingBRD || isClippingTRU) {
-						enemyMotionComponent.velocity.x = -20;
+						enemyMotionComponent.velocity.x = -clipVelocity;
 					}
 					else if (isClippingBLD || isClippingTLU) {
-						enemyMotionComponent.velocity.x = 20;
+						enemyMotionComponent.velocity.x = clipVelocity;
 					}
 					else if (isClippingBRR || isClippingBLL) {
-						enemyMotionComponent.velocity.y = -20;
+						enemyMotionComponent.velocity.y = -clipVelocity;
 					}
 					else if (isClippingTRR || isClippingTLL) {
-						enemyMotionComponent.velocity.y = 20;
+						enemyMotionComponent.velocity.y = clipVelocity;
 					}
 					enemyMotionComponent.acceleration.x = 0;
 					enemyMotionComponent.acceleration.y = 0;
 					return;
 				}
+
 				std::vector<vec2> adjacentSquares;
 				vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
 				vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
 				vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
 				vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
+
 				adjacentSquares.push_back(above);
 				adjacentSquares.push_back(right);
 				adjacentSquares.push_back(below);
 				adjacentSquares.push_back(left);
+
 				for (vec2 adjacentSquare : adjacentSquares) {
 					if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
+						// if its a free tile
 						if (levelTiles[(size_t)adjacentSquare[0]][(size_t)adjacentSquare[1]] == 0) {
 							bool inClosedList = false;
 							for (const ListEntry& closedEntry : closedList) {
@@ -309,26 +338,153 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				}
 				currIter++;
 			}
-
 		}
 		else if (registry.walkingBehaviors.has(enemy_entity)) {
-			enemyMotionComponent.acceleration.y = enemyGravity;
-			if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
-				// deccelerate faster than accelerate
-				if (enemyMotionComponent.velocity.x > 0) {
-					enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+		// if dumb, else
+		auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
+			if (walkingBehavior.stupid) {
+				enemyMotionComponent.acceleration.y = enemyGravity;
+				if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
+					// decelerate faster than accelerate, use the global level var?
+					if (enemyMotionComponent.velocity.x > 0) {
+						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+					}
+					else {
+						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.3;
+					}
 				}
 				else {
-					enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.25;
+					if (enemyMotionComponent.velocity.x < 0) {
+						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+					}
+					else {
+						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.3;
+					}
 				}
 			}
 			else {
-				if (enemyMotionComponent.velocity.x < 0) {
-					enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+				enemyMotionComponent.acceleration.y = enemyGravity;
+				// smart walker
+				struct ListEntry {
+					vec2 position;
+					int parent;
+					int cost;
+				};
+
+				vec2 goalPos  = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+				vec2 enemyPos = { (int)((enemyTransformComponent.position.x  + 1) / 16), (int)((enemyTransformComponent.position.y  + 1) / 16) };
+
+				if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
+					return;
 				}
-				else {
-					enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.25;
+
+				std::vector<ListEntry> openList;
+				std::vector<ListEntry> closedList;
+				ListEntry startPos = { enemyPos, NULL, 0 };
+				openList.push_back(startPos);
+
+				// TODO update this to use binary search/insert for speed if its a problem speed wise
+				uint8 maxIter = 25;
+				uint8 currIter = 0;
+				std::vector<ListEntry> entriesSoFar;
+				while (!openList.empty())
+				{
+					if (maxIter < currIter) {
+						return;
+					}
+					int lowestIndexSoFar = 0;
+					ListEntry currentPos = { enemyPos, NULL, 999 };
+					for (int k = 0; k < openList.size(); k++) {
+						if (openList[k].cost + Heuristic(openList[k].position, goalPos) < currentPos.cost + Heuristic(currentPos.position, goalPos)) {
+							currentPos = openList[k];
+							lowestIndexSoFar = k;
+						}
+					}
+					entriesSoFar.push_back(currentPos);
+					openList.erase(openList.begin() + lowestIndexSoFar);
+					closedList.push_back(currentPos);
+					if (currentPos.position == goalPos) {
+						// goal found
+						// go to the start of the path, and set direction as next step to take
+						ListEntry currentEntry = currentPos;
+						vec2 prevPos = currentEntry.position;
+						currentEntry.parent = currentPos.parent;
+						while (currentEntry.position != entriesSoFar[currentEntry.parent].position) {
+							prevPos = currentEntry.position;
+							currentEntry = entriesSoFar[currentEntry.parent];
+						}
+
+						vec2 direction = prevPos - enemyPos;
+						// decelerate faster than accelerate, use the global level var?
+						walkingBehavior.jumpRequest = false;
+						if (direction.x != 0) {
+							enemyMotionComponent.acceleration.x = direction.x * enemyPathingBehavior.pathSpeed;
+							if (direction.x > 0 && enemyMotionComponent.velocity.x < 0 || direction.x < 0 && enemyMotionComponent.velocity.x > 0) {
+								enemyMotionComponent.acceleration.x *= 1.75;
+							}
+						}
+						else {
+							if (direction.y < 0) {
+								walkingBehavior.jumpRequest = true;
+							}
+						}
+						return;
+					}
+
+					std::vector<vec2> adjacentSquares;
+					vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
+					vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
+					vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
+					vec2 left  = { currentPos.position[0] - 1, currentPos.position[1] };
+
+					if (levelTiles[below.x][below.y] == 0) { // if current tile has no floor
+						adjacentSquares.push_back(below);
+					}
+					else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
+						adjacentSquares.push_back(above);        // if current has floor
+					}
+					adjacentSquares.push_back(right);
+					adjacentSquares.push_back(left);
+
+					for (vec2 adjacentSquare : adjacentSquares) {
+						if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
+							// if its a free tile
+							if (levelTiles[(size_t)adjacentSquare[0]][(size_t)adjacentSquare[1]] == 0) {
+								bool inClosedList = false;
+								for (const ListEntry& closedEntry : closedList) {
+									vec2 position = closedEntry.position;
+									if (position[0] == adjacentSquare[0] && position[1] == adjacentSquare[1]) {
+										inClosedList = true;
+										break;
+									}
+								}
+								if (inClosedList) {
+									continue;
+								}
+								bool inOpenList = false;
+								ListEntry* openListVersion;
+								for (ListEntry listEntry : openList) {
+									if (listEntry.position[0] == adjacentSquare[0] && listEntry.position[1] == adjacentSquare[1]) {
+										inClosedList = true;
+										openListVersion = &listEntry;
+										break;
+									}
+								}
+								if (inOpenList) {
+									if (currentPos.cost + 1 < openListVersion->cost) {
+										openListVersion->parent = currIter;
+									}
+								}
+								else {
+									ListEntry addEntry = { adjacentSquare, currIter, currentPos.cost + 1 };
+									openList.push_back(addEntry);
+								}
+							}
+						}
+					}
+					currIter++;
 				}
+
 			}
 		}
 		else {
@@ -354,10 +510,160 @@ void AISystem::Init(std::vector<std::vector<int>> newLevelTiles) {
 	levelTiles = newLevelTiles;
 }
 
-// make DE-INIT?
-
 // Manhattan distance heuristic for heuristic search
 float AISystem::Heuristic(vec2 startPos, vec2 goalPos) {
 	return abs(startPos[0] - goalPos[0]) + abs(startPos[1] - goalPos[1]);
 }
 
+void AISystem::EnemyJumping(Entity enemy_entity, float deltaTime) {
+	auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
+	if (walkingBehavior.stupid) {
+		return;
+	}
+	MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
+	bool bGrounded = false;
+	bool bStillLaddered = false;
+	bool bCollidedDirectlyAbove = false;
+	bool bJumpingAndAscending = enemyMotion.velocity.y < 0.f;
+
+	std::vector<CollisionEvent> enemyRelevantCollisions;
+	std::vector<CollisionEvent> groundableCollisions;
+	std::vector<CollisionEvent> directlyAboveCollisions;
+
+	// Check if grounded or colliding above
+	const auto& collisionsRegistry = registry.collisionEvents;
+	for (u32 i = 0; i < collisionsRegistry.components.size(); ++i)
+	{
+		const CollisionEvent colEvent = collisionsRegistry.components[i];
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = colEvent.other;
+
+		if (entity.GetTagAndID() != enemy_entity.GetTagAndID())
+		{
+			continue;
+		}
+
+		if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
+		{
+			enemyRelevantCollisions.push_back(colEvent);
+
+			CollisionComponent& enemyCollider = registry.colliders.get(entity);
+
+			// Note(Kevin): this second collision check redundant right now but may become needed later - keep for now?
+			CollisionInfo collisionCheck = CheckCollision(enemyCollider, registry.colliders.get(entity_other));
+			if (collisionCheck.collides && abs(collisionCheck.collision_overlap.y) < abs(collisionCheck.collision_overlap.x))
+			{
+				if (collisionCheck.collision_overlap.y <= 0.f
+					&& enemyMotion.velocity.y >= 0.f) // check we are not already moving up otherwise glitches.
+				{
+					groundableCollisions.push_back(colEvent);
+					bGrounded = true;
+				}
+				if (collisionCheck.collision_overlap.y > 0.f)
+				{
+					directlyAboveCollisions.push_back(colEvent);
+					bCollidedDirectlyAbove = true;
+				}
+			}
+		}
+
+		/** If pressing up, colliding with a ladder, and not jumping and ascending, then we can climb ladder */
+		/* IMPLEMENT LADDER CLIMBING..?
+		if (bUpKeyPressed && entity_other.GetTag() == TAG_LADDER && !bJumpingAndAscending)
+		{
+			bLaddered = true;
+		}
+		if (bLaddered && entity_other.GetTag() == TAG_LADDER)
+		{
+			bStillLaddered = true;
+		}
+
+	}
+
+	if (!bStillLaddered)
+	{
+		bLaddered = false;
+	}
+	*/
+	}
+
+	// Check if actually grounded
+	if (bGrounded)
+	{
+		for (auto gcol : groundableCollisions)
+		{
+			for (auto pcol : enemyRelevantCollisions)
+			{
+				if (gcol.collision_overlap.x == pcol.collision_overlap.x
+					&& gcol.collision_overlap.y != pcol.collision_overlap.y)
+				{
+					/* Check we aren't in a wall */
+					bGrounded = false;
+					break;
+				}
+			}
+		}
+	}
+	// Check if actually hit head
+	if (bCollidedDirectlyAbove)
+	{
+		for (auto acol : directlyAboveCollisions)
+		{
+			for (auto pcol : enemyRelevantCollisions)
+			{
+				if (acol.collision_overlap.x == pcol.collision_overlap.x
+					&& acol.collision_overlap.y != pcol.collision_overlap.y)
+				{
+					/* Check we aren't in a wall */
+					bCollidedDirectlyAbove = false;
+					break;
+				}
+			}
+		}
+	}
+	/*
+	if (bLaddered)
+	{
+		playerMotion.acceleration.y = 0.0;
+		playerMotion.velocity.y = 0.f;
+		if (bUpKeyPressed)
+		{
+			playerMotion.velocity.y += -ladderClimbSpeed;
+		}
+		if (bDownKeyPressed)
+		{
+			playerMotion.velocity.y += ladderClimbSpeed;
+		}
+		bGrounded = true;
+	}
+	*/
+
+	if (bGrounded)
+	{
+		/*
+		if (!bLaddered)
+		{
+			// Only set velocity to 0 if we are not climbing ladder
+			playerMotion.velocity.y = 0.f;
+		}
+		coyoteTimer = coyoteTimeDefaultSeconds;
+		*/
+		enemyMotion.velocity.y = 0.f;
+	}
+
+	if (bCollidedDirectlyAbove)
+	{
+		// Check velocity is negative otherwise we can reset velocity to 0 when already falling
+		if (enemyMotion.velocity.y < 0.f) { enemyMotion.velocity.y = 0.f; }
+	}
+
+	if (walkingBehavior.jumpRequest)
+	{
+		// Actually jump
+		if (!bCollidedDirectlyAbove && (bGrounded))
+		{
+			walkingBehavior.jumpRequest = false;
+			enemyMotion.velocity.y = -enemyJumpSpeed;
+		}
+	}
+}
