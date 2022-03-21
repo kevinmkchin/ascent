@@ -144,6 +144,8 @@ struct Enemy
 {
     float projectile_speed = 120.f;
     float playerHurtCooldown = 0.f;
+    float attackCooldown = 2000.f;
+    float elapsedTime = 0.f;
 };
 
 struct Enemy_projectile {
