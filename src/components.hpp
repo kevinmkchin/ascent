@@ -172,7 +172,10 @@ struct PatrollingBehavior : Behavior {
 
 struct FlyingBehavior : Behavior {};
 
-struct WalkingBehavior : Behavior {};
+struct WalkingBehavior : Behavior {
+    bool stupid = true;
+    bool jumpRequest = false;
+};
 
 struct RangedBehavior : Behavior {
     i32 attackPower = 5;
