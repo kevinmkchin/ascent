@@ -150,7 +150,7 @@ Entity CreateBatEnemy(vec2 position)
                     true,
                     false,
                     true,
-                    32,
+                    64,
                     32,
                     0,
                     0,
@@ -159,23 +159,23 @@ Entity CreateBatEnemy(vec2 position)
 
                             // idle
                             {
-                                    8,
-                                    18,
+                                    4,
+                                    0,
                                     100.f * 4.f
                             },
 
                             // run
                             {
-                                    8,
+                                    4,
                                     0,
-                                    100.f * 6.f
+                                    100.f * 4.f
                             },
 
                             // death
                             {
-                                    8,
-                                    6,
-                                    100.f * 6.f
+                                    4,
+                                    4,
+                                    100.f * 4.f
                             },
 
                     },
