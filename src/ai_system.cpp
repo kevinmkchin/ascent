@@ -33,18 +33,25 @@ void AISystem::Step(float deltaTime)
 		const Entity& enemy = registry.enemy.entities[i];
 
 		// Attacks
-		if (enemyComponent.elapsedTime >= enemyComponent.attackCooldown) {
-			if (!registry.deathTimers.has(enemy)) {
-				EnemyAttack(enemy);
-				enemyComponent.elapsedTime = 0.f;
+		// injury cooldown increment
+		enemyComponent.enemyHurtElapsedTime += elapsedTime;
+		//Ranged Attacks
+		if (registry.rangedBehaviors.has(enemy)) {
+			auto& enemyRangedBehavior = registry.rangedBehaviors.get(enemy);
+			if (enemyRangedBehavior.elapsedTime >= enemyRangedBehavior.attackCooldown) {
+				if (!registry.deathTimers.has(enemy)) {
+					EnemyAttack(enemy);
+					enemyRangedBehavior.elapsedTime = 0.f;
+				}
+			}
+			else {
+				TransformComponent& enemyTransform = registry.transforms.get(enemy);
+				if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
+					enemyRangedBehavior.elapsedTime += elapsedTime;
+				}
 			}
 		}
-		else {
-			TransformComponent& enemyTransform = registry.transforms.get(enemy);
-			if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
-				enemyComponent.elapsedTime += elapsedTime;
-			}
-		}
+		// Melee TBC
 
 		// Dying / colliding with player
 		if (registry.deathTimers.has(enemy)) {

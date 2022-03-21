@@ -120,12 +120,16 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
 {
     if(holderComponent.want_to_shoot && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        Entity projectile;
+        Entity projectileEntity;
 
         switch (holderComponent.held_weapon.GetTag()) {
             case (TAG_BOW):
             {
-                projectile = createArrow(holderTransform.position);
+                RangedWeapon actualBow = registry.rangedWeapons.get(holderComponent.held_weapon);
+                projectileEntity = createArrow(holderTransform.position);
+                auto& actualProjectile = registry.playerProjectiles.get(projectileEntity);
+                actualProjectile.attackPower = actualBow.attackPower;
+                actualProjectile.attackVariance = actualBow.attackVariance;
                 SpriteComponent& sprite = registry.sprites.get(holderComponent.held_weapon);
                 sprite.selected_animation = 0;
                 sprite.animations[0].played = false;
@@ -137,23 +141,23 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
             }
         }
 
-        Item& item = registry.items.get(projectile);
+        Item& item = registry.items.get(projectileEntity);
         item.collidableWithEnvironment = true;
         item.thrown = true;
         item.grounded = false;
 
-        MotionComponent& motion = registry.motions.get(projectile);
+        MotionComponent& motion = registry.motions.get(projectileEntity);
         motion.acceleration.y = itemGravity;
 
         if(holderMotion.facingRight)
         {
             motion.velocity = {itemShootSideVelocity, itemThrowUpwardVelocity};
-            registry.sprites.get(projectile).reverse = false;
+            registry.sprites.get(projectileEntity).reverse = false;
         }
         else
         {
             motion.velocity = {-itemShootSideVelocity, itemThrowUpwardVelocity};
-            registry.sprites.get(projectile).reverse = true;
+            registry.sprites.get(projectileEntity).reverse = true;
         }
     }
 }

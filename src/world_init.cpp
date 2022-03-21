@@ -642,8 +642,8 @@ Entity createSword(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
-    registry.weapons.emplace(entity);
     registry.items.emplace(entity);
+    auto& meleeWeapon = registry.meleeWeapons.emplace(entity);
 
     vec2 dimensions = { 15, 20 };
     transform.position = position;
@@ -655,6 +655,8 @@ Entity createSword(vec2 position)
 
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;
+
+    meleeWeapon.attackPower = 10;
 
     registry.sprites.insert(
             entity,
@@ -677,6 +679,7 @@ Entity createBow(vec2 position)
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
     registry.items.emplace(entity);
+    auto& rangedWeapon = registry.rangedWeapons.emplace(entity);
 
     vec2 dimensions = { 16, 16 };
     transform.position = position;
@@ -688,6 +691,9 @@ Entity createBow(vec2 position)
 
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;
+
+    rangedWeapon.attackPower = 15;
+    rangedWeapon.attackVariance = 0;
 
     registry.sprites.insert(
             entity,
