@@ -4,6 +4,8 @@
 
 #include <SDL.h>
 
+#include <stb_image.h>
+
 // stlib
 #include <chrono>
 
@@ -78,6 +80,37 @@ INTERNAL bool SDLInitialize()
         fprintf(stderr, "Failed to open audio device");
         return false;
     }
+
+    // Windows Icon
+    int req_format = STBI_rgb_alpha;
+    void* iconMemory = nullptr;
+    int iconWidth = 0;
+    int iconHeight = 0;
+    int iconBitDepth = 0;
+    iconMemory = stbi_load(textures_path("icon.bmp").c_str(), (int*)&iconWidth, (int*)&iconHeight, (int*)&iconBitDepth, req_format);
+    Uint32 rmask, gmask, bmask, amask;
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        int shift = (req_format == STBI_rgb) ? 8 : 0;
+        rmask = 0xff000000 >> shift;
+        gmask = 0x00ff0000 >> shift;
+        bmask = 0x0000ff00 >> shift;
+        amask = 0x000000ff >> shift;
+    #else // little endian, like x86
+        rmask = 0x000000ff;
+        gmask = 0x0000ff00;
+        bmask = 0x00ff0000;
+        amask = (req_format == STBI_rgb) ? 0 : 0xff000000;
+    #endif
+    int depth, pitch;
+    if (req_format == STBI_rgb) {
+      depth = 24;
+      pitch = 3*iconWidth; // 3 bytes per pixel * pixels per row
+    } else { // STBI_rgb_alpha (RGBA)
+      depth = 32;
+      pitch = 4*iconWidth;
+    }
+    SDL_Surface* windowIcon = SDL_CreateRGBSurfaceFrom(iconMemory,iconWidth,iconHeight,depth,pitch,rmask,gmask,bmask,amask);
+    SDL_SetWindowIcon(window, windowIcon);
 
     return true;
 }
