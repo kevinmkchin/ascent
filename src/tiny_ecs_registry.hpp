@@ -34,6 +34,9 @@ public:
 	ComponentContainer<VisionComponent> visionComponents;
 	ComponentContainer<DeathTimer> deathTimers;
     ComponentContainer<PlayerProjectile> playerProjectiles;
+	ComponentContainer<Exp> exp;
+	ComponentContainer<Coin> coins;
+	ComponentContainer<GoldBar> goldBar;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -62,6 +65,9 @@ public:
 		registry_list.push_back(&visionComponents);
 		registry_list.push_back(&deathTimers);
         registry_list.push_back(&playerProjectiles);
+		registry_list.push_back(&exp);
+		registry_list.push_back(&coins);
+		registry_list.push_back(&goldBar);
 	}
 
 	void clear_all_components() {

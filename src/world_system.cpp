@@ -134,6 +134,18 @@ WorldSystem::WorldSystem()
                                            }
                                    });
 
+    allPossibleMutations.push_back({
+                                           "Moonspirit Wings",
+                                           "Gain an extra jump",
+                                           SpriteComponent(),
+                                           [](Entity mutatedEntity) {
+                                               if (registry.players.has(mutatedEntity)) {
+                                                   Player &playerComponent = registry.players.get(mutatedEntity);
+                                                   playerComponent.maxJumps++;
+                                               }
+                                           }
+                                   });
+
 }
 
 void WorldSystem::HandleMutations() {
@@ -263,6 +275,8 @@ void WorldSystem::loadAllContent() {
     player_levelup_sound = Mix_LoadWAV(audio_path("levelup.wav").c_str());
     blip_select_sound = Mix_LoadWAV(audio_path("blip_select.wav").c_str());
     player_jump_on_enemy_sound = Mix_LoadWAV(audio_path("player_jump_on_enemy_sound.wav").c_str());
+    coins_pickup_sound = Mix_LoadWAV(audio_path("coins_pickup.wav").c_str());
+    points_pickup_sound = Mix_LoadWAV(audio_path("points_pickup.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
         || sword_sound == nullptr
@@ -273,7 +287,9 @@ void WorldSystem::loadAllContent() {
         || gain_mutation_sound == nullptr
         || player_levelup_sound == nullptr
         || blip_select_sound == nullptr
-        || player_jump_on_enemy_sound == nullptr) {
+        || player_jump_on_enemy_sound == nullptr
+        || coins_pickup_sound == nullptr
+        || points_pickup_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
@@ -306,6 +322,10 @@ void WorldSystem::unloadAllContent() {
         Mix_FreeChunk(blip_select_sound);
     if (player_jump_on_enemy_sound != nullptr)
         Mix_FreeChunk(player_jump_on_enemy_sound);
+    if (coins_pickup_sound != nullptr)
+        Mix_FreeChunk(coins_pickup_sound);
+    if (points_pickup_sound != nullptr)
+        Mix_FreeChunk(points_pickup_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -407,6 +427,36 @@ bool WorldSystem::step(float deltaTime) {
 //		}
 //	}
 
+    float min_counter_ms_exp = 500.f;
+    for (Entity entity : registry.exp.entities) {
+        // progress timer
+        Exp& counter = registry.exp.get(entity);
+        counter.counter_ms_exp -= 2.f;
+        if (counter.counter_ms_exp < min_counter_ms_exp) {
+            min_counter_ms_exp = counter.counter_ms_exp;
+        }
+
+        if (counter.counter_ms_exp < 0) {
+            registry.exp.remove(entity);
+            registry.remove_all_components_of(entity);
+        }
+    }
+
+    float min_counter_ms_coins= 500.f;
+    for (Entity entity : registry.coins.entities) {
+        // progress timer
+        Coin& counter1 = registry.coins.get(entity);
+        counter1.counter_ms_coin -= 2.f;
+        if (counter1.counter_ms_coin < min_counter_ms_coins) {
+            min_counter_ms_coins = counter1.counter_ms_coin;
+        }
+
+        if (counter1.counter_ms_coin < 0) {
+            registry.exp.remove(entity);
+            registry.remove_all_components_of(entity);
+        }
+    }
+
     return true;
 }
 
@@ -417,6 +467,7 @@ void WorldSystem::handle_collisions() {
     MotionComponent &playerMotion = registry.motions.get(player);
     CollisionComponent &playerCollider = registry.colliders.get(player);
     HealthBar &playerHealth = registry.healthBar.get(player);
+    GoldBar &playercoins = registry.goldBar.get(player);
 
     // Loop over all collisions detected by the physics system
     auto &collisionsRegistry = registry.collisionEvents;
@@ -449,8 +500,7 @@ void WorldSystem::handle_collisions() {
                     }
                 }
 
-                if (enemyHealth.health <= 0.f &&
-                    !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
+                if (enemyHealth.health <= 0.f && !registry.deathTimers.has(entity))
                 {
                     registry.deathTimers.emplace(entity);
                     registry.colliders.remove(entity);
@@ -459,11 +509,11 @@ void WorldSystem::handle_collisions() {
                     motion.acceleration = {0.f, 0.f};
                     motion.velocity = {0.f, 0.f};
 
-                    playerComponent.experience += 40.f;
                     if (Mix_PlayChannel(-1, monster_death_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
-                } else {
+                } 
+                else {
                     if (Mix_PlayChannel(-1, monster_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -504,6 +554,27 @@ void WorldSystem::handle_collisions() {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
                 }
+            }
+
+            if (registry.exp.has(entity_other))
+            {
+                int random_weight = random(30, 40);
+                playerComponent.experience += random_weight;
+                if (Mix_PlayChannel(-1, points_pickup_sound, 0) == -1) {
+                    printf("Mix_PlayChannel: %s\n", Mix_GetError());
+                }
+                registry.remove_all_components_of(entity_other);
+
+            }
+
+            if (registry.coins.has(entity_other))
+            {
+                playercoins.coins += 10;
+                if (Mix_PlayChannel(-1, coins_pickup_sound, 0) == -1) {
+                    printf("Mix_PlayChannel: %s\n", Mix_GetError());
+                }
+                registry.remove_all_components_of(entity_other);
+
             }
 
             if (registry.enemyProjectiles.has(entity_other)) {
@@ -722,4 +793,11 @@ void WorldSystem::SDLProcessEvents() {
                 break;
         }
     }
+}
+
+int random(int min, int max)
+{
+    double x = rand() / static_cast<double>(RAND_MAX + 1);
+    int random_num = min + static_cast<int>(x * (max - min));
+    return random_num;
 }

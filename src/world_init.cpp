@@ -100,6 +100,8 @@ Entity createPlayer(vec2 position)
     registry.players.emplace(entity);
     registry.mutations.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
+    auto cb = registry.goldBar.emplace(entity);
+    cb.coins = 50.f;
     hb.health = 100.f;
     hb.maxHealth = 100.f;
 
@@ -146,7 +148,7 @@ Entity CreateBatEnemy(vec2 position)
                     true,
                     false,
                     true,
-                    32,
+                    64,
                     32,
                     0,
                     0,
@@ -155,23 +157,23 @@ Entity CreateBatEnemy(vec2 position)
 
                             // idle
                             {
-                                    8,
-                                    18,
+                                    4,
+                                    0,
                                     100.f * 4.f
                             },
 
                             // run
                             {
-                                    8,
+                                    4,
                                     0,
-                                    100.f * 6.f
+                                    100.f * 4.f
                             },
 
                             // death
                             {
-                                    8,
-                                    6,
-                                    100.f * 6.f
+                                    4,
+                                    4,
+                                    100.f * 4.f
                             },
 
                     },
@@ -788,6 +790,108 @@ Entity CreateShopItem(vec2 position, u8 shopItemIndex) // remove later - just a 
     collider.collision_neg = { 0, 0 };
     collider.collision_pos = { 16, 16 };
     collider.collider_position = transform.position;
+
+    return entity;
+}
+
+
+Entity createExp(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.exp.emplace(entity);
+
+    vec2 dimensions = { 8, 8 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_neg = { 6, 8 };
+    collider.collision_pos = { 6, 7 };
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                15,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::EXP,
+                true,
+                false,
+                true,
+                48,
+                8,
+                0,
+                0,
+                0.f,
+                {
+                                    {
+                                        6,
+                                        0,
+                                        600.f,
+                                        true,
+                                        false
+                                    }
+                                },
+        }
+    );
+
+    return entity;
+}
+
+
+Entity createCoins(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.coins.emplace(entity);
+
+    vec2 dimensions = { 8, 8 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_neg = { 6, 8 };
+    collider.collision_pos = { 6, 7 };
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                15,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::COIN,
+                true,
+                false,
+                true,
+                48,
+                8,
+                0,
+                0,
+                0.f,
+                {
+                                    {
+                                        6,
+                                        0,
+                                        600.f,
+                                        true,
+                                        false
+                                    }
+                                },
+        }
+    );
 
     return entity;
 }
