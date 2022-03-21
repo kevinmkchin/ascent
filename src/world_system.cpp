@@ -330,11 +330,11 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
     switch (mode) {
         case MODE_MAINMENU: {
             renderer->bgTexId = {
-                    TEXTURE_ASSET_ID::BG_LAYER1,
-                    TEXTURE_ASSET_ID::BG_LAYER2,
-                    TEXTURE_ASSET_ID::BG_LAYER3,
-                    TEXTURE_ASSET_ID::BG_LAYER4,
-                    TEXTURE_ASSET_ID::BG_LAYER5
+                    TEXTURE_ASSET_ID::BG_MENU_LAYER1,
+                    TEXTURE_ASSET_ID::BG_MENU_LAYER2,
+                    TEXTURE_ASSET_ID::BG_MENU_LAYER3,
+                    TEXTURE_ASSET_ID::BG_MENU_LAYER4,
+                    TEXTURE_ASSET_ID::BG_MENU_LAYER5
             };
         }
             break;
