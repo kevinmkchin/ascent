@@ -54,6 +54,11 @@ enum class TEXTURE_ASSET_ID : u16
     MUSHROOM,
     SLIME,
     WORM,
+    BG_MENU_LAYER1,
+    BG_MENU_LAYER2,
+    BG_MENU_LAYER3,
+    BG_MENU_LAYER4,
+    BG_MENU_LAYER5,
 
     TEXTURE_COUNT
 };
@@ -82,7 +87,12 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("goblin_bomber.png"),
         textures_path("mushroom.png"),
         textures_path("slime_fixed.png"),
-        textures_path("worm.png")
+        textures_path("worm.png"),
+        textures_path("menu_bg_layer1.png"),
+        textures_path("menu_bg_layer2.png"),
+        textures_path("menu_bg_layer3.png"),
+        textures_path("menu_bg_layer4.png"),
+        textures_path("menu_bg_layer5.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
