@@ -25,8 +25,8 @@
 #include "item_holder_system.hpp"
 
 #define WINDOW_TITLE "ASCENT"
-#define WINDOW_INITIAL_WIDTH 800
-#define WINDOW_INITIAL_HEIGHT 600
+#define WINDOW_INITIAL_WIDTH 1280
+#define WINDOW_INITIAL_HEIGHT 720
 
 INTERNAL SDL_Window* window = nullptr;
 INTERNAL SDL_GLContext openglContext = nullptr;
