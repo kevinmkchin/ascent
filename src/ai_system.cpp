@@ -13,7 +13,6 @@ INTERNAL float enemyAirDeceleration = 500.f;
 // LADDER
 INTERNAL float ladderClimbSpeed = 64.f;
 
-static float elapsedTime = 0.0f;
 float elapsedAICycleTime = 0.0f;
 
 // a representation of pathable tiles
@@ -22,26 +21,29 @@ std::vector<std::vector<int>> levelTiles;
 
 void AISystem::Step(float deltaTime)
 {
-	elapsedTime += deltaTime * 1000.0f;
+	float elapsedTime = deltaTime * 1000.0f;
 	HandleSpriteSheetFrame(deltaTime);
-	elapsedAICycleTime += deltaTime * 1000.0f;
+	elapsedAICycleTime += elapsedTime;
 	Entity playerEntity = registry.players.entities[0];
 	TransformComponent& playerTransform = registry.transforms.get(playerEntity);
-	if (elapsedTime >= 2000.0f) // TODO: Should probably handle each enemy separately for attack frequency
-	{
-		for (Entity& enemy : registry.enemy.entities)
-		{
-			if (!registry.deathTimers.has(enemy)) {
-				EnemyAttack(enemy);
-			}
-		}
-		elapsedTime = 0.0f;
-	}
 
 	for (int i = 0; i < registry.enemy.size(); ++i)
 	{
 		Enemy& enemyComponent = registry.enemy.components[i];
 		const Entity& enemy = registry.enemy.entities[i];
+
+		if (enemyComponent.elapsedTime >= enemyComponent.attackCooldown) {
+			if (!registry.deathTimers.has(enemy)) {
+				EnemyAttack(enemy);
+				enemyComponent.elapsedTime = 0.f;
+			}
+		}
+		else {
+			TransformComponent& enemyTransform = registry.transforms.get(enemy);
+			if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
+				enemyComponent.elapsedTime += elapsedTime;
+			}
+		}
 
 		if (registry.deathTimers.has(enemy)) {
 			DeathTimer& time = registry.deathTimers.get(enemy);
@@ -76,7 +78,6 @@ void AISystem::Step(float deltaTime)
 			if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
 				Pathfind(enemy);
 				MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
-				("Enemy motion x : %f, enemy motion y: %f \n", enemyMotionComponent.velocity.x, enemyMotionComponent.velocity.y);
 			}
 			elapsedAICycleTime = 0.f;
 		}
