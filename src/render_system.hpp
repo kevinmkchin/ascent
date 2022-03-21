@@ -105,9 +105,11 @@ private:
     // BATCH DRAWING
     void BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedSprites, const mat3& projection);
 
-    void DrawBackground(TEXTURE_ASSET_ID texId, float offset);
+    void DrawMainMenuBackground(float elapsed_ms);
 
     void DrawAllBackgrounds(float elapsed_ms);
+
+    void DrawBackground(TEXTURE_ASSET_ID texId, float offset);
 
     void DrawUI();
 
