@@ -323,9 +323,9 @@ void WorldSystem::unloadAllContent() {
     if (player_jump_on_enemy_sound != nullptr)
         Mix_FreeChunk(player_jump_on_enemy_sound);
     if (coins_pickup_sound != nullptr)
-        Mix_FreeChunk(player_jump_on_enemy_sound);
+        Mix_FreeChunk(coins_pickup_sound);
     if (points_pickup_sound != nullptr)
-        Mix_FreeChunk(player_jump_on_enemy_sound);
+        Mix_FreeChunk(points_pickup_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -500,8 +500,7 @@ void WorldSystem::handle_collisions() {
                     }
                 }
 
-                if (enemyHealth.health <= 0.f &&
-                    !registry.deathTimers.has(entity)) // TODO: Experience and/or money as drops to be picked up
+                if (enemyHealth.health <= 0.f && !registry.deathTimers.has(entity))
                 {
                     registry.deathTimers.emplace(entity);
                     registry.colliders.remove(entity);
@@ -510,70 +509,11 @@ void WorldSystem::handle_collisions() {
                     motion.acceleration = {0.f, 0.f};
                     motion.velocity = {0.f, 0.f};
 
-
-
-                    int random_count = random(1, 3);
-
-                    vec2 enemyPosition = registry.transforms.get(entity).position;
-                    vec2 expPosition = registry.transforms.get(entity).position;
-                    float expPositionx1 = registry.transforms.get(entity).position.x + 10;
-                    float expPositionx2 = registry.transforms.get(entity).position.x - 10;
-                    vec2 expPosition1 = { expPositionx1, expPosition.y };
-                    vec2 expPosition2 = { expPositionx2, expPosition.y };
-
-                    registry.remove_all_components_of(entity);
-
-                    int coin_or_exp = random(1, 3);
-
-                    if (coin_or_exp == 2) {
-                        for (int i = 1; i <= random_count; i++) {
-
-                            if (i == 1) {
-
-                                createCoins(expPosition);
-                            }
-
-                            if (i == 2) {
-                                vec2 expPosition1 = { expPositionx1, expPosition.y };
-                                createCoins(expPosition1);
-                            }
-
-                            else {
-                                vec2 expPosition2 = { expPositionx2, expPosition.y };
-                                createCoins(expPosition2);
-                            }
-
-                        }
-                    }
-                    else {
-
-                        for (int i = 1; i <= random_count; i++) {
-
-                            if (i == 1) {
-
-                                createExp(expPosition);
-                            }
-
-                            if (i == 2) {
-                                vec2 expPosition1 = { expPositionx1, expPosition.y };
-                                createExp(expPosition1);
-                            }
-
-                            else {
-                                vec2 expPosition2 = { expPositionx2, expPosition.y };
-                                createExp(expPosition2);
-                            }
-
-                        }
-
-                    }
-
-                    
-
                     if (Mix_PlayChannel(-1, monster_death_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
-                } else {
+                } 
+                else {
                     if (Mix_PlayChannel(-1, monster_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
