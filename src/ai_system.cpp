@@ -146,7 +146,6 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 // TODO
 	// make work when there's multiple spots the enemy would be ok with going
 		// probably do this by finding list of desirable spots then going to closest one
-	// PATROL BEHAVIOR
 void AISystem::Pathfind(Entity enemy_entity, float elapsedTime) {
 	bool isPlayerInAwarenessBubble = PlayerInAwarenessBubble(enemy_entity);
 	if (!isPlayerInAwarenessBubble) {
@@ -157,7 +156,6 @@ void AISystem::Pathfind(Entity enemy_entity, float elapsedTime) {
 	}
 }
 
-// TODO implement patrol behavior
 void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 	if (registry.patrollingBehaviors.has(enemy_entity)) {
 		PatrollingBehavior& patrollingBehavior = registry.patrollingBehaviors.get(enemy_entity);
