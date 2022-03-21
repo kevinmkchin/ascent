@@ -54,6 +54,8 @@ enum class TEXTURE_ASSET_ID : u16
     MUSHROOM,
     SLIME,
     WORM,
+    EXP,
+    COIN,
     BG_MENU_LAYER1,
     BG_MENU_LAYER2,
     BG_MENU_LAYER3,
@@ -88,6 +90,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mushroom.png"),
         textures_path("slime_fixed.png"),
         textures_path("worm.png"),
+        textures_path("exp.png"),
+        textures_path("coin.png"),
         textures_path("menu_bg_layer1.png"),
         textures_path("menu_bg_layer2.png"),
         textures_path("menu_bg_layer3.png"),
@@ -151,6 +155,18 @@ struct Enemy
 struct Enemy_projectile {
     Entity enemy_projectile;
 };
+
+struct Exp
+{
+    float counter_ms_exp = 500;
+};
+
+struct Coin
+{
+    float counter_ms_coin = 500;
+};
+
+
 
 struct PathingBehavior {
     vec2 goalFromPlayer = { 0.f, 0.f }; // (absolute value?) distance from player enemy would ideally like to be (in (x,y))
@@ -322,6 +338,11 @@ struct HealthBar
         health -= actualDamage;
         return actualDamage;
     }
+};
+
+struct GoldBar
+{
+    float coins = 50.f;
 };
 
 enum GAMETAGS : u8
