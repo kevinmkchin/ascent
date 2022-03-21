@@ -38,6 +38,7 @@ INTERNAL float percentYVelocityOnJumpRelease = 0.6f;
 // LADDER
 INTERNAL float ladderClimbSpeed = 64.f;
 
+INTERNAL bool bGrounded = false;
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
 INTERNAL bool bJumpKeyHeld = false;
@@ -114,7 +115,7 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
     const bool bUpKeyPressed = Input::GameUpIsPressed();
     const bool bDownKeyPressed = Input::GameDownIsPressed();
 
-    bool bGrounded = false;
+    bGrounded = false;
     bool bStillLaddered = false;
     bool bCollidedDirectlyAbove = false;
     bool bJumpingAndAscending = bJumping && playerMotion.velocity.y < 0.f;
@@ -413,7 +414,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             attackDir = 1;
         }
 
-        if(attackDir == 3 && !bJumping)
+        if(attackDir == 3 && bGrounded)
         {
             return; // can only attack down if jumping
         }

@@ -496,7 +496,7 @@ void WorldSystem::handle_collisions() {
                     if (Mix_PlayChannel(-1, player_jump_on_enemy_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
-                } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0 && !playerMotion.velocity.y > 0.f) {
+                } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f)) {
                     enemy.playerHurtCooldown = 2.f;
                     playerHealth.TakeDamage(8, 5);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {

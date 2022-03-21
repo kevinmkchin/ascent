@@ -97,14 +97,14 @@ void RenderSystem::InitializeUIStuff()
         -0.24f, -0.5f, 0.f, 0.f,
          0.24f, -0.5f, 0.f, 0.f,
 
-		-0.27f,  0.5f, 0.f, 0.f,
+		-0.262f,  0.5f, 0.f, 0.f,
         -0.24f,  0.5f, 0.f, 0.f,
-        -0.27f, -0.5f, 0.f, 0.f,
+        -0.262f, -0.5f, 0.f, 0.f,
         -0.24f, -0.5f, 0.f, 0.f,
 
-		0.27f,  0.5f, 0.f, 0.f,
+		0.262f,  0.5f, 0.f, 0.f,
         0.24f,  0.5f, 0.f, 0.f,
-        0.27f, -0.5f, 0.f, 0.f,
+        0.262f, -0.5f, 0.f, 0.f,
         0.24f, -0.5f, 0.f, 0.f
     };
     CreateMeshVertexArray(mutationSelectBorder, mutationSelectBorderVertices, mutationSelectBorderIndices, 64, 24, 2, 2, 0, GL_STATIC_DRAW);

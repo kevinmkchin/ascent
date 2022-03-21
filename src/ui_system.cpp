@@ -101,11 +101,11 @@ void UISystem::UpdateTextUI(float dt)
             char textBuffer[128];
 
             sprintf(textBuffer, "HP: %d/%d", (int) playerHealth.health, (int) playerHealth.maxHealth);
-            vtxt_move_cursor(20, 60);
+            vtxt_move_cursor(26, 66);
             vtxt_append_line(textBuffer, &font_c64, 40);
 
             sprintf(textBuffer, "Gold: %d", (int) 99);
-            vtxt_move_cursor(20, 112);
+            vtxt_move_cursor(26, 130);
             vtxt_append_line(textBuffer, &font_c64, 40);
 
             sprintf(textBuffer, "Lvl %d", (int) 1);
@@ -114,12 +114,12 @@ void UISystem::UpdateTextUI(float dt)
                 Player playerComponent = registry.players.components[0];
                 sprintf(textBuffer, "Lvl %d", playerComponent.level);
             }
-            vtxt_move_cursor(662, UI_LAYER_RESOLUTION_HEIGHT - 8);
+            vtxt_move_cursor(900, UI_LAYER_RESOLUTION_HEIGHT - 8);
             vtxt_append_line(textBuffer, &font_c64, 24);
 
             if(world->gamePaused)
             {
-                vtxt_move_cursor(635, 556);
+                vtxt_move_cursor(860, 556);
                 vtxt_append_line("PAUSED", &font_c64, 32);
             }
 
@@ -128,7 +128,7 @@ void UISystem::UpdateTextUI(float dt)
                 Player playerComponent = registry.players.components[0];
                 if(playerComponent.bDead)
                 {
-                    vtxt_move_cursor(420, 580);
+                    vtxt_move_cursor(700, 580);
                     vtxt_append_line("GAME OVER", &font_c64, 64);
                 }
             }
@@ -166,8 +166,8 @@ void UISystem::UpdateTextUI(float dt)
 
             if(cachedGameStage == CHAPTER_ONE_STAGE_ONE)
             {
-                *GlobalPauseForSeconds = 20.f;
-                showTutorialTimer = 20.f;
+                *GlobalPauseForSeconds = 9999.f;
+                showTutorialTimer = 9999.f;
                 world->darkenGameFrame = true;
             }
         }
@@ -180,30 +180,30 @@ void UISystem::UpdateTextUI(float dt)
             {
                 case CHAPTER_ONE_STAGE_ONE:
                 {
-                    vtxt_move_cursor(150,400);
+                    vtxt_move_cursor(390,500);
                     vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                    vtxt_move_cursor(420,530);
+                    vtxt_move_cursor(650,630);
                     vtxt_append_line("Stage One", &font_medusa_gothic, 110);
                 }break;
                 case CHAPTER_ONE_STAGE_TWO:
                 {
-                    vtxt_move_cursor(150,400);
+                    vtxt_move_cursor(390,500);
                     vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                    vtxt_move_cursor(420,530);
+                    vtxt_move_cursor(650,630);
                     vtxt_append_line("Stage Two", &font_medusa_gothic, 110);
                 }break;
-                // case CHAPTER_ONE_STAGE_THREE:
-                // {
-                //     vtxt_move_cursor(150,400);
-                //     vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                //     vtxt_move_cursor(420,530);
-                //     vtxt_append_line("Stage Three", &font_medusa_gothic, 110);
-                // }break;
+                case CHAPTER_ONE_STAGE_THREE:
+                {
+                    vtxt_move_cursor(390,500);
+                    vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
+                    vtxt_move_cursor(650,630);
+                    vtxt_append_line("Stage Three", &font_medusa_gothic, 110);
+                }break;
                 // case CHAPTER_TWO_STAGE_ONE:
                 // {
-                //     vtxt_move_cursor(150,400);
+                //     vtxt_move_cursor(390,500);
                 //     vtxt_append_line("Chapter Two", &font_medusa_gothic, 180);
-                //     vtxt_move_cursor(420,530);
+                //     vtxt_move_cursor(650,630);
                 //     vtxt_append_line("Stage One", &font_medusa_gothic, 110);
                 // }break;
             }
@@ -230,36 +230,36 @@ void UISystem::UpdateTextUI(float dt)
 
         if(Input::GetGamepad(0).isConnected)
         {
-            vtxt_move_cursor(60, 190);
+            vtxt_move_cursor(260, 190);
             vtxt_append_line("D-Pad or Left Thumbstick to move.", &font_c64, 40);
-            vtxt_move_cursor(60, 260);
+            vtxt_move_cursor(260, 260);
             vtxt_append_line("A to jump", &font_c64, 40);
-            vtxt_move_cursor(60, 330);
+            vtxt_move_cursor(260, 330);
             vtxt_append_line("X to attack", &font_c64, 40);
-            vtxt_move_cursor(60, 400);
+            vtxt_move_cursor(260, 400);
             vtxt_append_line("B to pick up item", &font_c64, 40);
-            vtxt_move_cursor(60, 450);
+            vtxt_move_cursor(260, 450);
             vtxt_append_line("B while holding item to throw item", &font_c64, 40);
-            vtxt_move_cursor(60, 500);
+            vtxt_move_cursor(260, 500);
             vtxt_append_line("B + down to drop item", &font_c64, 40);
-            vtxt_move_cursor(120, 800);
+            vtxt_move_cursor(320, 800);
             vtxt_append_line("Press A to continue...", &font_c64, 40);
         }
         else
         {
-            vtxt_move_cursor(60, 190);
+            vtxt_move_cursor(260, 190);
             vtxt_append_line("WASD to move.", &font_c64, 40);
-            vtxt_move_cursor(60, 260);
+            vtxt_move_cursor(260, 260);
             vtxt_append_line("J to jump", &font_c64, 40);
-            vtxt_move_cursor(60, 330);
+            vtxt_move_cursor(260, 330);
             vtxt_append_line("K to attack", &font_c64, 40);
-            vtxt_move_cursor(60, 400);
+            vtxt_move_cursor(260, 400);
             vtxt_append_line("L to pick up item", &font_c64, 40);
-            vtxt_move_cursor(60, 450);
+            vtxt_move_cursor(260, 450);
             vtxt_append_line("L while holding item to throw item", &font_c64, 40);
-            vtxt_move_cursor(60, 500);
+            vtxt_move_cursor(260, 500);
             vtxt_append_line("L + down to drop item", &font_c64, 40);
-            vtxt_move_cursor(120, 800);
+            vtxt_move_cursor(320, 800);
             vtxt_append_line("Press J to continue...", &font_c64, 40);
         }
 
@@ -301,7 +301,7 @@ void UISystem::UpdateLevelUpUI(float dt)
 
                 if(levelUpTextTimer > 99999.f)
                 {
-                    vtxt_move_cursor(450, 580);
+                    vtxt_move_cursor(670, 580);
                     vtxt_append_line("Level Up!", &font_c64, 80);
                 }
                 else
@@ -321,11 +321,11 @@ void UISystem::UpdateLevelUpUI(float dt)
                     }
 
                     // mutationOptions
-                    vtxt_move_cursor(121, 350);
+                    vtxt_move_cursor(180, 350);
                     vtxt_append_line(mutationOptions[0].name.c_str(), &font_c64, 28);
-                    vtxt_move_cursor(551, 350);
+                    vtxt_move_cursor(754, 350);
                     vtxt_append_line(mutationOptions[1].name.c_str(), &font_c64, 28);
-                    vtxt_move_cursor(983, 350);
+                    vtxt_move_cursor(1333, 350);
                     vtxt_append_line(mutationOptions[2].name.c_str(), &font_c64, 28);
 
                     // 19 char wide
@@ -335,9 +335,9 @@ void UISystem::UpdateLevelUpUI(float dt)
                     int descCursorY = 500;
                     while(mut1desc.length() > 0)
                     {
-                        std::string toPrint = mut1desc.substr(0, 19);
-                        mut1desc = mut1desc.erase(0, 19);
-                        vtxt_move_cursor(121, descCursorY);
+                        std::string toPrint = mut1desc.substr(0, 24);
+                        mut1desc = mut1desc.erase(0, 24);
+                        vtxt_move_cursor(180, descCursorY);
                         descCursorY += 25;
                         vtxt_append_line(toPrint.c_str(), &font_c64, 20);
                     }
@@ -345,9 +345,9 @@ void UISystem::UpdateLevelUpUI(float dt)
                     descCursorY = 500;
                     while(mut2desc.length() > 0)
                     {
-                        std::string toPrint = mut2desc.substr(0, 19);
-                        mut2desc = mut2desc.erase(0, 19);
-                        vtxt_move_cursor(551, descCursorY);
+                        std::string toPrint = mut2desc.substr(0, 24);
+                        mut2desc = mut2desc.erase(0, 24);
+                        vtxt_move_cursor(754, descCursorY);
                         descCursorY += 25;
                         vtxt_append_line(toPrint.c_str(), &font_c64, 20);
                     }
@@ -355,14 +355,14 @@ void UISystem::UpdateLevelUpUI(float dt)
                     descCursorY = 500;
                     while(mut3desc.length() > 0)
                     {
-                        std::string toPrint = mut3desc.substr(0, 19);
-                        mut3desc = mut3desc.erase(0, 19);
-                        vtxt_move_cursor(983, descCursorY);
+                        std::string toPrint = mut3desc.substr(0, 24);
+                        mut3desc = mut3desc.erase(0, 24);
+                        vtxt_move_cursor(1333, descCursorY);
                         descCursorY += 25;
                         vtxt_append_line(toPrint.c_str(), &font_c64, 20);
                     }
 
-                    vtxt_move_cursor(333, 900);
+                    vtxt_move_cursor(574, 900);
                     if(Input::GetGamepad(0).isConnected)
                     {
                         vtxt_append_line("Press A to select mutation...", &font_c64, 32);
