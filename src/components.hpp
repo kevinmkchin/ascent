@@ -106,6 +106,7 @@ enum class EFFECT_ASSET_ID : u8
 
     EFFECT_COUNT
 };
+
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 // Make sure these paths remain in sync with the associated enumerators.
@@ -146,22 +147,39 @@ struct Enemy
     float playerHurtCooldown = 0.f;
     float attackCooldown = 2000.f;
     float elapsedTime = 0.f;
+    //std::vector<Behavior> behaviors;
 };
 
-struct Enemy_projectile {
+struct Behavior {
+
+};
+
+struct EnemyProjectile {
     Entity enemy_projectile;
+    i32 attackPower = 0;
 };
 
-struct PathingBehavior {
+struct PathingBehavior : Behavior {
     vec2 goalFromPlayer = { 0.f, 0.f }; // (absolute value?) distance from player enemy would ideally like to be (in (x,y))
     float pathSpeed = 0;
-    bool flyingType = false;
 };
 
-struct PatrollingBehavior {
+struct PatrollingBehavior : Behavior {
     bool standStill; 
     float patrolSpeed = 0;    // speed at which enemy patrols their spawnpoint
     float patrolDistance = 0; // max distance enemy will patrol to from their spawnpoint in either direction
+};
+
+struct FlyingBehavior : Behavior {};
+
+struct WalkingBehavior : Behavior {};
+
+struct RangedBehavior : Behavior {
+    i32 attackPower = 5;
+};
+
+struct MeleeBehavior : Behavior {
+    i32 attackPower = 8;
 };
 
 struct Weapon

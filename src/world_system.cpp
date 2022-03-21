@@ -490,30 +490,32 @@ void WorldSystem::handle_collisions() {
                 Enemy &enemy = registry.enemy.get(entity_other);
 
                 // Check if player is moving vertically downwards
-                if (playerMotion.velocity.y > 100.f && registry.pathingBehaviors.get(entity_other).flyingType == false) {
+                if (playerMotion.velocity.y > 100.f && !(registry.flyingBehaviors.has(entity_other))) {
                     // player does not take damage & just bounces off
                     playerMotion.velocity = {0.f, -playerMotion.velocity.y};
                     if (Mix_PlayChannel(-1, player_jump_on_enemy_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
                 } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f)) {
+                    const MeleeBehavior enemyMeleeBehavior = registry.meleeBehaviors.get(entity_other);
                     enemy.playerHurtCooldown = 2.f;
-                    playerHealth.TakeDamage(8, 5);
+                    playerHealth.TakeDamage(enemyMeleeBehavior.attackPower, 5);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
                 }
             }
 
-            if (registry.enemyprojectile.has(entity_other)) {
+            if (registry.enemyProjectiles.has(entity_other)) {
                 if (playerHealth.health > 0) {
-                    playerHealth.TakeDamage(10, 5);
+                    const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
+                    playerHealth.TakeDamage(enemyProjectile.attackPower, 5);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
                 }
 
-                auto &enemyprojectileRegistry = registry.enemyprojectile;
+                auto &enemyprojectileRegistry = registry.enemyProjectiles;
                 Entity fire_entity = enemyprojectileRegistry.entities[0];
                 registry.remove_all_components_of(fire_entity);
             }
