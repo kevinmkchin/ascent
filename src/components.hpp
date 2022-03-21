@@ -166,8 +166,9 @@ struct PathingBehavior : Behavior {
 
 struct PatrollingBehavior : Behavior {
     bool standStill; 
-    float patrolSpeed = 0;    // speed at which enemy patrols their spawnpoint
-    float patrolDistance = 0; // max distance enemy will patrol to from their spawnpoint in either direction
+    float patrolSpeed = 0;       // speed at which enemy patrols their spawnpoint
+    float currentPatrolTime = 0; // current time patrolling 
+    float maxPatrolTime = 0;     // max time you patrol in that direction
 };
 
 struct FlyingBehavior : Behavior {};
@@ -234,6 +235,7 @@ struct CollisionComponent
 struct VisionComponent
 {
     float sightRadius = 0.f;
+    bool hasAggro = false;
 };
 
 struct Animation // NOT A COMPONENT

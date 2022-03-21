@@ -116,7 +116,6 @@ Entity CreateBatEnemy(vec2 position)
     auto& hb = registry.healthBar.emplace(entity);
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
-    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
     auto& flyingBehavior = registry.flyingBehaviors.emplace(entity);
     auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 20.f;
@@ -134,10 +133,6 @@ Entity CreateBatEnemy(vec2 position)
     float maxMoveSpeed = 128.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
-
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
-    patrollingBehavior.standStill = false;
 
     visualComponent.sightRadius = 96.f;
 
@@ -216,8 +211,8 @@ Entity CreateKnightEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
     visualComponent.sightRadius = 64.f;
@@ -265,13 +260,14 @@ Entity CreateGoblinEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.maxPatrolTime = 500.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
+    patrollingBehavior.currentPatrolTime = (float) (rand() % 200);
 
     walkingBehavior.stupid = false;
 
-    visualComponent.sightRadius = 72.f;
+    visualComponent.sightRadius = 48.f;
 
     registry.sprites.insert(
         entity,
@@ -348,8 +344,8 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
     visualComponent.sightRadius = 64.f;
@@ -428,8 +424,8 @@ Entity CreateMushroomEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
     visualComponent.sightRadius = 64.f;
@@ -508,8 +504,8 @@ Entity CreateSlimeEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
     visualComponent.sightRadius = 64.f;
@@ -588,8 +584,8 @@ Entity CreateWormEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.patrolDistance = 48.f;
-    patrollingBehavior.patrolSpeed = maxMoveSpeed / 2.f;
+    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
     visualComponent.sightRadius = 64.f;

@@ -2,10 +2,10 @@
 #include "ai_system.hpp"
 
 /* FLOOR-BOUND ENEMY PHYSICS CONFIGURATION */
-INTERNAL float enemyGravity = 200.f;
-INTERNAL float enemyJumpSpeed = 100.f;
-// INTERNAL float enemyMaxMoveSpeed = 64.f;
-INTERNAL float enemyMaxFallSpeed = 100.f;
+INTERNAL float enemyGravity = 250.f;
+INTERNAL float enemyJumpSpeed = 125.f;
+INTERNAL float enemyMaxMoveSpeed = 64.f;
+INTERNAL float enemyMaxFallSpeed = 125.f;
 INTERNAL float enemyGroundAcceleration = 700.f;
 INTERNAL float enemyGroundDeceleration = 1000.f;
 INTERNAL float enemyAirAcceleration = 650.f;
@@ -77,7 +77,7 @@ void AISystem::Step(float deltaTime)
 			if (!registry.deathTimers.has(enemy)) {
 				TransformComponent& enemyTransform = registry.transforms.get(enemy);
 				if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
-					Pathfind(enemy);
+					Pathfind(enemy, elapsedTime);
 					MotionComponent& enemyMotionComponent = registry.motions.get(enemy);
 				}
 				elapsedAICycleTime = 0.f;
@@ -147,10 +147,10 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 	// make work when there's multiple spots the enemy would be ok with going
 		// probably do this by finding list of desirable spots then going to closest one
 	// PATROL BEHAVIOR
-void AISystem::Pathfind(Entity enemy_entity) {
+void AISystem::Pathfind(Entity enemy_entity, float elapsedTime) {
 	bool isPlayerInAwarenessBubble = PlayerInAwarenessBubble(enemy_entity);
 	if (!isPlayerInAwarenessBubble) {
-		PatrolBehavior(enemy_entity);
+		PatrolBehavior(enemy_entity, elapsedTime);
 	}
 	else {
 		PathBehavior(enemy_entity);
@@ -158,7 +158,7 @@ void AISystem::Pathfind(Entity enemy_entity) {
 }
 
 // TODO implement patrol behavior
-void AISystem::PatrolBehavior(Entity enemy_entity) {
+void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 	if (registry.patrollingBehaviors.has(enemy_entity)) {
 		PatrollingBehavior& patrollingBehavior = registry.patrollingBehaviors.get(enemy_entity);
 		MotionComponent& motionComponent = registry.motions.get(enemy_entity);
@@ -166,7 +166,19 @@ void AISystem::PatrolBehavior(Entity enemy_entity) {
 		motionComponent.terminalVelocity.x = patrollingBehavior.patrolSpeed;
 		motionComponent.terminalVelocity.y = enemyMaxFallSpeed;
 
-		motionComponent.velocity.x = 0;
+		if (patrollingBehavior.standStill) {
+			motionComponent.velocity.x = 0;
+		}
+		else {
+			if (motionComponent.velocity.x == 0) {
+				motionComponent.velocity.x = patrollingBehavior.patrolSpeed;
+			}
+			patrollingBehavior.currentPatrolTime += elapsedTime;
+			if (patrollingBehavior.maxPatrolTime <= patrollingBehavior.currentPatrolTime) {
+				motionComponent.velocity.x = -patrollingBehavior.patrolSpeed;
+				patrollingBehavior.currentPatrolTime = 0;
+			}
+		}
 	}
 }
 
@@ -500,9 +512,19 @@ bool AISystem::PlayerInAwarenessBubble(Entity enemy_entity) {
 	VisionComponent& visionComponent = registry.visionComponents.get(enemy_entity);
 	vec2 relativePosition = abs(playerTransformComponent.position - enemyTransformComponent.position);
 	float sightRadius = visionComponent.sightRadius;
-	if (relativePosition.y < sightRadius && relativePosition.x < sightRadius) {
-		return true;
+	if (visionComponent.hasAggro) {
+		if (relativePosition.y < sightRadius * 1.25 && relativePosition.x < sightRadius * 1.5) {
+			return true;
+		}
+		visionComponent.hasAggro = false;
 	}
+	else {
+		if (relativePosition.y < sightRadius && relativePosition.x < sightRadius) {
+			return true;
+		}
+		visionComponent.hasAggro = true;
+	}
+
 	return false;
 }
 
@@ -516,6 +538,7 @@ float AISystem::Heuristic(vec2 startPos, vec2 goalPos) {
 }
 
 void AISystem::EnemyJumping(Entity enemy_entity, float deltaTime) {
+	registry.motions.get(enemy_entity).acceleration.y = enemyGravity;
 	auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
 	if (walkingBehavior.stupid) {
 		return;
