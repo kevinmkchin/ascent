@@ -71,7 +71,6 @@ void PickThreeRandomInts(int* x, int* y, int* z, int cap)
 
 int RandomInt(int min, int max)
 {
-    double x = rand() / static_cast<double>(RAND_MAX + 1);
-    int random_num = min + static_cast<int>(x * (max - min));
-    return random_num;
+	int retval = min + (rand() % static_cast<int>(max - min + 1));
+	return retval;
 }
