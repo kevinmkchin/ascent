@@ -16,11 +16,11 @@ public:
 	void Step(float deltaTime);
 	void HandleSpriteSheetFrame(float deltaTime);
 	void EnemyAttack(Entity enemy_entity);
-	void Pathfind(Entity enemy_entity);
-	void Physics(Entity enemy_entity, float deltaTime);
+	void Pathfind(Entity enemy_entity, float elapsedTime);
+	void EnemyJumping(Entity enemy_entity, float deltaTime);
 	bool PlayerInAwarenessBubble(Entity enemy_entity);
 	void PathBehavior(Entity enemy_entity);
-	void PatrolBehavior(Entity enemy_entity);
+	void PatrolBehavior(Entity enemy_entity, float elapsedTime);
 	void Init(std::vector<std::vector<int>> levelTiles);
 	float Heuristic(vec2 pos1, vec2 pos2);
 };
