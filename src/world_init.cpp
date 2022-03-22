@@ -104,15 +104,6 @@ Entity createPlayer(vec2 position)
     hb.health = 100.f;
     hb.maxHealth = 100.f;
 
-    // TODO if easy, set these to 150 on each, attack power up, pass on xp mult for now
-    /*
-    if (easyMode) {
-        hb.health = 150.f;
-        hb.maxHealth = 150.f;
-        player.attackPower = 40;
-    }
-    */
-
     return entity;
 }
 
