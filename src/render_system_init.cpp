@@ -60,6 +60,7 @@ void RenderSystem::InitializeUIStuff()
     CreateMeshVertexArray(textLayer1VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
     CreateMeshVertexArray(textLayer2VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
     CreateMeshVertexArray(textLayer3VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
+	CreateMeshVertexArray(textLayer4VAO, nullptr, nullptr, 0, 0, 2, 2, 0, GL_DYNAMIC_DRAW);
 
     u32 expProgressBarIndices[6] = {
         0, 1, 3,

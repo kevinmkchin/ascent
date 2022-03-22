@@ -424,6 +424,117 @@ void UISystem::UpdateLevelUpUI(float dt)
     RebindMeshBufferObjects(renderer->textLayer3VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);  
 }
 
+void UISystem::UpdateShopUI(float dt) {
+
+    renderer->showShopSelect = false;
+    vtxt_clear_buffer();
+
+    if (world->GetCurrentMode() == MODE_INGAME) {
+        Entity playerEntity = registry.players.entities[0];
+
+        if (registry.activeShopItems.size() > 0)
+        {
+            renderer->showShopSelect = true;
+            ActiveShopItem& activeShopItem = registry.activeShopItems.components[0];
+            Entity& shopEntity = activeShopItem.linkedEntity[0];
+            ShopItem& shopItem = registry.shopItems.get(shopEntity);
+            *GlobalPauseForSeconds = 100000.0f;
+            std::vector<Mutation> mutations = world->allPossibleMutations;
+            Mutation buy = {};
+
+            switch (shopItem.mutationIndex) {
+                case 0:
+                    buy = mutations[2];
+                    break;
+                case 1:
+                    buy = mutations[0];
+                    break;
+                case 2:
+                    buy = mutations[1];
+                    break;
+                case 3:
+                    buy = mutations[3];
+                    break;
+                case 4:
+                    buy = mutations[6];
+                    break;
+                default:
+                    break;
+            }
+
+            vtxt_move_cursor(754, 350);
+            vtxt_append_line(buy.name.c_str(), &font_c64, 28);
+
+            int descCursorY = 500;
+            std::string mut_desc = buy.description;
+            while (mut_desc.length() > 0)
+            {
+                std::string toPrint = mut_desc.substr(0, 24);
+                mut_desc = mut_desc.erase(0, 24);
+                vtxt_move_cursor(754, descCursorY);
+                descCursorY += 25;
+                vtxt_append_line(toPrint.c_str(), &font_c64, 20);
+            }
+
+            vtxt_move_cursor(620, 850);
+            if (Input::GetGamepad(0).isConnected)
+            {
+                vtxt_append_line("Press A to buy for 50 gold.", &font_c64, 32);
+            }
+            else
+            {
+                vtxt_append_line("Press J to buy for 50 gold.", &font_c64, 32);
+            }
+
+            vtxt_move_cursor(930, 900);
+            vtxt_append_line("or", &font_c64, 32);
+
+            vtxt_move_cursor(730, 950);
+            if (Input::GetGamepad(0).isConnected)
+            {
+                vtxt_append_line("Press X to exit...", &font_c64, 32);
+            }
+            else
+            {
+                vtxt_append_line("Press K to exit...", &font_c64, 32);
+            }
+
+            if (Input::GameJumpHasBeenPressed())
+            {
+                GoldBar& playerGold = registry.goldBar.get(playerEntity);
+                
+                if (playerGold.coins >= 50) {
+                    
+                    playerGold.coins -= 50;
+                    
+                    ActiveMutationsComponent& playerActiveMutations = registry.mutations.get(playerEntity);
+                    playerActiveMutations.mutations.push_back(buy);
+
+                    registry.remove_all_components_of(shopEntity);
+                }
+                else {
+                    // TODO: display UI saying not enough
+                    registry.activeShopItems.clear();
+                }
+
+                *GlobalPauseForSeconds = 0.0f;
+            }
+
+            if (Input::GameAttackHasBeenPressed())
+            {
+                registry.activeShopItems.clear();
+                *GlobalPauseForSeconds = 0.0f;
+            }
+
+        }
+    }
+
+    vtxt_vertex_buffer vb = vtxt_grab_buffer();
+    renderer->textLayer4FontAtlas = texture_c64;
+    renderer->textLayer4Colour = vec4(1.f, 1.f, 1.f, 1.0f);
+    RebindMeshBufferObjects(renderer->textLayer4VAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
+}
+
 #pragma warning(pop)
 
 void UISystem::Step(float deltaTime)
@@ -448,4 +559,5 @@ void UISystem::Step(float deltaTime)
     UpdateExpUI(deltaTime);
     UpdateTextUI(deltaTime);
     UpdateLevelUpUI(deltaTime);
+    UpdateShopUI(deltaTime);
 }

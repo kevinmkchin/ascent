@@ -25,6 +25,8 @@ public:
     ComponentContainer<Weapon> weapons;
     ComponentContainer<HolderComponent> holders;
     ComponentContainer<Item> items;
+	ComponentContainer<ShopItem> shopItems;
+	ComponentContainer<ActiveShopItem> activeShopItems;
 	ComponentContainer<PathingBehavior> pathingBehaviors;
 	ComponentContainer<PatrollingBehavior> patrollingBehaviors;
 	ComponentContainer<FlyingBehavior> flyingBehaviors;
@@ -57,6 +59,8 @@ public:
         registry_list.push_back(&weapons);
         registry_list.push_back(&holders);
         registry_list.push_back(&items);
+		registry_list.push_back(&shopItems);
+		registry_list.push_back(&activeShopItems);
 		registry_list.push_back(&pathingBehaviors);
 		registry_list.push_back(&patrollingBehaviors);
 		registry_list.push_back(&flyingBehaviors);

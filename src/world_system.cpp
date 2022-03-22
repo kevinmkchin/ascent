@@ -617,6 +617,14 @@ void WorldSystem::handle_collisions() {
 
             }
 
+            if (registry.shopItems.has(entity_other))
+            {
+                if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN) && registry.activeShopItems.size() == 0) {
+                    auto& activeItem = registry.activeShopItems.emplace(entity_other);
+                    activeItem.linkedEntity.push_back(entity_other);
+                }
+            }
+
             if (registry.enemyProjectiles.has(entity_other)) {
                 if (playerHealth.health > 0) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
