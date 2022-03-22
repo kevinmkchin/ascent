@@ -437,10 +437,10 @@ void WorldSystem::handle_collisions() {
                 Enemy& enemyComponent = registry.enemy.get(entity);
                 if (is_thrown_weapon) {
                     auto& playerProjectile = registry.playerProjectiles.get(entity_other);
-                    if (enemyComponent.enemyHurtCooldown < enemyComponent.enemyHurtElapsedTime) {
-                        enemyHealth.TakeDamage((float)playerProjectile.attackPower, (float)playerProjectile.attackVariance);
-                        enemyComponent.enemyHurtElapsedTime = 0;
-                    }
+                    //if (enemyComponent.enemyHurtCooldown < enemyComponent.enemyHurtElapsedTime) {
+                    enemyHealth.TakeDamage((float)playerProjectile.attackPower, (float)playerProjectile.attackVariance);
+                    //    enemyComponent.enemyHurtElapsedTime = 0;
+                    //}
                 } 
                 else if (entity_other.GetTag() == TAG_PLAYERMELEEATTACK) {
                     HolderComponent playerHolder = registry.holders.get(registry.players.entities.front());
@@ -448,10 +448,10 @@ void WorldSystem::handle_collisions() {
                     if (registry.meleeWeapons.has(playerHolder.held_weapon)) {
                         meleeWeaponAttackPower += registry.meleeWeapons.get(playerHolder.held_weapon).attackPower;
                     }
-                    if (enemyComponent.enemyHurtCooldown < enemyComponent.enemyHurtElapsedTime) {
-                        enemyHealth.TakeDamage((float)playerComponent.attackPower + meleeWeaponAttackPower, (float)playerComponent.attackVariance);
-                        enemyComponent.enemyHurtElapsedTime = 0;
-                    }
+                    //if (enemyComponent.enemyHurtCooldown < enemyComponent.enemyHurtElapsedTime) {
+                    enemyHealth.TakeDamage((float)playerComponent.attackPower + meleeWeaponAttackPower, (float)playerComponent.attackVariance);
+                    //    enemyComponent.enemyHurtElapsedTime = 0;
+                    //}
                     // Move the player a little bit - its more fun
                     if (playerSystem->lastAttackDirection == 3) {
                         auto &playerMotion = registry.motions.get(player);
