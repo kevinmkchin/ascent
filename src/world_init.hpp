@@ -22,6 +22,8 @@ Entity CreateSlimeEnemy(vec2 position);
 
 Entity CreateWormEnemy(vec2 position);
 
+Entity createEnemyLobbingProjectile(vec2 position, vec2 velocity, vec2 acceleration, Entity enemy);
+
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy);
 
 Entity createExp(vec2 position);

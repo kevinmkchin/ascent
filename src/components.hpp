@@ -40,6 +40,7 @@ enum class TEXTURE_ASSET_ID : u16
     SHOPBG,
     MAINMENUBG,
     FIRE,
+    LOB_PROJECTILE,
     PLAYER,
     SWORD,
     BG_LAYER1,
@@ -80,6 +81,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
+        textures_path("lob_projectile.png"),
         textures_path("player.png"),
         textures_path("sword.png"),
         textures_path("bg_layer1.png"),
@@ -118,6 +120,7 @@ enum class EFFECT_ASSET_ID : u8
 
     EFFECT_COUNT
 };
+
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 // Make sure these paths remain in sync with the associated enumerators.
@@ -158,10 +161,18 @@ struct Enemy
 {
     float projectile_speed = 120.f;
     float playerHurtCooldown = 0.f;
+    float attackCooldown = 2000.f;
+    float elapsedTime = 0.f;
+    //std::vector<Behavior> behaviors;
 };
 
-struct Enemy_projectile {
+struct Behavior {
+
+};
+
+struct EnemyProjectile {
     Entity enemy_projectile;
+    i32 attackPower = 0;
 };
 
 struct Exp
@@ -174,18 +185,32 @@ struct Coin
     float counter_seconds_coin = 999999.f;
 };
 
-
-
 struct PathingBehavior {
     vec2 goalFromPlayer = { 0.f, 0.f }; // (absolute value?) distance from player enemy would ideally like to be (in (x,y))
     float pathSpeed = 0;
-    bool flyingType = false;
 };
 
-struct PatrollingBehavior {
+struct PatrollingBehavior : Behavior {
     bool standStill; 
-    float patrolSpeed = 0;    // speed at which enemy patrols their spawnpoint
-    float patrolDistance = 0; // max distance enemy will patrol to from their spawnpoint in either direction
+    float patrolSpeed = 0;       // speed at which enemy patrols their spawnpoint
+    float currentPatrolTime = 0; // current time patrolling 
+    float maxPatrolTime = 0;     // max time you patrol in that direction
+};
+
+struct FlyingBehavior : Behavior {};
+
+struct WalkingBehavior : Behavior {
+    bool stupid = true;
+    bool jumpRequest = false;
+};
+
+struct RangedBehavior : Behavior {
+    bool lobbing = false;
+    i32 attackPower = 5;
+};
+
+struct MeleeBehavior : Behavior {
+    i32 attackPower = 8;
 };
 
 struct Weapon
@@ -238,6 +263,7 @@ struct CollisionComponent
 struct VisionComponent
 {
     float sightRadius = 0.f;
+    bool hasAggro = false;
 };
 
 struct Animation // NOT A COMPONENT
