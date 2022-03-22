@@ -85,7 +85,7 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
         item.collidableWithEnvironment = true;
         item.grounded = false;
 
-        if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
+        if ((registry.meleeWeapons.has(held_weapon) || registry.rangedWeapons.has(held_weapon)) && !registry.activePlayerProjectiles.has(held_weapon))
         {
             registry.activePlayerProjectiles.emplace(held_weapon);
         }
@@ -110,7 +110,7 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
         MotionComponent& motion = registry.motions.get(held_weapon);
         motion.acceleration.y = itemGravity;
 
-        if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
+        if ((registry.meleeWeapons.has(held_weapon) || registry.rangedWeapons.has(held_weapon)) && !registry.activePlayerProjectiles.has(held_weapon))
         {
             registry.activePlayerProjectiles.emplace(held_weapon);
         }
@@ -158,10 +158,10 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
             }
         }
 
-        Item& item = registry.items.get(projectile);
-        item.collidableWithEnvironment = true;
-        item.grounded = false;
-
+        if (wasProjectileFired) {
+            Item& item = registry.items.get(projectileEntity);
+            item.collidableWithEnvironment = true;
+            item.grounded = false;
             MotionComponent& motion = registry.motions.get(projectileEntity);
             motion.acceleration.y = itemGravity;
 
