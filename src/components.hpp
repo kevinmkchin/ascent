@@ -177,7 +177,8 @@ struct EnemyProjectile {
 
 struct Exp
 {
-    float counter_seconds_exp = 6.f;
+    float counter_seconds_exp_default = 6.f;
+    float counter_seconds_exp = counter_seconds_exp_default;
 };
 
 struct Coin

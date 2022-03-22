@@ -83,12 +83,19 @@ void UISystem::UpdateTextUI(float dt)
     {
         case MODE_MAINMENU:
         {
-            vtxt_move_cursor(350, 440);
+            vtxt_move_cursor(350, 340);
             vtxt_append_line("ASCENT", &font_c64, 72);
-            vtxt_move_cursor(350, 600);
+            vtxt_move_cursor(350, 500);
             vtxt_append_line("PLAY (ENTER)", &font_c64, 48);
-            vtxt_move_cursor(350, 760);
+            vtxt_move_cursor(350, 660);
             vtxt_append_line("EXIT (Q)", &font_c64, 48);
+            vtxt_move_cursor(350, 820);
+            if (world->GetCurrentDifficulty() == DIFFICULTY_EASY) { 
+                vtxt_append_line("SWAP DIFFICULTY [STANDARD] (R)", &font_c64, 36); 
+            }
+            else {
+                vtxt_append_line("SWAP DIFFICULTY [HARD] (R)", &font_c64, 36);
+            }
         }break;
         case MODE_INGAME:
         {

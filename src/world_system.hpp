@@ -23,6 +23,12 @@ enum GAMEMODE
 	MODE_INGAME
 };
 
+enum DIFFICULTY
+{
+	DIFFICULTY_STANDARD,
+	DIFFICULTY_EASY
+};
+
 enum GAMELEVELENUM : u8
 {
 	CHAPTER_ONE_STAGE_ONE,
@@ -70,6 +76,15 @@ public:
 
     GAMEMODE GetCurrentMode() { return currentGameMode; }
     GAMELEVELENUM GetCurrentStage() { return currentGameStage; }
+	DIFFICULTY GetCurrentDifficulty() { return currentDifficulty; }
+	void SwapCurrentDifficulty() {
+		if (currentDifficulty == DIFFICULTY_STANDARD) {
+			currentDifficulty = DIFFICULTY_EASY;
+		}
+		else {
+			currentDifficulty = DIFFICULTY_STANDARD;
+		}
+	}
 
 	bool is_over()const;
 
@@ -118,6 +133,7 @@ private:
     bool gameIsRunning;
     GAMEMODE currentGameMode;
     GAMELEVELENUM currentGameStage;
+	DIFFICULTY currentDifficulty = DIFFICULTY_EASY;
 	RenderSystem* renderer;
 	PlayerSystem* playerSystem;
 	AISystem* aiSystem;
