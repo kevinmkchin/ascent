@@ -408,6 +408,7 @@ Entity CreateMushroomEnemy(vec2 position)
     auto& visualComponent = registry.visionComponents.emplace(entity);
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& rangedBehavior = registry.rangedBehaviors.emplace(entity);
     auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
     auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
     hb.health = 50.f;
@@ -429,6 +430,8 @@ Entity CreateMushroomEnemy(vec2 position)
     patrollingBehavior.maxPatrolTime = 200.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
+
+    rangedBehavior.lobbing = true;
 
     visualComponent.sightRadius = 64.f;
 
@@ -721,6 +724,39 @@ Entity createBow(vec2 position)
                         }
                     },
             }
+    );
+
+    return entity;
+}
+
+Entity createEnemyLobbingProjectile(vec2 position, vec2 velocity, vec2 acceleration, Entity enemy) {
+    auto entity = Entity::CreateEntity();
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& rangedBehavior = registry.rangedBehaviors.get(enemy);
+    vec2 dimensions = { 8, 8 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    motion.velocity = velocity;
+    motion.acceleration = acceleration;
+    motion.terminalVelocity.y = 200.f;
+
+    collider.collision_pos = dimensions / 2.f;
+    collider.collision_neg = dimensions / 2.f;
+    auto& projectile = registry.enemyProjectiles.emplace(entity);
+    projectile.attackPower = rangedBehavior.attackPower;
+    projectile.enemy_projectile = enemy;
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                10,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::LOB_PROJECTILE
+        }
     );
 
     return entity;
