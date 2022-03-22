@@ -19,3 +19,8 @@
 
 - Updated flying enemy animations and sprite sheet:
 	- Visible in world_init.cpp
+
+- Coins and exp drop after enemy death + animation 
+	- Visible in world_init.cpp (Lines 834-942)
+	- Visible in worldSystem.cpp
+	- Visible in components.hpp
