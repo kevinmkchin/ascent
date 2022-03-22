@@ -47,55 +47,6 @@ void AISystem::Step(float deltaTime)
 			DeathTimer& time = registry.deathTimers.get(enemy);
 			time.elapsed_ms -= deltaTime * 1000.f;
 			enemyComponent.playerHurtCooldown = time.elapsed_ms;
-			if (time.elapsed_ms <= 0.f) {
-				
-				int random_count = random(1, 3);
-
-				vec2 expPosition = registry.transforms.get(enemy).position;
-				vec2 expPosition1 = { expPosition.x + 10.f, expPosition.y };
-				vec2 expPosition2 = { expPosition.x - 10.f, expPosition.y };
-
-				registry.remove_all_components_of(enemy);
-
-				int coin_or_exp = random(1, 3);
-
-				if (coin_or_exp == 2) {
-					for (int i = 1; i <= random_count; i++) {
-
-						if (i == 1) {
-							createCoins(expPosition);
-						}
-
-						if (i == 2) {
-							createCoins(expPosition1);
-						}
-
-						else {
-							createCoins(expPosition2);
-						}
-
-					}
-				}
-				else {
-
-					for (int i = 1; i <= random_count; i++) {
-
-						if (i == 1) {
-							createExp(expPosition);
-						}
-
-						if (i == 2) {
-							createExp(expPosition1);
-						}
-
-						else {
-							createExp(expPosition2);
-						}
-
-					}
-
-				}
-			}
 		}
 		else {
 			if (enemyComponent.playerHurtCooldown > 0.f)

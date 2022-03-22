@@ -33,7 +33,3 @@ Entity createBow(vec2 position);
 Entity CreateShopItem(vec2 position, u8 shopItemIndex);
 
 Entity createCoins(vec2 position);
-
-int random(int min, int max);
-
-
