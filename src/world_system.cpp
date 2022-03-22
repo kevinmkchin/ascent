@@ -450,12 +450,15 @@ bool WorldSystem::step(float deltaTime) {
                 continue;
             }
 
-            auto& expTransform = registry.transforms.get(entity);
-            auto& expMotion = registry.motions.get(entity);
-            vec2 toPlayerVec = playerTransform.position - expTransform.position;
-            if(length(toPlayerVec) < playerExpPickUpRange)
+            if(counter.counter_seconds_exp < (counter.counter_seconds_exp_default - 2.f))
             {
-                expMotion.velocity = normalize(toPlayerVec) * 100.f;
+                auto& expTransform = registry.transforms.get(entity);
+                auto& expMotion = registry.motions.get(entity);
+                vec2 toPlayerVec = playerTransform.position - expTransform.position;
+                if(length(toPlayerVec) < playerExpPickUpRange)
+                {
+                    expMotion.velocity = normalize(toPlayerVec) * 100.f;
+                }
             }
         }
     }
