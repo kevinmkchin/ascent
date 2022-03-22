@@ -38,6 +38,7 @@ INTERNAL float percentYVelocityOnJumpRelease = 0.6f;
 // LADDER
 INTERNAL float ladderClimbSpeed = 64.f;
 
+INTERNAL i32 numJumpsPossible = 0;
 INTERNAL bool bGrounded = false;
 INTERNAL bool bPendingJump = false;
 INTERNAL bool bJumping = false;
@@ -108,7 +109,7 @@ INTERNAL void HandleBasicMovementInput(MotionComponent& playerMotion, Player& pl
     playerMotion.terminalVelocity.y = playerMaxFallSpeed;
 }
 
-INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion)
+INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMotion, const Player* playerComponentPtr)
 {
     const bool bLeftKeyPressed = Input::GameLeftIsPressed();
     const bool bRightKeyPressed = Input::GameRightIsPressed();
@@ -236,9 +237,15 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
             playerMotion.velocity.y = 0.f;
         }
         coyoteTimer = coyoteTimeDefaultSeconds;
+        numJumpsPossible = playerComponentPtr->maxJumps;
     }
     else if(!bJumping) // if not grounded and not jumping, then we must be falling
     {
+        if(coyoteTimer == coyoteTimeDefaultSeconds)
+        {
+            // happens once when u fall off a block
+            --numJumpsPossible;
+        }
         coyoteTimer -= deltaTime;
     }
 
@@ -256,8 +263,9 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
         if (jumpBufferTimer > jumpBufferMaxHoldSeconds) { bPendingJump = false; }
 
         // Actually jump
-        if(!bCollidedDirectlyAbove && (bGrounded || (coyoteTimer > 0.f && !bJumping)))
+        if(!bCollidedDirectlyAbove && (numJumpsPossible > 0 || bGrounded || (coyoteTimer > 0.f && !bJumping)))
         {
+            --numJumpsPossible;
             bPendingJump = false;
             bJumping = true;
             bLaddered = false;
@@ -431,7 +439,14 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
         i16 meleeBoxWidth = playerComponentPtr->meleeAttackRange;
         i16 meleeBoxHeight = playerComponentPtr->meleeAttackArc;
 
-        vec2 dimensions;
+        SpriteComponent attackBox = {
+            {0,0},
+            20,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::SWORDSWING_LEFT
+        };
+        shortvec2& dimensions = attackBox.dimensions;
+
         if(attackDir == 0)
         {
             transform.position.x = playerTransform.position.x - 8;
@@ -441,6 +456,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { 0, (i16)(meleeBoxHeight/2) };
             collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight/2) };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_LEFT;
         }
         else if(attackDir == 1)
         {
@@ -451,6 +467,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { meleeBoxWidth, (i16)(meleeBoxHeight/2) };
             collider.collision_neg = { 0, (i16)(meleeBoxHeight/2) };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_RIGHT;
         }
         else if(attackDir == 2)
         {
@@ -461,6 +478,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { (i16)(meleeBoxHeight/2), 0 };
             collider.collision_neg = { (i16)(meleeBoxHeight/2), meleeBoxWidth };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_UP;
         }
         else if(attackDir == 3)
         {
@@ -471,17 +489,13 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             collider.collider_position = transform.position;
             collider.collision_pos = { (i16)(meleeBoxHeight/2), meleeBoxWidth };
             collider.collision_neg = { (i16)(meleeBoxHeight/2), 0 };
+            attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_DOWN;
         }
         playerMeleeAttackPositionOffsetFromPlayer = transform.position - playerTransform.position;
 
         registry.sprites.insert(
             playerMeleeAttackEntity,
-            {
-                    dimensions,
-                    20,
-                    EFFECT_ASSET_ID::SPRITE,
-                    TEXTURE_ASSET_ID::BOX
-            }
+            attackBox
         );
 
         if(Mix_PlayChannel(-1, world->sword_sound, 0) == -1) 
@@ -528,6 +542,6 @@ void PlayerSystem::Step(float deltaTime)
 
     HandleBasicMovementInput(playerMotion, *playerComponentPtr);
     HandleItemInteractionInput(playerHolder);
-    ResolveComplexMovement(deltaTime, playerMotion);
+    ResolveComplexMovement(deltaTime, playerMotion, playerComponentPtr);
     HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
 }

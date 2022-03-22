@@ -22,10 +22,16 @@ Entity CreateSlimeEnemy(vec2 position);
 
 Entity CreateWormEnemy(vec2 position);
 
+Entity createEnemyLobbingProjectile(vec2 position, vec2 velocity, vec2 acceleration, Entity enemy);
+
 Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy);
+
+Entity createExp(vec2 position);
 
 Entity createSword(vec2 position);
 
 Entity createBow(vec2 position);
 
 Entity CreateShopItem(vec2 position, u8 shopItemIndex);
+
+Entity createCoins(vec2 position);

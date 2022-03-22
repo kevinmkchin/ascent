@@ -69,6 +69,42 @@ INTERNAL void MoveEntities(float deltaTime)
         {
             motion.velocity.y += motion.acceleration.y * deltaTime;
         }
+        if(motion.drag.x != 0.f || motion.drag.y != 0.f)
+        {
+            if(motion.velocity.x > 0.f)
+            {
+                motion.velocity.x -= motion.drag.x * deltaTime;
+                if(motion.velocity.x < 0.f)
+                {
+                    motion.velocity.x = 0.f;
+                }
+            }
+            else
+            {
+                motion.velocity.x += motion.drag.x * deltaTime;
+                if(motion.velocity.x > 0.f)
+                {
+                    motion.velocity.x = 0.f;
+                }
+            }
+            if(motion.velocity.y > 0.f)
+            {
+                motion.velocity.y -= motion.drag.y * deltaTime;
+                if(motion.velocity.y < 0.f)
+                {
+                    motion.velocity.y = 0.f;
+                }
+            }
+            else
+            {
+                motion.velocity.y += motion.drag.y * deltaTime;
+                if(motion.velocity.y > 0.f)
+                {
+                    motion.velocity.y = 0.f;
+                }
+            }
+        }
+
         Entity e = motion_registry.entities[i];
         registry.transforms.get(e).position += ((float)0.5 * (motion.velocity + old_velocity)) * deltaTime;
         if(registry.colliders.has(e))
@@ -112,6 +148,12 @@ INTERNAL void CheckAllCollisions()
 
     std::vector<Entity> enemies = registry.enemy.entities;
     entitiesToCheck.insert(entitiesToCheck.end(), enemies.begin(), enemies.end());
+
+    std::vector<Entity> expEntities = registry.exp.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), expEntities.begin(), expEntities.end());
+
+    std::vector<Entity> coinEntities = registry.coins.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), coinEntities.begin(), coinEntities.end());
 
     std::vector<ColEventWrapper> colEventSortingVector;
 

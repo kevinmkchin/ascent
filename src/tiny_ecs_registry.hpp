@@ -20,16 +20,23 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<HealthBar> healthBar;
 	ComponentContainer<Enemy> enemy;
-	ComponentContainer<Enemy_projectile> enemyprojectile;
+	ComponentContainer<EnemyProjectile> enemyProjectiles;
 	ComponentContainer<ActiveMutationsComponent> mutations;
     ComponentContainer<Weapon> weapons;
     ComponentContainer<HolderComponent> holders;
     ComponentContainer<Item> items;
 	ComponentContainer<PathingBehavior> pathingBehaviors;
 	ComponentContainer<PatrollingBehavior> patrollingBehaviors;
+	ComponentContainer<FlyingBehavior> flyingBehaviors;
+	ComponentContainer<WalkingBehavior> walkingBehaviors;
+	ComponentContainer<RangedBehavior> rangedBehaviors;
+	ComponentContainer<MeleeBehavior> meleeBehaviors;
 	ComponentContainer<VisionComponent> visionComponents;
 	ComponentContainer<DeathTimer> deathTimers;
     ComponentContainer<PlayerProjectile> playerProjectiles;
+	ComponentContainer<Exp> exp;
+	ComponentContainer<Coin> coins;
+	ComponentContainer<GoldBar> goldBar;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -44,16 +51,23 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&healthBar);
 		registry_list.push_back(&enemy);
-		registry_list.push_back(&enemyprojectile);
+		registry_list.push_back(&enemyProjectiles);
         registry_list.push_back(&mutations);
         registry_list.push_back(&weapons);
         registry_list.push_back(&holders);
         registry_list.push_back(&items);
 		registry_list.push_back(&pathingBehaviors);
 		registry_list.push_back(&patrollingBehaviors);
+		registry_list.push_back(&flyingBehaviors);
+		registry_list.push_back(&walkingBehaviors);
+		registry_list.push_back(&rangedBehaviors);
+		registry_list.push_back(&meleeBehaviors);
 		registry_list.push_back(&visionComponents);
 		registry_list.push_back(&deathTimers);
         registry_list.push_back(&playerProjectiles);
+		registry_list.push_back(&exp);
+		registry_list.push_back(&coins);
+		registry_list.push_back(&goldBar);
 	}
 
 	void clear_all_components() {
