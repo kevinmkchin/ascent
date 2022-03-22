@@ -67,7 +67,6 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
         holderComponent.held_weapon = holderComponent.near_weapon;
         Item& item = registry.items.get(holderComponent.held_weapon);
         item.collidableWithEnvironment = false;
-        item.thrown = false;
         item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
@@ -84,7 +83,6 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
 
         Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
-        item.thrown = true;
         item.grounded = false;
 
         if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
@@ -107,7 +105,6 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 
         Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
-        item.thrown = true;
         item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(held_weapon);
@@ -154,7 +151,6 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
 
         Item& item = registry.items.get(projectile);
         item.collidableWithEnvironment = true;
-        item.thrown = true;
         item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(projectile);
