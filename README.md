@@ -24,3 +24,10 @@
 	- Visible in world_init.cpp (Lines 834-942)
 	- Visible in worldSystem.cpp
 	- Visible in components.hpp
+
+- Pathing etc.
+	- Visible in ai_system.cpp primarily, supported by components system and world_init
+
+- multiple difficulties:
+	- Visible everywhere enum DIFFICULTY (found in world_system.cpp) members are used, primarily world_system.cpp
+	- button is in ui system and main
