@@ -88,6 +88,7 @@ public:
 
 	bool is_over()const;
 
+
     void set_is_over(bool over) { gameIsRunning = over; }
 
     float* GlobalPauseForSeconds = nullptr;
@@ -108,7 +109,9 @@ public:
 	Mix_Chunk* gain_mutation_sound;
 	Mix_Chunk* player_levelup_sound;
 	Mix_Chunk* blip_select_sound;
-    Mix_Chunk* player_jump_on_enemy_sound;
+    Mix_Chunk* player_jump_on_enemy_sound; 
+	Mix_Chunk* coins_pickup_sound;
+	Mix_Chunk* points_pickup_sound;
 
 private:
     void loadAllContent();
