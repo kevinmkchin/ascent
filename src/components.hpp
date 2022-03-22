@@ -166,12 +166,12 @@ struct Enemy_projectile {
 
 struct Exp
 {
-    float counter_ms_exp = 500;
+    float counter_seconds_exp = 6.f;
 };
 
 struct Coin
 {
-    float counter_ms_coin = 500;
+    float counter_seconds_coin = 999999.f;
 };
 
 
@@ -222,6 +222,7 @@ struct MotionComponent
 {
     vec2 velocity = { 0.f, 0.f };               // signed
     vec2 acceleration = { 0.f, 0.f };           // signed
+    vec2 drag = { 0.f, 0.f };                   // unsigned
     vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
     bool facingRight = true;
 };

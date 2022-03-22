@@ -807,30 +807,35 @@ Entity createExp(vec2 position)
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;
 
+    motion.velocity.x = (float) RandomInt(-150, 150);
+    motion.velocity.y = (float) RandomInt(-160, -80);
+    motion.drag.x = 300.f;
+    motion.acceleration.y = 320.f;
+
     registry.sprites.insert(
         entity,
         {
-                dimensions,
-                15,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::EXP,
-                true,
-                false,
-                true,
-                48,
-                8,
-                0,
-                0,
-                0.f,
+            dimensions,
+            15,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::EXP,
+            true,
+            false,
+            true,
+            48,
+            8,
+            0,
+            0,
+            0.f,
+            {
                 {
-                                    {
-                                        6,
-                                        0,
-                                        600.f,
-                                        true,
-                                        false
-                                    }
-                                },
+                    6,
+                    0,
+                    600.f,
+                    true,
+                    false
+                }
+            },
         }
     );
 
@@ -858,30 +863,35 @@ Entity createCoins(vec2 position)
     float maxFallSpeed = 200.f;
     motion.terminalVelocity.y = maxFallSpeed;
 
+    motion.velocity.x = (float) RandomInt(-150, 150);
+    motion.velocity.y = (float) RandomInt(-160, -80);
+    motion.drag.x = 300.f;
+    motion.acceleration.y = 320.f;
+
     registry.sprites.insert(
         entity,
         {
-                dimensions,
-                15,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::COIN,
-                true,
-                false,
-                true,
-                48,
-                8,
-                0,
-                0,
-                0.f,
+            dimensions,
+            15,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::COIN,
+            true,
+            false,
+            true,
+            48,
+            8,
+            0,
+            0,
+            0.f,
+            {
                 {
-                                    {
-                                        6,
-                                        0,
-                                        600.f,
-                                        true,
-                                        false
-                                    }
-                                },
+                    6,
+                    0,
+                    600.f,
+                    true,
+                    false
+                }
+            },
         }
     );
 
