@@ -97,9 +97,10 @@ Entity createPlayer(vec2 position)
         }
     );
 
-    registry.players.emplace(entity);
+    auto& player = registry.players.emplace(entity);
     registry.mutations.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
+
     hb.health = 100.f;
     hb.maxHealth = 100.f;
 

@@ -232,6 +232,12 @@ void WorldSystem::SpawnLevelEntities() {
     // Create player
     player = createPlayer(currentLevelData.playerStart);
 
+    if (currentDifficulty == DIFFICULTY_EASY) {
+        registry.healthBar.get(player).maxHealth += 50;
+        registry.healthBar.get(player).health += 50;
+        registry.players.get(player).attackPower += 10;
+    }
+
     createSword(currentLevelData.playerStart);
 
     createBow(currentLevelData.playerStart + vec2({10.f, 0}));
@@ -722,4 +728,8 @@ void WorldSystem::SDLProcessEvents() {
                 break;
         }
     }
+}
+
+void swapPlayerStats() {
+
 }
