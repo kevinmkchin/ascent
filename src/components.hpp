@@ -227,6 +227,16 @@ struct Item
     bool grounded = true;
 };
 
+struct ShopItem
+{
+    u8 mutationIndex;
+};
+
+struct ActiveShopItem 
+{
+    std::vector<Entity> linkedEntity = {};
+};
+
 struct PlayerProjectile
 {
     float elapsed_time = 0.f;

@@ -17,8 +17,15 @@
 - Bouncing off of ground enemies:
 	- Visible in WorldSystem.cpp -> handle_collisions()
 
-- Updated flying enemy animations and sprite sheet:
+- Various enemy assets & animations:
+	- Enemy animation system in ai_system.cpp
 	- Visible in world_init.cpp
+
+- Enemy death animations:
+	- ai_system.cpp, world_system.cpp
+
+- Buying mutations from shop:
+	- ui_system.cpp, world_system.cpp -> handle_collisions()
 
 - Coins and exp drop after enemy death + animation 
 	- Visible in world_init.cpp (Lines 834-942)
