@@ -151,7 +151,7 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 				velocity.x += random_change * percent_diff;
 
 				vec2 neg_velocity = { -velocity.x, velocity.y };
-				
+
 				createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
 				createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
 			}
@@ -222,8 +222,8 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			};
 
 			// GOAL POS IS NOT CORRECTLY CONSIDERED HERE! be aware.
-			vec2 goalPos  = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
-			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1)  / 16), (int)((enemyTransformComponent.position.y + 1)  / 16) };
+			vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 
 			if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 				return;
@@ -287,7 +287,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					vec2 direction = prevPos - enemyPos;
 
 					// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
-					enemyMotionComponent.velocity = direction * 25.f; 
+					enemyMotionComponent.velocity = direction * 25.f;
 					auto& enemyCollider = registry.colliders.get(enemy_entity);
 					float spriteWidth = enemyCollider.collision_pos.x;
 					float spriteHeight = enemyCollider.collision_pos.y;
@@ -372,8 +372,8 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			}
 		}
 		else if (registry.walkingBehaviors.has(enemy_entity)) {
-		// if dumb, else
-		auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
+			// if dumb, else
+			auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
 			if (walkingBehavior.stupid) {
 				enemyMotionComponent.acceleration.y = enemyGravity;
 				if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
@@ -403,8 +403,8 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					int cost;
 				};
 
-				vec2 goalPos  = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
-				vec2 enemyPos = { (int)((enemyTransformComponent.position.x  + 1) / 16), (int)((enemyTransformComponent.position.y  + 1) / 16) };
+				vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+				vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 
 				if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 					return;
@@ -467,13 +467,14 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
 					vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
 					vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
-					vec2 left  = { currentPos.position[0] - 1, currentPos.position[1] };
-
-					if (levelTiles[below.x][below.y] == 0) { // if current tile has no floor
-						adjacentSquares.push_back(below);
-					}
-					else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
-						adjacentSquares.push_back(above);        // if current has floor
+					vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
+					if (below.x >= 0 && below.y >= 0 && below.x < levelTiles.size() && below.y < levelTiles[0].size()) {
+						if (levelTiles[below.x][below.y] == 0) { // if current tile has no floor
+							adjacentSquares.push_back(below);
+						}
+						else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
+							adjacentSquares.push_back(above);        // if current has floor
+						}
 					}
 					adjacentSquares.push_back(right);
 					adjacentSquares.push_back(left);
