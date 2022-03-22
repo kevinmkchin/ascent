@@ -78,6 +78,9 @@ public:
     TextureHandle   textLayer3FontAtlas;
     vec4            textLayer3Colour = vec4(1.f,1.f,1.f,1.f);
     MeshHandle      textLayer3VAO;
+    TextureHandle   textLayer4FontAtlas;
+    vec4            textLayer4Colour = vec4(1.f, 1.f, 1.f, 1.f);
+    MeshHandle      textLayer4VAO;
 
     MeshHandle      expProgressBar;
     float           expProgressNormalized = 0.f; // range 0 to 1
@@ -85,6 +88,7 @@ public:
     MeshHandle      mutationSelectBorder;
     MeshHandle      mutationSelectBox;
     bool            showMutationSelect = false;
+    bool            showShopSelect = false;
     i8              mutationSelectionIndex = 1;
 
     float           currentTimeInSeconds = 0.f;

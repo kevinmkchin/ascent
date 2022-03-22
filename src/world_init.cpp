@@ -827,6 +827,9 @@ Entity CreateShopItem(vec2 position, u8 shopItemIndex) // remove later - just a 
     collider.collision_pos = { 16, 16 };
     collider.collider_position = transform.position;
 
+    auto& itemInfo = registry.shopItems.emplace(entity);
+    itemInfo.mutationIndex = shopItemIndex;
+
     return entity;
 }
 
