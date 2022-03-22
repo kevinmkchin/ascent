@@ -399,10 +399,6 @@ bool WorldSystem::step(float deltaTime) {
         }
     }
 
-    if (Input::HasKeyBeenPressed(SDL_SCANCODE_U)) {
-        registry.mutations.get(registry.players.entities[0]).mutations.push_back(allPossibleMutations[1]);
-    }
-
     auto& playerProjectileRegistry = registry.playerProjectiles;
     for(int i = 0; i < playerProjectileRegistry.size(); i++)
     {
@@ -430,14 +426,31 @@ bool WorldSystem::step(float deltaTime) {
 //		}
 //	}
 
-    for (Entity entity : registry.exp.entities) {
-        // progress timer
-        Exp& counter = registry.exp.get(entity);
-        counter.counter_seconds_exp -= deltaTime;
+    float playerExpPickUpRange = 38.f;
+    if(registry.transforms.has(player))
+    {
+        auto& playerTransform = registry.transforms.get(player);
+        for (Entity entity : registry.exp.entities) {
+            // progress timer
+            Exp& counter = registry.exp.get(entity);
+            counter.counter_seconds_exp -= deltaTime;
+            if (counter.counter_seconds_exp < 0.f) {
+                registry.exp.remove(entity);
+                registry.remove_all_components_of(entity);
+            }
 
-        if (counter.counter_seconds_exp < 0.f) {
-            registry.exp.remove(entity);
-            registry.remove_all_components_of(entity);
+            if(!registry.transforms.has(entity) || !registry.motions.has(entity))
+            {
+                continue;
+            }
+
+            auto& expTransform = registry.transforms.get(entity);
+            auto& expMotion = registry.motions.get(entity);
+            vec2 toPlayerVec = playerTransform.position - expTransform.position;
+            if(length(toPlayerVec) < playerExpPickUpRange)
+            {
+                expMotion.velocity = normalize(toPlayerVec) * 100.f;
+            }
         }
     }
 
@@ -507,7 +520,6 @@ void WorldSystem::handle_collisions() {
                     vec2 expPosition = registry.transforms.get(entity).position;
                     registry.remove_all_components_of(entity);
                     int coin_or_exp = RandomInt(0, 3);
-                    printf("%d\n", coin_or_exp);
                     if (coin_or_exp == 2) {
                         int random_count = RandomInt(1, 3);
                         for (int i = 1; i <= random_count; i++) 
