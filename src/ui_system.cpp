@@ -104,14 +104,16 @@ void UISystem::UpdateTextUI(float dt)
             MotionComponent& playerMotion = registry.motions.get(playerEntity);
             CollisionComponent& playerCollider = registry.colliders.get(playerEntity);
             HealthBar& playerHealth = registry.healthBar.get(playerEntity);
+            GoldBar& playerGold = registry.goldBar.get(playerEntity);
 
             char textBuffer[128];
 
-            sprintf(textBuffer, "HP: %d/%d", (int) playerHealth.health, (int) playerHealth.maxHealth);
+            int displayHealth = (playerHealth.health > 0.f && playerHealth.health < 1.f) ? 1 : (int) playerHealth.health;
+            sprintf(textBuffer, "HP: %d/%d", displayHealth, (int) playerHealth.maxHealth);
             vtxt_move_cursor(26, 66);
             vtxt_append_line(textBuffer, &font_c64, 40);
 
-            sprintf(textBuffer, "Gold: %d", (int) 99);
+            sprintf(textBuffer, "Gold: %d", (int)playerGold.coins);
             vtxt_move_cursor(26, 130);
             vtxt_append_line(textBuffer, &font_c64, 40);
 
