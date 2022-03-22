@@ -22,11 +22,12 @@ public:
 	ComponentContainer<Enemy> enemy;
 	ComponentContainer<EnemyProjectile> enemyProjectiles;
 	ComponentContainer<ActiveMutationsComponent> mutations;
-    ComponentContainer<Weapon> weapons;
     ComponentContainer<HolderComponent> holders;
     ComponentContainer<Item> items;
 	ComponentContainer<ShopItem> shopItems;
 	ComponentContainer<ActiveShopItem> activeShopItems;
+	ComponentContainer<MeleeWeapon> meleeWeapons;
+	ComponentContainer<RangedWeapon> rangedWeapons;
 	ComponentContainer<PathingBehavior> pathingBehaviors;
 	ComponentContainer<PatrollingBehavior> patrollingBehaviors;
 	ComponentContainer<FlyingBehavior> flyingBehaviors;
@@ -56,9 +57,10 @@ public:
 		registry_list.push_back(&enemy);
 		registry_list.push_back(&enemyProjectiles);
         registry_list.push_back(&mutations);
-        registry_list.push_back(&weapons);
         registry_list.push_back(&holders);
         registry_list.push_back(&items);
+		registry_list.push_back(&meleeWeapons);
+		registry_list.push_back(&rangedWeapons);
 		registry_list.push_back(&shopItems);
 		registry_list.push_back(&activeShopItems);
 		registry_list.push_back(&pathingBehaviors);
