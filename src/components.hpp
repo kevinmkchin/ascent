@@ -147,8 +147,8 @@ struct Player
     float experience = 0.f;
 
     float movementSpeed = 64.f;
-    i32 attackPower = 30;
-    i32 attackVariance = 10;
+    i32 attackPower = 20;
+    i32 attackVariance = 7;
     i16 meleeAttackRange = 16;
     i16 meleeAttackArc = 12;
     float meleeAttackCooldown = 0.8f;   // TODO: maybe make this a percentage decrease than a flat number?
@@ -161,8 +161,8 @@ struct Enemy
 {
     float projectile_speed = 120.f;
     float playerHurtCooldown = 0.f;
-    float attackCooldown = 2000.f;
-    float elapsedTime = 0.f;
+    //float enemyHurtCooldown = 250.f;
+    //float enemyHurtElapsedTime = 0.f; disabled this because it basically slugs the game
     //std::vector<Behavior> behaviors;
 };
 
@@ -208,6 +208,8 @@ struct WalkingBehavior : Behavior {
 struct RangedBehavior : Behavior {
     bool lobbing = false;
     i32 attackPower = 5;
+    float attackCooldown = 2000.f;
+    float elapsedTime = 0.f;
 };
 
 struct MeleeBehavior : Behavior {
@@ -217,6 +219,17 @@ struct MeleeBehavior : Behavior {
 struct Weapon
 {
     float damage = 1.f;
+};
+
+//For entities that can hold items
+struct HolderComponent
+{
+    Entity held_weapon = Entity();
+    Entity near_weapon = Entity();
+    bool want_to_pick_up = false;
+    bool want_to_drop = false;
+    bool want_to_throw = false;
+    bool want_to_shoot = false;
 };
 
 struct Item
@@ -237,10 +250,23 @@ struct ActiveShopItem
     std::vector<Entity> linkedEntity = {};
 };
 
+struct MeleeWeapon  : Item {
+    i32 attackPower = 0;
+};
+
+struct RangedWeapon : Item {
+    i32 attackPower = 0;
+    i32 attackVariance = 0;
+    float rangedAttackTimeCooldown = 500.f;
+    float rangedAttackTimeElapsed = 0.f;
+};
+
 struct PlayerProjectile
 {
     float elapsed_time = 0.f;
     float minTravelTime = 0.4f; // projectile keeps moving regardless of friction for at least this duration
+    i32 attackPower = 0;
+    i32 attackVariance = 0;
     bool bHitWall = false;
 };
 
@@ -325,17 +351,6 @@ struct SpriteComponent
 struct DeathTimer 
 {
     float elapsed_ms = 550.f;
-};
-
-//For entities that can hold items
-struct HolderComponent
-{
-    Entity held_weapon = Entity();
-    Entity near_weapon = Entity();
-    bool want_to_pick_up = false;
-    bool want_to_drop = false;
-    bool want_to_throw = false;
-    bool want_to_shoot = false;
 };
 
 struct CollisionEvent

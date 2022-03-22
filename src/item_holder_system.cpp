@@ -132,15 +132,24 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
 {
     if(holderComponent.want_to_shoot && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        Entity projectile;
+        Entity projectileEntity;
+        bool wasProjectileFired = false;
 
         switch (holderComponent.held_weapon.GetTag()) {
             case (TAG_BOW):
             {
-                projectile = createArrow(holderTransform.position);
-                SpriteComponent& sprite = registry.sprites.get(holderComponent.held_weapon);
-                sprite.selected_animation = 0;
-                sprite.animations[0].played = false;
+                RangedWeapon& actualBow = registry.rangedWeapons.get(holderComponent.held_weapon);
+                if (actualBow.rangedAttackTimeElapsed > actualBow.rangedAttackTimeCooldown) {
+                    projectileEntity = createArrow(holderTransform.position);
+                    auto& actualProjectile = registry.playerProjectiles.get(projectileEntity);
+                    actualProjectile.attackPower = actualBow.attackPower;
+                    actualProjectile.attackVariance = actualBow.attackVariance;
+                    SpriteComponent& sprite = registry.sprites.get(holderComponent.held_weapon);
+                    sprite.selected_animation = 0;
+                    sprite.animations[0].played = false;
+                    actualBow.rangedAttackTimeElapsed = 0;
+                    wasProjectileFired = true;
+                }
                 break;
             }
             default:
@@ -153,18 +162,19 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
         item.collidableWithEnvironment = true;
         item.grounded = false;
 
-        MotionComponent& motion = registry.motions.get(projectile);
-        motion.acceleration.y = itemGravity;
+            MotionComponent& motion = registry.motions.get(projectileEntity);
+            motion.acceleration.y = itemGravity;
 
-        if(holderMotion.facingRight)
-        {
-            motion.velocity = {itemShootSideVelocity, itemThrowUpwardVelocity};
-            registry.sprites.get(projectile).reverse = false;
-        }
-        else
-        {
-            motion.velocity = {-itemShootSideVelocity, itemThrowUpwardVelocity};
-            registry.sprites.get(projectile).reverse = true;
+            if (holderMotion.facingRight)
+            {
+                motion.velocity = { itemShootSideVelocity, itemThrowUpwardVelocity };
+                registry.sprites.get(projectileEntity).reverse = false;
+            }
+            else
+            {
+                motion.velocity = { -itemShootSideVelocity, itemThrowUpwardVelocity };
+                registry.sprites.get(projectileEntity).reverse = true;
+            }
         }
     }
 }
@@ -189,6 +199,12 @@ INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionCompon
     }
 }
 
+INTERNAL void ResolveCooldown(HolderComponent holderComponent, float elapsedTime) {
+    if (registry.rangedWeapons.has(holderComponent.held_weapon)) {
+        registry.rangedWeapons.get(holderComponent.held_weapon).rangedAttackTimeElapsed += elapsedTime;
+    }
+}
+
 void ItemHolderSystem::Step(float deltaTime)
 {
     std::vector<Entity> holders = registry.holders.entities;
@@ -201,6 +217,7 @@ void ItemHolderSystem::Step(float deltaTime)
         ResolvePickUp(holderComponent);
         ResolveDrop(holderComponent);
         ResolveShoot(holderComponent, holderMotion, holderTransform);
+        ResolveCooldown(holderComponent, deltaTime * 1000.f);
         ResolveThrow(holderComponent, holderMotion);
         ResolveItemMovement(holderComponent, holderMotion, holderTransform);
     }

@@ -498,13 +498,33 @@ void WorldSystem::handle_collisions() {
             bool is_thrown_weapon = registry.items.has(entity_other)
                                     && registry.activePlayerProjectiles.has(entity_other)
                                     && (!registry.items.get(entity_other).grounded ||
-                                        abs(registry.motions.get(entity_other).velocity.x) > 0);
+                                        abs(registry.motions.get(entity_other).velocity.x) > 1);
 
             if (entity_other.GetTag() == TAG_PLAYERMELEEATTACK || is_thrown_weapon) {
                 HealthBar &enemyHealth = registry.healthBar.get(entity);
-                enemyHealth.TakeDamage((float) playerComponent.attackPower, (float) playerComponent.attackVariance);
-
-                if (entity_other.GetTag() == TAG_PLAYERMELEEATTACK) {
+                Enemy& enemyComponent = registry.enemy.get(entity);
+                if (is_thrown_weapon) {
+                    if (registry.playerProjectiles.has(entity_other)) {
+                        auto& playerProjectile = registry.playerProjectiles.get(entity_other);
+                        //if (enemyComponent.enemyHurtCooldown < enemyComponent.enemyHurtElapsedTime) {
+                        enemyHealth.TakeDamage((float)playerProjectile.attackPower, (float)playerProjectile.attackVariance);
+                        //    enemyComponent.enemyHurtElapsedTime = 0;
+                        //}
+                    }
+                    else { // thrown melee weapon
+                        enemyHealth.TakeDamage((float)playerComponent.attackPower, (float)playerComponent.attackVariance);
+                    }
+                } 
+                else if (entity_other.GetTag() == TAG_PLAYERMELEEATTACK) {
+                    HolderComponent playerHolder = registry.holders.get(registry.players.entities.front());
+                    float meleeWeaponAttackPower = 0;
+                    if (registry.meleeWeapons.has(playerHolder.held_weapon)) {
+                        meleeWeaponAttackPower += registry.meleeWeapons.get(playerHolder.held_weapon).attackPower;
+                    }
+                    //if (enemyComponent.enemyHurtCooldown < enemyComponent.enemyHurtElapsedTime) {
+                    enemyHealth.TakeDamage((float)playerComponent.attackPower + meleeWeaponAttackPower, (float)playerComponent.attackVariance);
+                    //    enemyComponent.enemyHurtElapsedTime = 0;
+                    //}
                     // Move the player a little bit - its more fun
                     if (playerSystem->lastAttackDirection == 3) {
                         auto &playerMotion = registry.motions.get(player);
