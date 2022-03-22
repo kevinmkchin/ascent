@@ -34,7 +34,7 @@ void AISystem::Step(float deltaTime)
 
 		// Attacks
 		// injury cooldown increment
-		enemyComponent.enemyHurtElapsedTime += elapsedTime;
+		// enemyComponent.enemyHurtElapsedTime += elapsedTime;
 		//Ranged Attacks
 		if (registry.rangedBehaviors.has(enemy)) {
 			auto& enemyRangedBehavior = registry.rangedBehaviors.get(enemy);

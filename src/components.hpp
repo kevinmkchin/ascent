@@ -145,8 +145,8 @@ struct Enemy
 {
     float projectile_speed = 120.f;
     float playerHurtCooldown = 0.f;
-    float enemyHurtCooldown = 250.f;
-    float enemyHurtElapsedTime = 0.f;
+    //float enemyHurtCooldown = 250.f;
+    //float enemyHurtElapsedTime = 0.f; disabled this because it basically slugs the game
     //std::vector<Behavior> behaviors;
 };
 
@@ -220,7 +220,7 @@ struct MeleeWeapon  : Item {
 struct RangedWeapon : Item {
     i32 attackPower = 0;
     i32 attackVariance = 0;
-    float rangedAttackTimeCooldown = 0.f;   // TODO: maybe make this a percentage decrease than a flat number?
+    float rangedAttackTimeCooldown = 500.f;
     float rangedAttackTimeElapsed = 0.f;
 };
 
