@@ -482,6 +482,37 @@ void RenderSystem::DrawUI()
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
         }
+
+        if (showShopSelect)
+        {
+            glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::MUTATION_SELECT_UI]);
+
+            glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+            GLuint xOffset_loc = glGetUniformLocation(currProgram, "xOffset");
+            GLuint bSelected_loc = glGetUniformLocation(currProgram, "bSelected");
+            GLuint bBox_loc = glGetUniformLocation(currProgram, "bBox");
+            GLuint time_loc = glGetUniformLocation(currProgram, "time");
+            glUniform1f(time_loc, currentTimeInSeconds);
+            glUniform1f(xOffset_loc, -0.6f);
+            glUniform1i(bSelected_loc, false);
+            glUniform1i(bBox_loc, true);
+
+            glUniform1f(xOffset_loc, 0.f);
+            glBindVertexArray(mutationSelectBox.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mutationSelectBox.idIBO);
+            glDrawElements(GL_TRIANGLES, mutationSelectBox.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+
+            glUniform1i(bBox_loc, false);
+            glUniform1f(xOffset_loc, 0.0f);
+            glUniform1i(bSelected_loc, (mutationSelectionIndex == 1));
+            glBindVertexArray(mutationSelectBorder.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mutationSelectBorder.idIBO);
+            glDrawElements(GL_TRIANGLES, mutationSelectBorder.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
     }
 
     glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::TEXT]);
@@ -512,6 +543,15 @@ void RenderSystem::DrawUI()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer3VAO.idIBO);
             glDrawElements(GL_TRIANGLES, textLayer3VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glBindTexture(GL_TEXTURE_2D, textLayer4FontAtlas.textureId);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform4f(textColour_loc, textLayer4Colour.x, textLayer4Colour.y, textLayer4Colour.z, textLayer4Colour.w);
+    glBindVertexArray(textLayer4VAO.idVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textLayer4VAO.idIBO);
+    glDrawElements(GL_TRIANGLES, textLayer4VAO.indicesCount, GL_UNSIGNED_INT, nullptr);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     glUseProgram(0);
