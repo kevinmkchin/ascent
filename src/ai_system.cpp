@@ -47,6 +47,11 @@ void AISystem::Step(float deltaTime)
 			DeathTimer& time = registry.deathTimers.get(enemy);
 			time.elapsed_ms -= deltaTime * 1000.f;
 			enemyComponent.playerHurtCooldown = time.elapsed_ms;
+
+			if (time.elapsed_ms <= 0.f) {
+				registry.remove_all_components_of(enemy);
+			}
+
 		}
 		else {
 			if (enemyComponent.playerHurtCooldown > 0.f)
