@@ -518,7 +518,6 @@ void WorldSystem::handle_collisions() {
                     motion.velocity = {0.f, 0.f};
 
                     vec2 expPosition = registry.transforms.get(entity).position;
-                    registry.remove_all_components_of(entity);
                     int coin_or_exp = RandomInt(0, 3);
                     if (coin_or_exp == 2) {
                         int random_count = RandomInt(1, 3);
