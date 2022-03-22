@@ -40,6 +40,7 @@ enum class TEXTURE_ASSET_ID : u16
     SHOPBG,
     MAINMENUBG,
     FIRE,
+    LOB_PROJECTILE,
     PLAYER,
     SWORD,
     BG_LAYER1,
@@ -54,6 +55,12 @@ enum class TEXTURE_ASSET_ID : u16
     MUSHROOM,
     SLIME,
     WORM,
+    EXP,
+    COIN,
+    SWORDSWING_LEFT,
+    SWORDSWING_RIGHT,
+    SWORDSWING_UP,
+    SWORDSWING_DOWN,
     BG_MENU_LAYER1,
     BG_MENU_LAYER2,
     BG_MENU_LAYER3,
@@ -74,6 +81,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
+        textures_path("lob_projectile.png"),
         textures_path("player.png"),
         textures_path("sword.png"),
         textures_path("bg_layer1.png"),
@@ -88,6 +96,12 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mushroom.png"),
         textures_path("slime_fixed.png"),
         textures_path("worm.png"),
+        textures_path("exp.png"),
+        textures_path("coin.png"),
+        textures_path("swing_left.png"),
+        textures_path("swing_right.png"),
+        textures_path("swing_up.png"),
+        textures_path("swing_down.png"),
         textures_path("menu_bg_layer1.png"),
         textures_path("menu_bg_layer2.png"),
         textures_path("menu_bg_layer3.png"),
@@ -138,8 +152,10 @@ struct Player
     i16 meleeAttackRange = 16;
     i16 meleeAttackArc = 12;
     float meleeAttackCooldown = 0.8f;   // TODO: maybe make this a percentage decrease than a flat number?
+
+    i32 maxJumps = 1;
 };
-const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1500.f, 9999.f, 9999.f, 9999.f, 9999.f, 9999.f }; 
+const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1200.f, 1850.f, 2650.f, 3700.f, 5000.f, 9999.f }; 
 
 struct Enemy
 {
@@ -159,7 +175,17 @@ struct EnemyProjectile {
     i32 attackPower = 0;
 };
 
-struct PathingBehavior : Behavior {
+struct Exp
+{
+    float counter_seconds_exp = 6.f;
+};
+
+struct Coin
+{
+    float counter_seconds_coin = 999999.f;
+};
+
+struct PathingBehavior {
     vec2 goalFromPlayer = { 0.f, 0.f }; // (absolute value?) distance from player enemy would ideally like to be (in (x,y))
     float pathSpeed = 0;
 };
@@ -179,6 +205,7 @@ struct WalkingBehavior : Behavior {
 };
 
 struct RangedBehavior : Behavior {
+    bool lobbing = false;
     i32 attackPower = 5;
 };
 
@@ -220,6 +247,7 @@ struct MotionComponent
 {
     vec2 velocity = { 0.f, 0.f };               // signed
     vec2 acceleration = { 0.f, 0.f };           // signed
+    vec2 drag = { 0.f, 0.f };                   // unsigned
     vec2 terminalVelocity = { 9999.f, 9999.f }; // unsigned
     bool facingRight = true;
 };
@@ -345,6 +373,11 @@ struct HealthBar
         health -= actualDamage;
         return actualDamage;
     }
+};
+
+struct GoldBar
+{
+    float coins = 50.f;
 };
 
 enum GAMETAGS : u8

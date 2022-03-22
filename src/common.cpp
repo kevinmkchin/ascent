@@ -68,3 +68,9 @@ void PickThreeRandomInts(int* x, int* y, int* z, int cap)
         *z = rand()%cap;
     } while(*z == *x || *z == *y);
 }
+
+int RandomInt(int min, int max)
+{
+	int retval = min + (rand() % static_cast<int>(max - min + 1));
+	return retval;
+}
