@@ -40,6 +40,7 @@ enum class TEXTURE_ASSET_ID : u16
     SHOPBG,
     MAINMENUBG,
     FIRE,
+    LOB_PROJECTILE,
     PLAYER,
     SWORD,
     BG_LAYER1,
@@ -80,6 +81,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("shopbg.png"),
         textures_path("mainmenu.png"),
         textures_path("fire.png"),
+        textures_path("lob_projectile.png"),
         textures_path("player.png"),
         textures_path("sword.png"),
         textures_path("bg_layer1.png"),
@@ -203,6 +205,7 @@ struct WalkingBehavior : Behavior {
 };
 
 struct RangedBehavior : Behavior {
+    bool lobbing = false;
     i32 attackPower = 5;
 };
 

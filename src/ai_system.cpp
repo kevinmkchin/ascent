@@ -180,10 +180,30 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 		TransformComponent& player_transform = registry.transforms.get(playerEntity);
 		TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
 		vec2 diff_distance = player_transform.position - enemy_transform.position;
-		if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > 0 && diff_distance.y < 20) {
-			float angle = atan2(diff_distance.y, diff_distance.x);
+		if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
+			if (enemyRangedBehavior.lobbing) {
+
+				vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
+				vec2 acceleration = vec2(0.f, 250.f);
+
+				float random_change = 15.f;
+				float percent_diff = (float)rand() / RAND_MAX;
+				int direction = rand() % 2;
+				if (direction) {
+					random_change *= -1.f;
+				}
+				velocity.x += random_change * percent_diff;
+
+				vec2 neg_velocity = { -velocity.x, velocity.y };
+				
+				createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
+				createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
+			}
+			else {
+				float angle = atan2(diff_distance.y, diff_distance.x);
 				vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
-			createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+				createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+			}
 		}
 	}
 	// TODO implement actual melee attacks from enemies, not just contact damage (MeleeBehavior component) but thats not for me to do yet
