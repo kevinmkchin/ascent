@@ -29,6 +29,7 @@ INTERNAL Entity createArrow(vec2 position)
     motion.terminalVelocity.y = maxFallSpeed;
 
     registry.playerProjectiles.emplace(entity);
+    registry.activePlayerProjectiles.emplace(entity);
 
     registry.sprites.insert(
             entity,
@@ -79,12 +80,19 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
 {
     if(holderComponent.want_to_drop && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        Item& item = registry.items.get(holderComponent.held_weapon);
+        Entity held_weapon = holderComponent.held_weapon;
+
+        Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
         item.thrown = true;
         item.grounded = false;
 
-        MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
+        if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
+        {
+            registry.activePlayerProjectiles.emplace(held_weapon);
+        }
+
+        MotionComponent& motion = registry.motions.get(held_weapon);
         motion.acceleration.y = itemGravity;
 
         holderComponent.held_weapon = Entity();
@@ -95,13 +103,20 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 {
     if(holderComponent.want_to_throw && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        Item& item = registry.items.get(holderComponent.held_weapon);
+        Entity held_weapon = holderComponent.held_weapon;
+
+        Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
         item.thrown = true;
         item.grounded = false;
 
-        MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
+        MotionComponent& motion = registry.motions.get(held_weapon);
         motion.acceleration.y = itemGravity;
+
+        if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
+        {
+            registry.activePlayerProjectiles.emplace(held_weapon);
+        }
 
         if(holderMotion.facingRight)
         {

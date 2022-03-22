@@ -487,7 +487,7 @@ void WorldSystem::handle_collisions() {
 
         if (registry.enemy.has(entity)) {
             bool is_thrown_weapon = registry.items.has(entity_other)
-                                    && registry.items.get(entity_other).thrown
+                                    && registry.activePlayerProjectiles.has(entity_other)
                                     && (!registry.items.get(entity_other).grounded ||
                                         abs(registry.motions.get(entity_other).velocity.x) > 0);
 
@@ -506,6 +506,11 @@ void WorldSystem::handle_collisions() {
                         float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
                         playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
                     }
+                }
+
+                if (is_thrown_weapon)
+                {
+                    registry.activePlayerProjectiles.remove(entity_other);
                 }
 
                 if (enemyHealth.health <= 0.f && !registry.deathTimers.has(entity))

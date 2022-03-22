@@ -234,6 +234,10 @@ struct PlayerProjectile
     bool bHitWall = false;
 };
 
+struct ActivePlayerProjectile {
+
+};
+
 struct TransformComponent
 {
     vec2 position = { 0.f, 0.f };

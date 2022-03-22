@@ -34,6 +34,7 @@ public:
 	ComponentContainer<VisionComponent> visionComponents;
 	ComponentContainer<DeathTimer> deathTimers;
     ComponentContainer<PlayerProjectile> playerProjectiles;
+    ComponentContainer<ActivePlayerProjectile> activePlayerProjectiles;
 	ComponentContainer<Exp> exp;
 	ComponentContainer<Coin> coins;
 	ComponentContainer<GoldBar> goldBar;
@@ -65,6 +66,7 @@ public:
 		registry_list.push_back(&visionComponents);
 		registry_list.push_back(&deathTimers);
         registry_list.push_back(&playerProjectiles);
+        registry_list.push_back(&activePlayerProjectiles);
 		registry_list.push_back(&exp);
 		registry_list.push_back(&coins);
 		registry_list.push_back(&goldBar);
