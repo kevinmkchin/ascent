@@ -89,7 +89,7 @@ public:
 		}
 	}
 
-	void WorldSystem::HelpMode();
+	void HelpMode();
 
 	bool is_over()const;
 
