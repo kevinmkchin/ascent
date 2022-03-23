@@ -30,6 +30,8 @@
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
+
+
 enum class TEXTURE_ASSET_ID : u16
 {
     ASCENT_LEVELTILES_SHEET,
@@ -66,6 +68,7 @@ enum class TEXTURE_ASSET_ID : u16
     BG_MENU_LAYER3,
     BG_MENU_LAYER4,
     BG_MENU_LAYER5,
+    HELP_MENU,
 
     TEXTURE_COUNT
 };
@@ -106,7 +109,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("menu_bg_layer2.png"),
         textures_path("menu_bg_layer3.png"),
         textures_path("menu_bg_layer4.png"),
-        textures_path("menu_bg_layer5.png")
+        textures_path("menu_bg_layer5.png"),
+        textures_path("help.png")
 };
 
 enum class EFFECT_ASSET_ID : u8

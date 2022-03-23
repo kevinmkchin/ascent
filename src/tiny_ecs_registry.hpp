@@ -74,6 +74,7 @@ public:
 		registry_list.push_back(&exp);
 		registry_list.push_back(&coins);
 		registry_list.push_back(&goldBar);
+		
 	}
 
 	void clear_all_components() {

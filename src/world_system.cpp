@@ -11,6 +11,7 @@
 #include "input.hpp"
 #include "levels.cpp"
 
+
 WorldSystem::WorldSystem()
         : window(nullptr), renderer(nullptr), gameIsRunning(true), currentGameMode(MODE_MAINMENU),
           currentGameStage(GAME_NOT_STARTED) {
@@ -194,6 +195,16 @@ void WorldSystem::StartNewRun() {
     SetRandomizerSeed(seed);
 
     StartNewStage(CHAPTER_ONE_STAGE_ONE);
+}
+
+void WorldSystem::HelpMode() {
+
+    SetCurrentMode(MODE_HELP);
+
+    if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+        SetCurrentMode(MODE_INGAME);
+    }
+
 }
 
 void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
@@ -403,11 +414,28 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
             };
         }
             break;
+        case MODE_HELP: {
+            renderer->bgTexId = {
+                    TEXTURE_ASSET_ID::HELP_MENU,
+            };
+        }
+            break;
     }
 }
 
 void WorldSystem::UpdateMode() {
-    if (GetCurrentMode() == MODE_MAINMENU) {
+    if (GetCurrentMode() == MODE_MAINMENU ) {
+        if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+            StartNewRun();
+        }
+
+        else if (Input::HasKeyBeenPressed(SDL_SCANCODE_H)) {
+            HelpMode();
+        }
+
+    }
+
+    else if (GetCurrentMode() == MODE_HELP) {
         if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
             StartNewRun();
         }
