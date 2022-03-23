@@ -683,6 +683,9 @@ Entity createBow(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.items.emplace(entity);
 
+    auto& weapon = registry.weapons.emplace(entity);
+    weapon.ranged = true;
+
     vec2 dimensions = { 16, 16 };
     transform.position = position;
     transform.rotation = 0.f;
