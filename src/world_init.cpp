@@ -328,7 +328,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
     auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
-    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+    auto& rangedBehavior = registry.rangedBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -348,7 +348,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
 
     patrollingBehavior.maxPatrolTime = 200.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
-    patrollingBehavior.standStill = false;
+    patrollingBehavior.standStill = true;
 
     visualComponent.sightRadius = 64.f;
 
