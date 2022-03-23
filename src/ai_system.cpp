@@ -128,39 +128,41 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 void AISystem::EnemyAttack(Entity enemy_entity) {
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
 	vec2 pos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
-	if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[pos[0]][pos[1]] == 0)
-	{
-		Enemy& enemy = registry.enemy.get(enemy_entity);
-		RangedBehavior enemyRangedBehavior = registry.rangedBehaviors.get(enemy_entity);
-		MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
-		Entity playerEntity = registry.players.entities.front();
-		MotionComponent& playerMotion = registry.motions.get(playerEntity);
-		TransformComponent& player_transform = registry.transforms.get(playerEntity);
-		TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
-		vec2 diff_distance = player_transform.position - enemy_transform.position;
-		if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
-			if (enemyRangedBehavior.lobbing) {
+	if (pos[0] < levelTiles.size() && pos[1] < levelTiles[0].size() && pos[0] >= 0 && pos[1] >= 0) {
+		if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[pos[0]][pos[1]] == 0)
+		{
+			Enemy& enemy = registry.enemy.get(enemy_entity);
+			RangedBehavior enemyRangedBehavior = registry.rangedBehaviors.get(enemy_entity);
+			MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
+			Entity playerEntity = registry.players.entities.front();
+			MotionComponent& playerMotion = registry.motions.get(playerEntity);
+			TransformComponent& player_transform = registry.transforms.get(playerEntity);
+			TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
+			vec2 diff_distance = player_transform.position - enemy_transform.position;
+			if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
+				if (enemyRangedBehavior.lobbing) {
 
-				vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
-				vec2 acceleration = vec2(0.f, 250.f);
+					vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
+					vec2 acceleration = vec2(0.f, 250.f);
 
-				float random_change = 15.f;
-				float percent_diff = (float)rand() / RAND_MAX;
-				int direction = rand() % 2;
-				if (direction) {
-					random_change *= -1.f;
+					float random_change = 15.f;
+					float percent_diff = (float)rand() / RAND_MAX;
+					int direction = rand() % 2;
+					if (direction) {
+						random_change *= -1.f;
+					}
+					velocity.x += random_change * percent_diff;
+
+					vec2 neg_velocity = { -velocity.x, velocity.y };
+
+					createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
+					createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
 				}
-				velocity.x += random_change * percent_diff;
-
-				vec2 neg_velocity = { -velocity.x, velocity.y };
-
-				createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
-				createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
-			}
-			else {
-				float angle = atan2(diff_distance.y, diff_distance.x);
-				vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
-				createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+				else {
+					float angle = atan2(diff_distance.y, diff_distance.x);
+					vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
+					createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+				}
 			}
 		}
 	}
