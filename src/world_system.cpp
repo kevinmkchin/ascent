@@ -259,7 +259,33 @@ void WorldSystem::SpawnLevelEntities() {
 
     // Create enemies
     for (vec2 groundEnemySpawn: currentLevelData.groundMonsterSpawns) {
-        CreateGoblinEnemy(groundEnemySpawn);
+
+        int spawnType = rand() % 2;
+        
+        if (currentGameStage == CHAPTER_ONE_STAGE_ONE) {
+            if (spawnType == 0) {
+                CreateGoblinEnemy(groundEnemySpawn);
+            }
+            else {
+                CreateSlimeEnemy(groundEnemySpawn);
+            }
+        }
+        else if (currentGameStage == CHAPTER_ONE_STAGE_TWO) {
+            if (spawnType == 0) {
+                CreateMushroomEnemy(groundEnemySpawn);
+            }
+            else {
+                CreateWormEnemy(groundEnemySpawn);
+            }
+        }
+        else {
+            if (spawnType == 0) {
+                CreateGoblinBomberEnemy(groundEnemySpawn);
+            }
+            else {
+                CreateMushroomEnemy(groundEnemySpawn);
+            }
+        }
     }
     for (vec2 flyingEnemySpawn: currentLevelData.flyingMonsterSpawns) {
         CreateBatEnemy(flyingEnemySpawn);
@@ -569,7 +595,7 @@ void WorldSystem::handle_collisions() {
             if (entity_other.GetTag() == TAG_SPIKE) {
                 if (playerMotion.velocity.y > 0.f) // only hurt when falling on spikes
                 {
-                    playerHealth.health = -9999.f;
+                    playerHealth.health = -10.f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
