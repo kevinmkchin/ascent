@@ -126,7 +126,9 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 }
 
 void AISystem::EnemyAttack(Entity enemy_entity) {
-	if (registry.rangedBehaviors.has(enemy_entity))
+	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
+	vec2 pos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
+	if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[pos[0]][pos[1]] == 0)
 	{
 		Enemy& enemy = registry.enemy.get(enemy_entity);
 		RangedBehavior enemyRangedBehavior = registry.rangedBehaviors.get(enemy_entity);
