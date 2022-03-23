@@ -439,6 +439,9 @@ void WorldSystem::UpdateMode() {
         if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
             StartNewRun();
         }
+        else if (Input::HasKeyBeenPressed(SDL_SCANCODE_M)) {
+            SetCurrentMode(MODE_MAINMENU);
+        }
     }
 }
 
