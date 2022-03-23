@@ -223,6 +223,7 @@ struct Weapon
     float damage = 1.f;
     float throwDamage = 0.f;
     bool ranged = false;
+    float cooldown = 1.f;
 };
 
 struct Item
