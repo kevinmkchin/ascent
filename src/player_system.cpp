@@ -401,7 +401,10 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
         }
     }
 
-    if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed())
+    Entity held_weapon = registry.holders.get(playerEntity).held_weapon;
+    bool hasRangedWeapon = held_weapon.GetTag() != 0 && registry.weapons.has(held_weapon) && registry.weapons.get(held_weapon).ranged;
+
+    if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed() && !hasRangedWeapon)
     {
         u8 attackDir = bFaceRight; // 0 left, 1 right, 2 up, 3 down
 

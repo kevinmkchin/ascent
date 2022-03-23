@@ -221,6 +221,8 @@ struct MeleeBehavior : Behavior {
 struct Weapon
 {
     float damage = 1.f;
+    float throwDamage = 0.f;
+    bool ranged = false;
 };
 
 struct Item
@@ -249,7 +251,7 @@ struct PlayerProjectile
 };
 
 struct ActivePlayerProjectile {
-
+    float damage = 0.f;
 };
 
 struct TransformComponent
