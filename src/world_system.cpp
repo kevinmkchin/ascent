@@ -536,6 +536,8 @@ bool WorldSystem::step(float deltaTime) {
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
+    bool bGoToNextStage = false;
+
     Player &playerComponent = registry.players.get(player);
     TransformComponent &playerTransform = registry.transforms.get(player);
     MotionComponent &playerMotion = registry.motions.get(player);
@@ -697,7 +699,7 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed()) {
-                StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
+                bGoToNextStage = true;
             }
 
 //			// Checking Player - Deadly collisions
@@ -778,6 +780,11 @@ void WorldSystem::handle_collisions() {
     }
     // Remove all collisions from this simulation Step
     registry.collisionEvents.clear();
+
+    if(bGoToNextStage)
+    {
+        StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
+    }
 
 
     if (playerHealth.health <= 0.f && !playerComponent.bDead) {
