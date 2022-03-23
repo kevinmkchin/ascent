@@ -145,6 +145,7 @@ int main(int argc, char* argv[])
     ItemHolderSystem itemHolderSystem;
 	AISystem ai;
     UISystem ui;
+    
 
     // Initialize SDL window and OpenGL context
     if(!SDLInitialize()) return EXIT_FAILURE;
@@ -212,6 +213,10 @@ int main(int argc, char* argv[])
             } else if (Input::HasKeyBeenPressed(SDL_SCANCODE_R)) {
                 world.SwapCurrentDifficulty();
             }
+
+           /* else if (Input::HasKeyBeenPressed(SDL_SCANCODE_H)) {
+                world.HelpMode();
+            }*/
         }
 
         ui.Step(deltaTime);

@@ -90,12 +90,15 @@ void UISystem::UpdateTextUI(float dt)
             vtxt_move_cursor(350, 660);
             vtxt_append_line("EXIT (Q)", &font_c64, 48);
             vtxt_move_cursor(350, 820);
+            vtxt_append_line("HELP (H)", &font_c64, 48);
+            vtxt_move_cursor(350, 960);
             if (world->GetCurrentDifficulty() == DIFFICULTY_EASY) { 
                 vtxt_append_line("SWAP DIFFICULTY [STANDARD] (R)", &font_c64, 36); 
             }
             else {
                 vtxt_append_line("SWAP DIFFICULTY [HARD] (R)", &font_c64, 36);
             }
+            
         }break;
         case MODE_INGAME:
         {
