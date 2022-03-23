@@ -698,6 +698,7 @@ void WorldSystem::handle_collisions() {
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed()) {
                 StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
+                continue;
             }
 
 //			// Checking Player - Deadly collisions
