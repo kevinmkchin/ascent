@@ -626,7 +626,7 @@ void WorldSystem::handle_collisions() {
             if (entity_other.GetTag() == TAG_SPIKE) {
                 if (playerMotion.velocity.y > 0.f) // only hurt when falling on spikes
                 {
-                    playerHealth.health = -10.f;
+                    playerHealth.health += -10.f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
