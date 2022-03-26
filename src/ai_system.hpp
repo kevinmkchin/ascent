@@ -8,7 +8,6 @@
 #include "common.hpp"
 #include "world_init.hpp"
 #include "physics_system.hpp"
-//#include "levels.cpp"
 
 class AISystem
 {
