@@ -31,6 +31,8 @@ private:
     
     void UpdateLevelUpUI(float dt);
 
+    void UpdateShopUI(float dt);
+
     RenderSystem* renderer;
     WorldSystem* world;
     PlayerSystem* playerSystem;

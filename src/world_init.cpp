@@ -328,7 +328,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
     auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
-    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+    auto& rangedBehavior = registry.rangedBehaviors.emplace(entity);
     hb.health = 50.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
@@ -348,7 +348,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
 
     patrollingBehavior.maxPatrolTime = 200.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
-    patrollingBehavior.standStill = false;
+    patrollingBehavior.standStill = true;
 
     visualComponent.sightRadius = 64.f;
 
@@ -683,6 +683,9 @@ Entity createBow(vec2 position)
     auto& collider = registry.colliders.emplace(entity);
     registry.items.emplace(entity);
 
+    auto& weapon = registry.weapons.emplace(entity);
+    weapon.ranged = true;
+
     vec2 dimensions = { 16, 16 };
     transform.position = position;
     transform.rotation = 0.f;
@@ -826,6 +829,9 @@ Entity CreateShopItem(vec2 position, u8 shopItemIndex) // remove later - just a 
     collider.collision_neg = { 0, 0 };
     collider.collision_pos = { 16, 16 };
     collider.collider_position = transform.position;
+
+    auto& itemInfo = registry.shopItems.emplace(entity);
+    itemInfo.mutationIndex = shopItemIndex;
 
     return entity;
 }

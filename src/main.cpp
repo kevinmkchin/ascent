@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
     ItemHolderSystem itemHolderSystem;
 	AISystem ai;
     UISystem ui;
+    
 
     // Initialize SDL window and OpenGL context
     if(!SDLInitialize()) return EXIT_FAILURE;
@@ -225,7 +226,7 @@ int main(int argc, char* argv[])
                     world.SwapCurrentDifficulty();
                 }
             }
-
+            
             ui.Step(deltaTime);
         }
 

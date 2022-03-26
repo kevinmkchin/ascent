@@ -126,39 +126,43 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 }
 
 void AISystem::EnemyAttack(Entity enemy_entity) {
-	if (registry.rangedBehaviors.has(enemy_entity))
-	{
-		Enemy& enemy = registry.enemy.get(enemy_entity);
-		RangedBehavior enemyRangedBehavior = registry.rangedBehaviors.get(enemy_entity);
-		MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
-		Entity playerEntity = registry.players.entities.front();
-		MotionComponent& playerMotion = registry.motions.get(playerEntity);
-		TransformComponent& player_transform = registry.transforms.get(playerEntity);
-		TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
-		vec2 diff_distance = player_transform.position - enemy_transform.position;
-		if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
-			if (enemyRangedBehavior.lobbing) {
+	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
+	vec2 pos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
+	if (pos[0] < levelTiles.size() && pos[1] < levelTiles[0].size() && pos[0] >= 0 && pos[1] >= 0) {
+		if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[pos[0]][pos[1]] == 0)
+		{
+			Enemy& enemy = registry.enemy.get(enemy_entity);
+			RangedBehavior enemyRangedBehavior = registry.rangedBehaviors.get(enemy_entity);
+			MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
+			Entity playerEntity = registry.players.entities.front();
+			MotionComponent& playerMotion = registry.motions.get(playerEntity);
+			TransformComponent& player_transform = registry.transforms.get(playerEntity);
+			TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
+			vec2 diff_distance = player_transform.position - enemy_transform.position;
+			if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
+				if (enemyRangedBehavior.lobbing) {
 
-				vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
-				vec2 acceleration = vec2(0.f, 250.f);
+					vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
+					vec2 acceleration = vec2(0.f, 250.f);
 
-				float random_change = 15.f;
-				float percent_diff = (float)rand() / RAND_MAX;
-				int direction = rand() % 2;
-				if (direction) {
-					random_change *= -1.f;
+					float random_change = 15.f;
+					float percent_diff = (float)rand() / RAND_MAX;
+					int direction = rand() % 2;
+					if (direction) {
+						random_change *= -1.f;
+					}
+					velocity.x += random_change * percent_diff;
+
+					vec2 neg_velocity = { -velocity.x, velocity.y };
+
+					createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
+					createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
 				}
-				velocity.x += random_change * percent_diff;
-
-				vec2 neg_velocity = { -velocity.x, velocity.y };
-				
-				createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
-				createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
-			}
-			else {
-				float angle = atan2(diff_distance.y, diff_distance.x);
-				vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
-				createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+				else {
+					float angle = atan2(diff_distance.y, diff_distance.x);
+					vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
+					createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+				}
 			}
 		}
 	}
@@ -222,8 +226,8 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			};
 
 			// GOAL POS IS NOT CORRECTLY CONSIDERED HERE! be aware.
-			vec2 goalPos  = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
-			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1)  / 16), (int)((enemyTransformComponent.position.y + 1)  / 16) };
+			vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 
 			if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 				return;
@@ -287,7 +291,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					vec2 direction = prevPos - enemyPos;
 
 					// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
-					enemyMotionComponent.velocity = direction * 25.f; 
+					enemyMotionComponent.velocity = direction * 25.f;
 					auto& enemyCollider = registry.colliders.get(enemy_entity);
 					float spriteWidth = enemyCollider.collision_pos.x;
 					float spriteHeight = enemyCollider.collision_pos.y;
@@ -372,8 +376,8 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			}
 		}
 		else if (registry.walkingBehaviors.has(enemy_entity)) {
-		// if dumb, else
-		auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
+			// if dumb, else
+			auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
 			if (walkingBehavior.stupid) {
 				enemyMotionComponent.acceleration.y = enemyGravity;
 				if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
@@ -403,8 +407,8 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					int cost;
 				};
 
-				vec2 goalPos  = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
-				vec2 enemyPos = { (int)((enemyTransformComponent.position.x  + 1) / 16), (int)((enemyTransformComponent.position.y  + 1) / 16) };
+				vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+				vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 
 				if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
 					return;
@@ -467,13 +471,14 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
 					vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
 					vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
-					vec2 left  = { currentPos.position[0] - 1, currentPos.position[1] };
-
-					if (levelTiles[below.x][below.y] == 0) { // if current tile has no floor
-						adjacentSquares.push_back(below);
-					}
-					else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
-						adjacentSquares.push_back(above);        // if current has floor
+					vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
+					if (below.x >= 0 && below.y >= 0 && below.x < levelTiles.size() && below.y < levelTiles[0].size()) {
+						if (levelTiles[below.x][below.y] == 0) { // if current tile has no floor
+							adjacentSquares.push_back(below);
+						}
+						else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
+							adjacentSquares.push_back(above);        // if current has floor
+						}
 					}
 					adjacentSquares.push_back(right);
 					adjacentSquares.push_back(left);
