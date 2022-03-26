@@ -2,6 +2,7 @@
 #include <chrono>
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "console.hpp"
 
 #include "tiny_ecs_registry.hpp"
 
@@ -515,6 +516,13 @@ void RenderSystem::DrawUI()
     glBindVertexArray(0);
 
     glUseProgram(0);
+
+
+    // CONSOLE RENDERING
+    glDisable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    console_render();
+    glEnable(GL_DEPTH_TEST);
 }
 
 // draw the intermediate texture to the screen

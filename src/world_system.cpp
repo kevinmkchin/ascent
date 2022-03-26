@@ -8,8 +8,10 @@
 
 #include "physics_system.hpp"
 #include "player_system.hpp"
+#include "ui_system.hpp"
 #include "input.hpp"
 #include "levels.cpp"
+#include "console.hpp"
 
 WorldSystem::WorldSystem()
         : window(nullptr), renderer(nullptr), gameIsRunning(true), currentGameMode(MODE_MAINMENU),
@@ -146,6 +148,25 @@ WorldSystem::WorldSystem()
                                            }
                                    });
 
+    get_console().bind_cmd("die", 
+        [this](std::istream& is, std::ostream& os){
+            auto& playerHealth = registry.healthBar.get(this->player);
+            playerHealth.health = -99.f;
+        });
+
+    get_console().bind_cmd("restart", 
+        [this](std::istream& is, std::ostream& os){
+            if(this->currentGameMode == MODE_INGAME)
+            {
+                this->StartNewStage(END_THE_GAME);
+                this->uiSystem->cachedGameStage = GAME_NOT_STARTED;
+                this->StartNewRun();
+            }
+            else
+            {
+                console_printf("'restart' command only works while in game...");
+            }
+        });
 }
 
 void WorldSystem::HandleMutations() {
@@ -219,6 +240,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 // CHECK IF GAME SHOULD END
     if (stage == END_THE_GAME) {
         printf("Ending run.\n");
+        currentGameStage = GAME_NOT_STARTED;
         SetCurrentMode(MODE_MAINMENU);
         return;
     }
@@ -589,7 +611,7 @@ void WorldSystem::handle_collisions() {
                 } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f)) {
                     const MeleeBehavior enemyMeleeBehavior = registry.meleeBehaviors.get(entity_other);
                     enemy.playerHurtCooldown = 2.f;
-                    playerHealth.TakeDamage(enemyMeleeBehavior.attackPower, 5);
+                    playerHealth.TakeDamage((float) enemyMeleeBehavior.attackPower, 5.f);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -620,7 +642,7 @@ void WorldSystem::handle_collisions() {
             if (registry.enemyProjectiles.has(entity_other)) {
                 if (playerHealth.health > 0) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
-                    playerHealth.TakeDamage(enemyProjectile.attackPower, 5);
+                    playerHealth.TakeDamage((float) enemyProjectile.attackPower, 5.f);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -793,8 +815,20 @@ void WorldSystem::SDLProcessEvents() {
         switch (event.type) {
             case SDL_KEYDOWN: {
                 Input::ProcessSDLKeyDownEvent(event.key);
-            }
-                break;
+
+                if (event.key.keysym.sym == SDLK_BACKQUOTE)
+                {
+                    console_toggle();
+                    break;
+                }
+
+                if (console_is_shown())
+                {
+                    console_keydown(event.key);
+                    break;
+                }
+            }break;
+
             case SDL_KEYUP: {
                 Input::ProcessSDLKeyUpEvent(event.key);
             }

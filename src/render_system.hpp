@@ -42,11 +42,11 @@ class RenderSystem {
 	 * Whenever possible, add to these lists instead of creating dynamic state
 	 * it is easier to debug and faster to execute for the computer.
 	 */
+
+public:
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
     std::array<GLuint, effect_count> effects;
-
-public:
 
     float elapsedTime = 0;
 	// Initialize the window
@@ -60,6 +60,13 @@ public:
 
     // Call this when the display resolution (i.e. the window size) changes
     void UpdateBackBufferSize();
+
+    vec2 GetBackBufferSize()
+    {
+        return vec2((float)backbufferWidth, (float)backbufferHeight);
+    }
+
+    mat3 CreateGameProjectionMatrix();
 
     // Camera bounds
     vec2 cameraBoundMin;
@@ -114,8 +121,6 @@ private:
     void DrawUI();
 
 	void FinalDrawToScreen();
-
-    mat3 CreateGameProjectionMatrix();
 
     // World handle
     WorldSystem* world;

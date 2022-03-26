@@ -1,8 +1,14 @@
 #pragma once
 
+#include "common.hpp"
+
 class RenderSystem;
 class WorldSystem;
 class PlayerSystem;
+struct vtxt_font;
+struct TextureHandle;
+
+void LoadFont(vtxt_font* font_handle, TextureHandle* font_atlas, const char* font_path, u8 font_size, bool useNearest = false);
 
 class UISystem
 {
@@ -14,6 +20,8 @@ public:
     void Step(float deltaTime);
 
     float* GlobalPauseForSeconds = nullptr;
+
+    u8 cachedGameStage;
 
 private:
 

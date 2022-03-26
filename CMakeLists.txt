@@ -44,6 +44,7 @@ set(SOURCE_FILES
     src/ui_system.cpp
     src/file_system.cpp
     src/item_holder_system.cpp
+    src/console.cpp
     #src/timer_win64.cpp
     )
 

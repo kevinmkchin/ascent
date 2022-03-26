@@ -16,6 +16,7 @@
 
 class RenderSystem;
 class PlayerSystem;
+class UISystem;
 
 enum GAMEMODE
 {
@@ -112,6 +113,9 @@ public:
     Mix_Chunk* player_jump_on_enemy_sound; 
 	Mix_Chunk* coins_pickup_sound;
 	Mix_Chunk* points_pickup_sound;
+
+	// HACK should prob remove later
+	UISystem* uiSystem;
 
 private:
     void loadAllContent();
