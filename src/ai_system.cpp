@@ -129,7 +129,7 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
 	vec2 pos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 	if (pos[0] < levelTiles.size() && pos[1] < levelTiles[0].size() && pos[0] >= 0 && pos[1] >= 0) {
-		if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[pos[0]][pos[1]] == 0)
+		if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[(int)pos[0]][(int)pos[1]] == 0)
 		{
 			Enemy& enemy = registry.enemy.get(enemy_entity);
 			RangedBehavior enemyRangedBehavior = registry.rangedBehaviors.get(enemy_entity);
@@ -307,7 +307,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					bool isClippingBLD = direction.y > 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
 					bool isClippingBRR = direction.x > 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
 					bool isClippingBRD = direction.y > 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
-					int clipVelocity = 15;
+					float clipVelocity = 15.f;
 					if (isClippingBRD || isClippingTRU) {
 						enemyMotionComponent.velocity.x = -clipVelocity;
 					}
@@ -386,7 +386,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
 					}
 					else {
-						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.3;
+						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.3f;
 					}
 				}
 				else {
@@ -394,7 +394,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
 					}
 					else {
-						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.3;
+						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.3f;
 					}
 				}
 			}
@@ -473,7 +473,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
 					vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
 					if (below.x >= 0 && below.y >= 0 && below.x < levelTiles.size() && below.y < levelTiles[0].size()) {
-						if (levelTiles[below.x][below.y] == 0) { // if current tile has no floor
+						if (levelTiles[(int)below.x][(int)below.y] == 0) { // if current tile has no floor
 							adjacentSquares.push_back(below);
 						}
 						else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
