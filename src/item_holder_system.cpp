@@ -6,6 +6,8 @@ INTERNAL float itemThrowUpwardVelocity = -125.f;
 INTERNAL float itemThrowSideVelocity = 150.f;
 INTERNAL float itemShootSideVelocity = 250.f;
 
+INTERNAL float bowCooldown = 0.5;
+
 ItemHolderSystem::ItemHolderSystem()
 = default;
 
@@ -67,7 +69,6 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
         holderComponent.held_weapon = holderComponent.near_weapon;
         Item& item = registry.items.get(holderComponent.held_weapon);
         item.collidableWithEnvironment = false;
-        item.thrown = false;
         item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(holderComponent.held_weapon);
@@ -84,7 +85,6 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
 
         Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
-        item.thrown = true;
         item.grounded = false;
 
         if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
@@ -107,7 +107,6 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 
         Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
-        item.thrown = true;
         item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(held_weapon);
@@ -133,8 +132,17 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 
 INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
 {
-    if(holderComponent.want_to_shoot && holderComponent.held_weapon.GetTagAndID() != 0)
+    if(holderComponent.want_to_shoot && holderComponent.held_weapon.GetTagAndID() != 0 && registry.weapons.has(holderComponent.held_weapon))
     {
+        Weapon& weapon = registry.weapons.get(holderComponent.held_weapon);
+
+        if (weapon.cooldown > 0)
+        {
+            return;
+        }
+
+        weapon.cooldown = bowCooldown;
+
         Entity projectile;
 
         switch (holderComponent.held_weapon.GetTag()) {
@@ -154,7 +162,6 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
 
         Item& item = registry.items.get(projectile);
         item.collidableWithEnvironment = true;
-        item.thrown = true;
         item.grounded = false;
 
         MotionComponent& motion = registry.motions.get(projectile);
@@ -201,6 +208,12 @@ void ItemHolderSystem::Step(float deltaTime)
         HolderComponent& holderComponent = registry.holders.get(holder);
         MotionComponent& holderMotion = registry.motions.get(holder);
         TransformComponent& holderTransform = registry.transforms.get(holder);
+
+        if (holderComponent.held_weapon.GetTagAndID() != 0 && registry.weapons.has(holderComponent.held_weapon))
+        {
+            Weapon& weapon = registry.weapons.get(holderComponent.held_weapon);
+            weapon.cooldown -= deltaTime;
+        }
 
         ResolvePickUp(holderComponent);
         ResolveDrop(holderComponent);

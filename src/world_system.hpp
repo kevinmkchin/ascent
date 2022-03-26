@@ -18,10 +18,13 @@ class RenderSystem;
 class PlayerSystem;
 class UISystem;
 
+
 enum GAMEMODE
 {
 	MODE_MAINMENU,
-	MODE_INGAME
+	MODE_INGAME,
+	MODE_HELP,
+	MODE_HELP1
 };
 
 enum DIFFICULTY
@@ -86,6 +89,8 @@ public:
 			currentDifficulty = DIFFICULTY_STANDARD;
 		}
 	}
+
+	void HelpMode();
 
 	bool is_over()const;
 

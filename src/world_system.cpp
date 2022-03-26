@@ -13,6 +13,7 @@
 #include "levels.cpp"
 #include "console.hpp"
 
+
 WorldSystem::WorldSystem()
         : window(nullptr), renderer(nullptr), gameIsRunning(true), currentGameMode(MODE_MAINMENU),
           currentGameStage(GAME_NOT_STARTED) {
@@ -217,6 +218,16 @@ void WorldSystem::StartNewRun() {
     StartNewStage(CHAPTER_ONE_STAGE_ONE);
 }
 
+void WorldSystem::HelpMode() {
+
+    SetCurrentMode(MODE_HELP);
+
+    if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+        SetCurrentMode(MODE_INGAME);
+    }
+
+}
+
 void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 // SAVE PLAYER DATA
     auto playerPlayerComponent = Player();
@@ -281,7 +292,33 @@ void WorldSystem::SpawnLevelEntities() {
 
     // Create enemies
     for (vec2 groundEnemySpawn: currentLevelData.groundMonsterSpawns) {
-        CreateGoblinEnemy(groundEnemySpawn);
+
+        int spawnType = rand() % 2;
+        
+        if (currentGameStage == CHAPTER_ONE_STAGE_ONE) {
+            if (spawnType == 0) {
+                CreateGoblinEnemy(groundEnemySpawn);
+            }
+            else {
+                CreateSlimeEnemy(groundEnemySpawn);
+            }
+        }
+        else if (currentGameStage == CHAPTER_ONE_STAGE_TWO) {
+            if (spawnType == 0) {
+                CreateMushroomEnemy(groundEnemySpawn);
+            }
+            else {
+                CreateWormEnemy(groundEnemySpawn);
+            }
+        }
+        else {
+            if (spawnType == 0) {
+                CreateGoblinBomberEnemy(groundEnemySpawn);
+            }
+            else {
+                CreateMushroomEnemy(groundEnemySpawn);
+            }
+        }
     }
     for (vec2 flyingEnemySpawn: currentLevelData.flyingMonsterSpawns) {
         CreateBatEnemy(flyingEnemySpawn);
@@ -399,13 +436,33 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
             };
         }
             break;
+        case MODE_HELP: {
+            renderer->bgTexId = {
+                    TEXTURE_ASSET_ID::HELP_MENU,
+            };
+        }
+            break;
     }
 }
 
 void WorldSystem::UpdateMode() {
-    if (GetCurrentMode() == MODE_MAINMENU) {
+    if (GetCurrentMode() == MODE_MAINMENU ) {
         if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
             StartNewRun();
+        }
+
+        else if (Input::HasKeyBeenPressed(SDL_SCANCODE_H)) {
+            HelpMode();
+        }
+
+    }
+
+    else if (GetCurrentMode() == MODE_HELP) {
+        if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+            StartNewRun();
+        }
+        else if (Input::HasKeyBeenPressed(SDL_SCANCODE_M)) {
+            SetCurrentMode(MODE_MAINMENU);
         }
     }
 }
@@ -501,6 +558,8 @@ bool WorldSystem::step(float deltaTime) {
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
+    bool bGoToNextStage = false;
+
     Player &playerComponent = registry.players.get(player);
     TransformComponent &playerTransform = registry.transforms.get(player);
     MotionComponent &playerMotion = registry.motions.get(player);
@@ -591,7 +650,7 @@ void WorldSystem::handle_collisions() {
             if (entity_other.GetTag() == TAG_SPIKE) {
                 if (playerMotion.velocity.y > 0.f) // only hurt when falling on spikes
                 {
-                    playerHealth.health = -9999.f;
+                    playerHealth.health += -10.f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -608,7 +667,7 @@ void WorldSystem::handle_collisions() {
                     if (Mix_PlayChannel(-1, player_jump_on_enemy_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
-                } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f)) {
+                } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f) && registry.meleeBehaviors.has(entity_other)) {
                     const MeleeBehavior enemyMeleeBehavior = registry.meleeBehaviors.get(entity_other);
                     enemy.playerHurtCooldown = 2.f;
                     playerHealth.TakeDamage((float) enemyMeleeBehavior.attackPower, 5.f);
@@ -639,6 +698,14 @@ void WorldSystem::handle_collisions() {
 
             }
 
+            if (registry.shopItems.has(entity_other))
+            {
+                if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN) && registry.activeShopItems.size() == 0) {
+                    auto& activeItem = registry.activeShopItems.emplace(entity_other);
+                    activeItem.linkedEntity.push_back(entity_other);
+                }
+            }
+
             if (registry.enemyProjectiles.has(entity_other)) {
                 if (playerHealth.health > 0) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
@@ -654,7 +721,8 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed()) {
-                StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
+                bGoToNextStage = true;
+                continue;
             }
 
 //			// Checking Player - Deadly collisions
@@ -735,6 +803,11 @@ void WorldSystem::handle_collisions() {
     }
     // Remove all collisions from this simulation Step
     registry.collisionEvents.clear();
+
+    if(bGoToNextStage)
+    {
+        StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
+    }
 
 
     if (playerHealth.health <= 0.f && !playerComponent.bDead) {
