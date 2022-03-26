@@ -9,6 +9,8 @@
 // stlib
 #include <chrono>
 
+#include "vertext.h"
+
 // internal
 #include "ai_system.hpp"
 #include "physics_system.hpp"
@@ -18,6 +20,7 @@
 #include "player_system.hpp"
 #include "sprite_system.hpp"
 #include "ui_system.hpp"
+#include "console.hpp"
 //#include "timer.h"
 
 #define TINY_ECS_LIB_IMPLEMENTATION
@@ -131,6 +134,9 @@ INTERNAL bool OpenGLInitialize()
 
 using Clock = std::chrono::high_resolution_clock;
 
+INTERNAL vtxt_font g_font_handle_c64;
+INTERNAL TextureHandle g_font_atlas_c64;
+
 // Entry point
 int main(int argc, char* argv[])
 {
@@ -154,9 +160,13 @@ int main(int argc, char* argv[])
     renderer.Init(window, &world);
 	world.init(&renderer, &playerSystem, &ai);
     world.GlobalPauseForSeconds = &GlobalPauseForSeconds;
+    world.uiSystem = &ui;
     ui.Init(&renderer, &world, &playerSystem);
     ui.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     playerSystem.Init(&world, &ui);
+
+    LoadFont(&g_font_handle_c64, &g_font_atlas_c64, font_path("SourceCodePro.ttf").c_str(), 20, false); //CONSOLE_TEXT_SIZE
+    console_initialize(&g_font_handle_c64, g_font_atlas_c64, &renderer);
 
 	// Variable timestep loop
 	auto t = Clock::now();
@@ -175,46 +185,51 @@ int main(int argc, char* argv[])
         float currentTimeInSeconds = (float)(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() / 1000.0);
         renderer.currentTimeInSeconds = currentTimeInSeconds;
 
-        if(GlobalPauseForSeconds > 0.f || world.gamePaused)
+        if(console_is_hidden())
         {
-            if(!world.gamePaused) { GlobalPauseForSeconds -= deltaTime; }
-            playerSystem.PausedStep(deltaTime);
-        }
-        else
-        {
-            world.UpdateMode();
-            world.step(deltaTime);
-            //printf("world.Step: %f seconds\n", timer::timestamp());
-            if(world.GetCurrentMode() == MODE_INGAME)
-            {   
-                world.HandleMutations();
-                playerSystem.PrePhysicsStep(deltaTime);
-                physics.step(deltaTime);
-                //printf("physics.Step: %f seconds\n", timer::timestamp());
-                ai.Step(deltaTime);
-                //printf("ai.Step: %f seconds\n", timer::timestamp());
-                playerSystem.Step(deltaTime);
-                //printf("playerSystem.Step: %f seconds\n", timer::timestamp());
-                itemHolderSystem.Step(deltaTime);
-                //printf("itemHolderSystem.Step: %f seconds\n", timer::timestamp());
-                spriteSystem.Step(deltaTime);
-                //printf("spriteSystem.Step: %f seconds\n", timer::timestamp());
-                world.handle_collisions();
-                //printf("handle_collisions: %f seconds\n", timer::timestamp());
-            } else if (Input::HasKeyBeenPressed(SDL_SCANCODE_Q)) {
-                world.cleanUp();
-                renderer.CleanUp();
-
-                SDL_DestroyWindow(window);
-                SDL_GL_DeleteContext(openglContext);
-                SDL_Quit();
-                return EXIT_SUCCESS;
-            } else if (Input::HasKeyBeenPressed(SDL_SCANCODE_R)) {
-                world.SwapCurrentDifficulty();
+            if(GlobalPauseForSeconds > 0.f || world.gamePaused)
+            {
+                if(!world.gamePaused) { GlobalPauseForSeconds -= deltaTime; }
+                playerSystem.PausedStep(deltaTime);
             }
+            else
+            {
+                world.UpdateMode();
+                world.step(deltaTime);
+                //printf("world.Step: %f seconds\n", timer::timestamp());
+                if(world.GetCurrentMode() == MODE_INGAME)
+                {   
+                    world.HandleMutations();
+                    playerSystem.PrePhysicsStep(deltaTime);
+                    physics.step(deltaTime);
+                    //printf("physics.Step: %f seconds\n", timer::timestamp());
+                    ai.Step(deltaTime);
+                    //printf("ai.Step: %f seconds\n", timer::timestamp());
+                    playerSystem.Step(deltaTime);
+                    //printf("playerSystem.Step: %f seconds\n", timer::timestamp());
+                    itemHolderSystem.Step(deltaTime);
+                    //printf("itemHolderSystem.Step: %f seconds\n", timer::timestamp());
+                    spriteSystem.Step(deltaTime);
+                    //printf("spriteSystem.Step: %f seconds\n", timer::timestamp());
+                    world.handle_collisions();
+                    //printf("handle_collisions: %f seconds\n", timer::timestamp());
+                } else if (Input::HasKeyBeenPressed(SDL_SCANCODE_Q)) {
+                    world.cleanUp();
+                    renderer.CleanUp();
+
+                    SDL_DestroyWindow(window);
+                    SDL_GL_DeleteContext(openglContext);
+                    SDL_Quit();
+                    return EXIT_SUCCESS;
+                } else if (Input::HasKeyBeenPressed(SDL_SCANCODE_R)) {
+                    world.SwapCurrentDifficulty();
+                }
+            }
+
+            ui.Step(deltaTime);
         }
 
-        ui.Step(deltaTime);
+        console_update(deltaTime);
 
         Input::ResetControllerStates();
         Input::ResetKeyboardStates();

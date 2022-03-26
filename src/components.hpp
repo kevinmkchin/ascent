@@ -117,6 +117,8 @@ enum class EFFECT_ASSET_ID : u8
     TEXT,
     EXP_UI,
     MUTATION_SELECT_UI,
+    CONSOLE_UI,
+    CONSOLE_TEXT_UI,
 
     EFFECT_COUNT
 };
@@ -131,6 +133,8 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("text_ui"),
         shader_path("exp_ui"),
         shader_path("mutation_select_ui"),
+        shader_path("console_ui"),
+        shader_path("console_text_ui"),
 };
 
 /**

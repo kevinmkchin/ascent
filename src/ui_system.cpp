@@ -18,7 +18,7 @@ INTERNAL vtxt_font font_medusa_gothic;
 INTERNAL TextureHandle texture_medusa_gothic;
 
 
-INTERNAL void LoadFont(vtxt_font* font_handle, TextureHandle* font_atlas, const char* font_path, u8 font_size, bool useNearest = false)
+void LoadFont(vtxt_font* font_handle, TextureHandle* font_atlas, const char* font_path, u8 font_size, bool useNearest)
 {
     BinaryFileHandle fontfile;
     ReadFileBinary(fontfile, font_path);
@@ -32,7 +32,7 @@ INTERNAL void LoadFont(vtxt_font* font_handle, TextureHandle* font_atlas, const 
 
 UISystem::UISystem()
 {
-
+    cachedGameStage = GAME_NOT_STARTED;
 }
 
 void UISystem::Init(RenderSystem* render_sys_arg, WorldSystem* world_sys_arg, PlayerSystem* player_sys_arg)
@@ -153,7 +153,6 @@ void UISystem::UpdateTextUI(float dt)
     LOCAL_PERSIST float showTutorialTimer = 0.f;
 
     // chapter change text
-    LOCAL_PERSIST GAMELEVELENUM cachedGameStage = GAME_NOT_STARTED;
     LOCAL_PERSIST bool showChapterText = false;
     LOCAL_PERSIST float chapterTextAlpha = 0.f;
     if(world->GetCurrentStage() != cachedGameStage)
