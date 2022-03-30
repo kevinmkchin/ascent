@@ -393,9 +393,15 @@ struct HealthBar
 {
 	float health = 100.f;
     float maxHealth = 100.f;
+    bool bInvincible = false;
 
     float TakeDamage(float base, float variance = 0.f)
     {
+        if(bInvincible)
+        {
+            return 0.f;
+        }
+
         float low = base - variance;
         float high = base + variance;
         float actualDamage = low + static_cast<float>(rand())/(static_cast<float>(RAND_MAX/(high-low)));
