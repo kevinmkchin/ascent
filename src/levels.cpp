@@ -5,15 +5,6 @@
 
 #include "common.hpp"
 #include "tiny_ecs_registry.hpp"
-//#include "world_system.hpp"
-
-#define TILE_SIZE 16
-#define ROOM_DIMENSION_X 11
-#define ROOM_DIMENSION_Y 9
-#define NUMROOMSWIDE 5
-#define NUMFLOORS 5
-#define NUMTILESWIDE NUMROOMSWIDE * ROOM_DIMENSION_X
-#define NUMTILESTALL NUMFLOORS * ROOM_DIMENSION_Y
 
 INTERNAL void AddTileSizedCollider(Entity tileEntity)
 {
@@ -210,6 +201,8 @@ namespace ns
 
 //                          ROOM TYPE    ARRAY OF ROOM DATA
 INTERNAL std::unordered_map<std::string, std::vector<ns::RoomRawData>> chapterOneRooms;
+INTERNAL std::unordered_map<std::string, std::vector<ns::RoomRawData>> chapterTwoRooms;
+INTERNAL std::unordered_map<std::string, std::vector<ns::RoomRawData>> chapterThreeRooms;
 
 INTERNAL void LoadAllLevelData()
 {
@@ -224,7 +217,6 @@ INTERNAL void LoadAllLevelData()
     JSON roomData;
     ifs >> roomData;
     ifs.close();
-
     int roomCount = roomData["count"].get<int>();
     JSON roomDataJsonArray = roomData["rooms"];
     for (JSON::iterator it = roomDataJsonArray.begin(); it != roomDataJsonArray.end(); ++it)
@@ -236,6 +228,48 @@ INTERNAL void LoadAllLevelData()
             chapterOneRooms.insert({ roomRawData.type, std::vector<ns::RoomRawData>() });
         }
         chapterOneRooms.at(roomRawData.type).push_back(roomRawData);
+    }
+
+    ifs = std::ifstream(level_path("chapter2.json"));
+    if (!ifs.is_open()) {
+        std::cerr << " Failed to open level data..." << std::endl;
+        assert(0);
+        return;
+    }
+    ifs >> roomData;
+    ifs.close();
+    roomCount = roomData["count"].get<int>();
+    roomDataJsonArray = roomData["rooms"];
+    for (JSON::iterator it = roomDataJsonArray.begin(); it != roomDataJsonArray.end(); ++it)
+    {
+        JSON room = *it;
+        auto roomRawData = room.get<ns::RoomRawData>();
+        if (chapterTwoRooms.count(roomRawData.type) == 0)
+        {
+            chapterTwoRooms.insert({ roomRawData.type, std::vector<ns::RoomRawData>() });
+        }
+        chapterTwoRooms.at(roomRawData.type).push_back(roomRawData);
+    }
+
+    ifs = std::ifstream(level_path("chapter3.json"));
+    if (!ifs.is_open()) {
+        std::cerr << " Failed to open level data..." << std::endl;
+        assert(0);
+        return;
+    }
+    ifs >> roomData;
+    ifs.close();
+    roomCount = roomData["count"].get<int>();
+    roomDataJsonArray = roomData["rooms"];
+    for (JSON::iterator it = roomDataJsonArray.begin(); it != roomDataJsonArray.end(); ++it)
+    {
+        JSON room = *it;
+        auto roomRawData = room.get<ns::RoomRawData>();
+        if (chapterThreeRooms.count(roomRawData.type) == 0)
+        {
+            chapterThreeRooms.insert({ roomRawData.type, std::vector<ns::RoomRawData>() });
+        }
+        chapterThreeRooms.at(roomRawData.type).push_back(roomRawData);
     }
 }
 
@@ -417,20 +451,62 @@ INTERNAL void AddColliderIfRequired(Entity tileEntity, i32 col, i32 row)
 /** Process and ready the level for gameplay.
  *  Change sprites for top or bottom tiles.
  *  Add colliders to tiles that can be collided with. */
-INTERNAL void UpdateLevelGeometry()
+INTERNAL void UpdateLevelGeometry(GAMELEVELENUM stageToGenerate)
 {
-    for (int col = 0; col < NUMTILESWIDE; ++col)
+    switch(stageToGenerate)
     {
-        for (int row = 0; row < NUMTILESTALL; ++row)
+        case CHAPTER_ONE_STAGE_ONE:
         {
-            Entity e = levelTiles[col][row];
-            if (e != 0)
+            for (int col = 0; col < NUMTILESWIDE; ++col)
             {
-                ChangeSpritesBasedOnTopBottom(e, col, row);
-                AddColliderIfRequired(e, col, row);
+                for (int row = 0; row < NUMTILESTALL; ++row)
+                {
+                    Entity e = levelTiles[col][row];
+                    if (e != 0)
+                    {
+                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        AddColliderIfRequired(e, col, row);
+                    }
+                }
             }
+            break;
+        }
+
+        case CHAPTER_TWO_STAGE_ONE:
+        {
+            for (int col = 0; col < NUMTILESWIDE; ++col)
+            {
+                for (int row = 0; row < NUMTILESTALL; ++row)
+                {
+                    Entity e = levelTiles[col][row];
+                    if (e != 0)
+                    {
+                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        AddColliderIfRequired(e, col, row);
+                    }
+                }
+            }
+            break;
+        }
+
+        case CHAPTER_THREE_STAGE_ONE:
+        {
+            for (int col = 0; col < NUMTILESWIDE; ++col)
+            {
+                for (int row = 0; row < NUMTILESTALL; ++row)
+                {
+                    Entity e = levelTiles[col][row];
+                    if (e != 0)
+                    {
+                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        AddColliderIfRequired(e, col, row);
+                    }
+                }
+            }
+            break;
         }
     }
+    
 }
 
 INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
@@ -438,8 +514,22 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     ClearLevelTiles();
     ClearCurrentLevelData();
 
+    std::unordered_map<std::string, std::vector<ns::RoomRawData>>& currentChapterRooms = chapterOneRooms;
+    switch(stageToGenerate)
+    {
+        case CHAPTER_ONE_STAGE_ONE:{
+            currentChapterRooms = chapterOneRooms;
+        }break;
+        case CHAPTER_TWO_STAGE_ONE:{
+            currentChapterRooms = chapterTwoRooms;
+        }break;
+        case CHAPTER_THREE_STAGE_ONE:{
+            currentChapterRooms = chapterThreeRooms;
+        }break;
+    }
+
     std::array<std::array<ns::RoomRawData, NUMROOMSWIDE>, NUMFLOORS> roomDataArray;
-    const ns::RoomRawData& sampleRoom = chapterOneRooms.at("start")[0];
+    const ns::RoomRawData& sampleRoom = currentChapterRooms.at("start")[0];
     i32 rw = sampleRoom.width;
     i32 rh = sampleRoom.height;
     char* tileDataArray = (char*)malloc(rw * rh);
@@ -453,11 +543,11 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
         {
             fallingAndLanding = rand() % NUMROOMSWIDE;
         }
-        u32 fallingRoomIndex = rand() % chapterOneRooms["falling"].size();
-        roomDataArray[floor][fallingAndLanding] = chapterOneRooms["falling"][fallingRoomIndex];
+        u32 fallingRoomIndex = rand() % currentChapterRooms["falling"].size();
+        roomDataArray[floor][fallingAndLanding] = currentChapterRooms["falling"][fallingRoomIndex];
 
-        u32 landingRoomIndex = rand() % chapterOneRooms["landing"].size();
-        roomDataArray[floor + 1][fallingAndLanding] = chapterOneRooms["landing"][landingRoomIndex];
+        u32 landingRoomIndex = rand() % currentChapterRooms["landing"].size();
+        roomDataArray[floor + 1][fallingAndLanding] = currentChapterRooms["landing"][landingRoomIndex];
     }
 
     // END ROOM
@@ -466,8 +556,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     {
         end = rand() % NUMROOMSWIDE;
     }
-    u32 endRoomIndex = rand() % chapterOneRooms["end"].size();
-    roomDataArray[0][end] = chapterOneRooms["end"][endRoomIndex];
+    u32 endRoomIndex = rand() % currentChapterRooms["end"].size();
+    roomDataArray[0][end] = currentChapterRooms["end"][endRoomIndex];
 
     // START ROOM
     u32 start = rand() % NUMROOMSWIDE;
@@ -475,8 +565,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     {
         start = rand() % NUMROOMSWIDE;
     }
-    u32 startRoomIndex = rand() % chapterOneRooms["start"].size();
-    roomDataArray[NUMFLOORS - 1][start] = chapterOneRooms["start"][startRoomIndex];
+    u32 startRoomIndex = rand() % currentChapterRooms["start"].size();
+    roomDataArray[NUMFLOORS - 1][start] = currentChapterRooms["start"][startRoomIndex];
 
     // SHOP ROOM
     u32 shopCol = rand() % 2 == 0 ? 0 : NUMROOMSWIDE - 1;
@@ -496,8 +586,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
         }
         ++loop;
     }
-    u32 shopRoomIndex = rand() % chapterOneRooms["shop"].size();
-    roomDataArray[shopRow][shopCol] = chapterOneRooms["shop"][shopRoomIndex];
+    u32 shopRoomIndex = rand() % currentChapterRooms["shop"].size();
+    roomDataArray[shopRow][shopCol] = currentChapterRooms["shop"][shopRoomIndex];
 
     // CORRIDORS
     for (int i = 0; i < NUMFLOORS; ++i)
@@ -506,8 +596,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
         {
             if (roomDataArray[i][j].data.empty())
             {
-                u32 corridorRoomIndex = rand() % chapterOneRooms["corridor"].size();
-                roomDataArray[i][j] = chapterOneRooms["corridor"][corridorRoomIndex];
+                u32 corridorRoomIndex = rand() % currentChapterRooms["corridor"].size();
+                roomDataArray[i][j] = currentChapterRooms["corridor"][corridorRoomIndex];
             }
         }
     }
@@ -522,57 +612,31 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     }
 
     // Process and prepare the level
-    UpdateLevelGeometry();
+    UpdateLevelGeometry(stageToGenerate);
 
-    // Boundary
-    for (int i = -1; i < ((NUMTILESWIDE)+1); ++i)
+    if(stageToGenerate == CHAPTER_ONE_STAGE_ONE)
     {
-        auto _a = CreateBasicLevelTile(i, -1);
-        auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
-        AddTileSizedCollider(_a);
-        AddTileSizedCollider(_b);
-        ChangeSpritesBasedOnTopBottom(_a, i, -1);
-        ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
+        // Boundary
+        for (int i = -1; i < ((NUMTILESWIDE)+1); ++i)
+        {
+            auto _a = CreateBasicLevelTile(i, -1);
+            auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
+            AddTileSizedCollider(_a);
+            AddTileSizedCollider(_b);
+            ChangeSpritesBasedOnTopBottom(_a, i, -1);
+            ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
+        }
+        for (int i = -1; i < ((NUMTILESTALL)+1); ++i)
+        {
+            auto _a = CreateBasicLevelTile(-1, i);
+            auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
+            AddTileSizedCollider(_a);
+            AddTileSizedCollider(_b);
+        }
     }
-    for (int i = -1; i < ((NUMTILESTALL)+1); ++i)
-    {
-        auto _a = CreateBasicLevelTile(-1, i);
-        auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
-        AddTileSizedCollider(_a);
-        AddTileSizedCollider(_b);
-    }
-
-    // auto upBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
-    // auto& upBoundETransform = registry.transforms.emplace(upBoundE);
-    // upBoundETransform.position = { 0.f, -TILE_SIZE };
-    // auto& upBoundECollider = registry.colliders.emplace(upBoundE);
-    // upBoundECollider.collision_neg = {0.f,0.f};
-    // upBoundECollider.collision_pos = { TILE_SIZE * NUMTILESWIDE , TILE_SIZE };
-
-    // auto lowBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
-    // auto& lowBoundETransform = registry.transforms.emplace(lowBoundE);
-    // lowBoundETransform.position = { 0.f, TILE_SIZE*NUMTILESTALL };
-    // auto& lowBoundECollider = registry.colliders.emplace(lowBoundE);
-    // lowBoundECollider.collision_neg = {0.f,0.f};
-    // lowBoundECollider.collision_pos = { TILE_SIZE * NUMTILESWIDE , TILE_SIZE };
-
-    // auto leftBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
-    // auto& leftBoundETransform = registry.transforms.emplace(leftBoundE);
-    // leftBoundETransform.position = { -TILE_SIZE, 0.f };
-    // auto& leftBoundECollider = registry.colliders.emplace(leftBoundE);
-    // leftBoundECollider.collision_neg = {0.f,0.f};
-    // leftBoundECollider.collision_pos = { TILE_SIZE, TILE_SIZE*NUMTILESTALL };
-
-    // auto rightBoundE = Entity::CreateEntity(TAG_PLAYERBLOCKABLE);
-    // auto& rightBoundETransform = registry.transforms.emplace(rightBoundE);
-    // rightBoundETransform.position = { TILE_SIZE*NUMTILESWIDE, 0.f };
-    // auto& rightBoundECollider = registry.colliders.emplace(rightBoundE);
-    // rightBoundECollider.collision_neg = {0.f,0.f};
-    // rightBoundECollider.collision_pos = { TILE_SIZE, TILE_SIZE*NUMTILESTALL };
-
+    
     float halfWidth = (float)GAME_RESOLUTION_WIDTH / 2.f;
     float halfHeight = (float)GAME_RESOLUTION_HEIGHT / 2.f;
-
     currentLevelData.cameraBoundMin.x = (-1 * TILE_SIZE) + halfWidth;
     currentLevelData.cameraBoundMin.y = (-1 * TILE_SIZE) + halfHeight;
     currentLevelData.cameraBoundMax.x = (((NUMTILESWIDE)+1) * TILE_SIZE) - halfWidth;

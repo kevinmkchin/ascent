@@ -1,0 +1,74 @@
+{
+  "glyphnotes": {
+    "0": "empty",
+    "1": "startpoint",
+    "2": "endpoint",
+    "a": "regular tile",
+    "b": "wooden tile",
+    "c": "regularOrEmpty",
+    "l": "ladder",
+    "m": "monster",
+    "s": "loc shopitem",
+    "t": "treasure",
+    "w": "spikes"
+  },
+  "count": 8,
+  "rooms": [
+    {
+      "name": "start-eg1",
+      "type": "start",
+      "data": "0000000000000000000000000000000000000000000000000000000000001000000000AAA000000000000000AAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "end-eg1",
+      "type": "end",
+      "data": "00000020000000000A000000000000000000AA000000000000000000000000AA000000AA000000AA000000AAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "c-eg1",
+      "type": "corridor",
+      "data": "00000000000000000000000000000000000000000000000000000000M0000000M0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "l-eg1",
+      "type": "landing",
+      "data": "000000ALA00000000ALA00000000ALA00000000ALA00000000ALA00000000ALA000000A0ALA0A0M0AA00L00AAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "f-eg1",
+      "type": "falling",
+      "data": "00AAAAAAA000000000000000000M000000000AA0000000000000AA00A0000000000A0000A0000A0000000000A00AAA000AA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "shop-1",
+      "type": "shop",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBAB000000000B0000S0S000000LBBBBBL0000L00000L0000L0S0S0L00ABBBBBBBBBA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "end-spiky",
+      "type": "end",
+      "data": "00020000000000A00000000000000000000000A0000000000000000000A000A00000000000000AAWWWWWWAA0AAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "c-jumps",
+      "type": "corridor",
+      "data": "00000000000000M000000000AAAALAA00000000L0000000000L0000000000L000000M000L000000AA00AA000A000000000A",
+      "width": 11,
+      "height": 9
+    }
+  ]
+}

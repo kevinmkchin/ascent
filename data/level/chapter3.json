@@ -1,0 +1,60 @@
+{
+  "glyphnotes": {
+    "0": "empty",
+    "1": "startpoint",
+    "2": "endpoint",
+    "a": "regular tile",
+    "b": "wooden tile",
+    "c": "regularOrEmpty",
+    "l": "ladder",
+    "m": "monster",
+    "s": "loc shopitem",
+    "t": "treasure",
+    "w": "spikes"
+  },
+  "count": 6,
+  "rooms": [
+    {
+      "name": "start-eg1",
+      "type": "start",
+      "data": "AAAAAAAAAAAACCAAAAACCA000AC0CA000000C000C00000000000000000001000000000CAC000A0CCCAAACCCAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "end-eg1",
+      "type": "end",
+      "data": "AAAAAAAAAAAACCCAAAACCA000000000000000000000000M000000000CA00000AC00AAA020AAA0AAAAAAAAAAAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "c-eg1",
+      "type": "corridor",
+      "data": "CAAAAAAAAAC0CACCCCAAC00000000000000000M000000000AAC0000000000000M0AA0M0000CA0AAAAAWAAAAAAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "l-eg1",
+      "type": "landing",
+      "data": "AAALAAALAAAACALAAALAAA000LAAALAAA000LAAAL00C000L000L000000L0N0L000000L000L0000M0L0WWLCCCAAAAAAAAAAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "f-eg1",
+      "type": "falling",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAN000000000000000M00000000AAAAA00000000000000AA0000000AAAAA00000AAA",
+      "width": 11,
+      "height": 9
+    },
+    {
+      "name": "shop-1",
+      "type": "shop",
+      "data": "AAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBAB000000000B0000S0S000000LBBBBBL0000L00000L0000L0S0S0L00ABBBBBBBBBA",
+      "width": 11,
+      "height": 9
+    }
+  ]
+}

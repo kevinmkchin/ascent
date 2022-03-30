@@ -12,12 +12,17 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-
+#define TILE_SIZE 16
+#define ROOM_DIMENSION_X 11
+#define ROOM_DIMENSION_Y 9
+#define NUMROOMSWIDE 5
+#define NUMFLOORS 5
+#define NUMTILESWIDE NUMROOMSWIDE * ROOM_DIMENSION_X
+#define NUMTILESTALL NUMFLOORS * ROOM_DIMENSION_Y
 
 class RenderSystem;
 class PlayerSystem;
 class UISystem;
-
 
 enum GAMEMODE
 {
