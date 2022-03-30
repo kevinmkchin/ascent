@@ -1,6 +1,7 @@
 // internal
 #include "physics_system.hpp"
 #include "world_init.hpp"
+#include "world_system.hpp"
 
 CollisionInfo CheckCollision(CollisionComponent& collider1, CollisionComponent& collider2)
 {
@@ -106,7 +107,8 @@ INTERNAL void MoveEntities(float deltaTime)
         }
 
         Entity e = motion_registry.entities[i];
-        registry.transforms.get(e).position += ((float)0.5 * (motion.velocity + old_velocity)) * deltaTime;
+        TransformComponent& entityTransform = registry.transforms.get(e);
+        entityTransform.position += ((float)0.5 * (motion.velocity + old_velocity)) * deltaTime;
         if(registry.colliders.has(e))
         {
             registry.colliders.get(e).collider_position = registry.transforms.get(e).position;
@@ -119,6 +121,21 @@ INTERNAL void MoveEntities(float deltaTime)
             }
             else if (motion.velocity.x < 0.f) {
                 motion.facingRight = false;
+            }
+        }
+
+        // KILL MOVING ENTITY IF THEY FALL OUT OF LEVEL
+        if(entityTransform.position.y > ((NUMTILESTALL + 6) * TILE_SIZE))
+        {
+            auto _e = motion_registry.entities[i];
+            if(registry.players.has(_e))
+            {
+                auto& playerHp = registry.healthBar.get(_e);
+                playerHp.health = -9999.f;
+            }
+            else
+            {
+                registry.remove_all_components_of(_e);
             }
         }
     }
