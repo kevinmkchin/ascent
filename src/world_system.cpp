@@ -303,7 +303,7 @@ void WorldSystem::SpawnLevelEntities() {
                 CreateSlimeEnemy(groundEnemySpawn);
             }
         }
-        else if (currentGameStage == CHAPTER_ONE_STAGE_TWO) {
+        else if (currentGameStage == CHAPTER_TWO_STAGE_ONE) {
             if (spawnType == 0) {
                 CreateMushroomEnemy(groundEnemySpawn);
             }

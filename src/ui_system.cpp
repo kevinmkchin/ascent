@@ -162,7 +162,7 @@ void UISystem::UpdateTextUI(float dt)
     {
         cachedGameStage = world->GetCurrentStage();
         showChapterText = true;
-        chapterTextAlpha = 1.8f;
+        chapterTextAlpha = 3.0f;
     }
     if(showChapterText)
     {
@@ -171,17 +171,18 @@ void UISystem::UpdateTextUI(float dt)
             chapterTextAlpha -= 0.5f * dt;
         }
 
-        if(chapterTextAlpha < 0.f)
-        {
-            showChapterText = false;
+        // 2022-03-29 (Kevin): Commented out showing the tutorial after chapter text goes away
+        // if(chapterTextAlpha < 0.f)
+        // {
+        //     showChapterText = false;
 
-            if(cachedGameStage == CHAPTER_ONE_STAGE_ONE)
-            {
-                *GlobalPauseForSeconds = 9999.f;
-                showTutorialTimer = 9999.f;
-                world->darkenGameFrame = true;
-            }
-        }
+        //     if(cachedGameStage == CHAPTER_ONE_STAGE_ONE)
+        //     {
+        //         *GlobalPauseForSeconds = 9999.f;
+        //         showTutorialTimer = 9999.f;
+        //         world->darkenGameFrame = true;
+        //     }
+        // }
 
         vtxt_clear_buffer();
 
@@ -191,32 +192,31 @@ void UISystem::UpdateTextUI(float dt)
             {
                 case CHAPTER_ONE_STAGE_ONE:
                 {
-                    vtxt_move_cursor(390,500);
-                    vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                    vtxt_move_cursor(650,630);
-                    vtxt_append_line("Stage One", &font_medusa_gothic, 110);
+                    //vtxt_move_cursor(390,500);
+                    vtxt_move_cursor(100,800);
+                    vtxt_append_line("Chapter One", &font_medusa_gothic, 110);
+                    //vtxt_move_cursor(650,630);
+                    vtxt_move_cursor(100,930);
+                    vtxt_append_line("Ancestral Caves", &font_medusa_gothic, 80);
                 }break;
-                case CHAPTER_ONE_STAGE_TWO:
+                case CHAPTER_TWO_STAGE_ONE:
                 {
-                    vtxt_move_cursor(390,500);
-                    vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                    vtxt_move_cursor(650,630);
-                    vtxt_append_line("Stage Two", &font_medusa_gothic, 110);
+                    //vtxt_move_cursor(390,500);
+                    vtxt_move_cursor(100,800);
+                    vtxt_append_line("Chapter Two", &font_medusa_gothic, 110);
+                    //vtxt_move_cursor(650,630);
+                    vtxt_move_cursor(100,930);
+                    vtxt_append_line("Eternal Forest", &font_medusa_gothic, 80);
                 }break;
-                case CHAPTER_ONE_STAGE_THREE:
+                case CHAPTER_THREE_STAGE_ONE:
                 {
-                    vtxt_move_cursor(390,500);
-                    vtxt_append_line("Chapter One", &font_medusa_gothic, 180);
-                    vtxt_move_cursor(650,630);
-                    vtxt_append_line("Stage Three", &font_medusa_gothic, 110);
+                    //vtxt_move_cursor(390,500);
+                    vtxt_move_cursor(100,800);
+                    vtxt_append_line("Chapter Three", &font_medusa_gothic, 110);
+                    //vtxt_move_cursor(650,630);
+                    vtxt_move_cursor(100,930);
+                    vtxt_append_line("Mountaintop of Warriors", &font_medusa_gothic, 80);
                 }break;
-                // case CHAPTER_TWO_STAGE_ONE:
-                // {
-                //     vtxt_move_cursor(390,500);
-                //     vtxt_append_line("Chapter Two", &font_medusa_gothic, 180);
-                //     vtxt_move_cursor(650,630);
-                //     vtxt_append_line("Stage One", &font_medusa_gothic, 110);
-                // }break;
             }
         }
 
