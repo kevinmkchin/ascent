@@ -196,7 +196,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, PlayerSystem *player_sys_arg,
     SetCurrentMode(MODE_MAINMENU);
 
     // Playing background music indefinitely
-    Mix_PlayMusic(background_music, -1);
+    // TODO(Kevin): uncomment  // Mix_PlayMusic(background_music, -1);
     fprintf(stderr, "Loaded music\n");
 }
 

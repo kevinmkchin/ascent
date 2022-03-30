@@ -48,6 +48,22 @@ void UISystem::Init(RenderSystem* render_sys_arg, WorldSystem* world_sys_arg, Pl
     LoadFont(&font_medusa_gothic, &texture_medusa_gothic, font_path("medusa-gothic.otf").c_str(), TEXT_SIZE);
 }
 
+void UISystem::UpdateHealthBarUI(float dt)
+{
+    if(registry.players.size() > 0)
+    {
+        auto e = registry.players.entities[0];
+
+        auto& playerHP = registry.healthBar.get(e);
+
+        float currentHP = playerHP.health;
+        float lowerBound = 0.f;
+        float upperBound = playerHP.maxHealth;
+
+        renderer->healthPointsNormalized = ((currentHP - lowerBound) / (upperBound - lowerBound));
+    }
+}
+
 void UISystem::UpdateExpUI(float dt)
 {
     if(registry.players.size() > 0)
@@ -113,12 +129,12 @@ void UISystem::UpdateTextUI(float dt)
 
             int displayHealth = (playerHealth.health > 0.f && playerHealth.health < 1.f) ? 1 : (int) playerHealth.health;
             sprintf(textBuffer, "HP: %d/%d", displayHealth, (int) playerHealth.maxHealth);
-            vtxt_move_cursor(26, 66);
-            vtxt_append_line(textBuffer, &font_c64, 40);
+            vtxt_move_cursor(270, 70);
+            vtxt_append_line(textBuffer, &font_c64, 24);
 
-            sprintf(textBuffer, "Gold: %d", (int)playerGold.coins);
-            vtxt_move_cursor(26, 130);
-            vtxt_append_line(textBuffer, &font_c64, 40);
+            sprintf(textBuffer, "GOLD: %d", (int)playerGold.coins);
+            vtxt_move_cursor(40, 130);
+            vtxt_append_line(textBuffer, &font_c64, 32);
 
             sprintf(textBuffer, "Lvl %d", (int) 1);
             if(registry.players.size() > 0)
@@ -558,6 +574,7 @@ void UISystem::Step(float deltaTime)
         }
     }
 
+    UpdateHealthBarUI(deltaTime);
     UpdateExpUI(deltaTime);
     UpdateTextUI(deltaTime);
     UpdateLevelUpUI(deltaTime);

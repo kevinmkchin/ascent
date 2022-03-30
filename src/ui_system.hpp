@@ -25,6 +25,8 @@ public:
 
 private:
 
+    void UpdateHealthBarUI(float dt);
+
     void UpdateExpUI(float dt);
 
     void UpdateTextUI(float dt);

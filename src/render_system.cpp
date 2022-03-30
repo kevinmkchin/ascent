@@ -415,13 +415,29 @@ void RenderSystem::DrawUI()
     if(world->GetCurrentMode() == MODE_INGAME)
     {   
         glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::EXP_UI]);
-
         glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
         GLuint expProgress_loc = glGetUniformLocation(currProgram, "expProgress");
         glUniform1f(expProgress_loc, expProgressNormalized);
         glBindVertexArray(expProgressBar.idVAO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, expProgressBar.idIBO);
                 glDrawElements(GL_TRIANGLES, expProgressBar.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::HEALTHBAR_BORDER_UI]);
+        glBindVertexArray(healthBarBorder.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, healthBarBorder.idIBO);
+                glDrawElements(GL_TRIANGLES, healthBarBorder.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::HEALTHBAR_UI]);
+        glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+        GLuint hpNormalized_loc = glGetUniformLocation(currProgram, "hpNormalized");
+        glUniform1f(hpNormalized_loc, healthPointsNormalized);
+        glBindVertexArray(healthBar.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, healthBar.idIBO);
+                glDrawElements(GL_TRIANGLES, healthBar.indicesCount, GL_UNSIGNED_INT, nullptr);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 

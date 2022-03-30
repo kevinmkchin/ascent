@@ -75,6 +75,29 @@ void RenderSystem::InitializeUIStuff()
     };
     CreateMeshVertexArray(expProgressBar, expProgressBarVertices, expProgressBarIndices, 16, 6, 2, 2, 0, GL_STATIC_DRAW);
 
+    u32 healthBarIndices[6] = {
+        0, 1, 3,
+        0, 3, 2
+    };
+    float healthBarVertices[16] = {
+        //  x   y    u    v
+        -0.96f,  0.935f, 0.f, 0.f,       -0.2f,  0.935f, 1.f, 0.f,
+
+        -0.96f, 0.850f, 0.f, 1.f,        -0.2f, 0.850f, 1.f, 1.f
+    };
+    CreateMeshVertexArray(healthBar, healthBarVertices, healthBarIndices, 16, 6, 2, 2, 0, GL_STATIC_DRAW);
+
+    u32 healthBarBorderIndices[6] = {
+        0, 1, 3,
+        0, 3, 2
+    };
+    float healthBarBorderVertices[16] = {
+        //  x   y    u    v
+        -0.9645f,  0.942f, 0.f, 0.f,       -0.1955f,  0.942f, 1.f, 0.f,
+
+        -0.9645f, 0.843f, 0.f, 1.f,        -0.1955f, 0.843f, 1.f, 1.f
+    };
+    CreateMeshVertexArray(healthBarBorder, healthBarBorderVertices, healthBarBorderIndices, 16, 6, 2, 2, 0, GL_STATIC_DRAW);
 
     u32 mutationSelectBorderIndices[24] = {
         0, 1, 3,
