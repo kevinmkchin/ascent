@@ -168,6 +168,22 @@ WorldSystem::WorldSystem()
                 console_printf("'restart' command only works while in game...");
             }
         });
+
+    get_console().bind_cmd("next_stage",
+        [this](std::istream& is, std::ostream& os){
+            StartNewStage((GAMELEVELENUM) ((u8) this->currentGameStage + 1));
+        });
+
+    get_console().bind_cmd("godmode",
+        [this](std::istream& is, std::ostream& os){
+            auto& playerHP = registry.healthBar.get(this->player);
+            playerHP.bInvincible = !playerHP.bInvincible;
+            if(playerHP.bInvincible) {
+                console_printf("godmode ON\n");
+            } else {
+                console_printf("godmode OFF\n");
+            }
+        });
 }
 
 void WorldSystem::HandleMutations() {
