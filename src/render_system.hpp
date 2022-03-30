@@ -89,6 +89,11 @@ public:
     vec4            textLayer4Colour = vec4(1.f, 1.f, 1.f, 1.f);
     MeshHandle      textLayer4VAO;
 
+    MeshHandle      healthBarBorder;
+
+    MeshHandle      healthBar;
+    float           healthPointsNormalized = 0.6f;//1.f;
+
     MeshHandle      expProgressBar;
     float           expProgressNormalized = 0.f; // range 0 to 1
 

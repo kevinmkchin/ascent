@@ -8,9 +8,9 @@ in vec2 fragPos;
 
 void main()
 {
-    float ep = (expProgress*2.0-1.0);
+    float epNDC = (expProgress*2.0-1.0);
 
-    if(fragPos.x < ep)
+    if(fragPos.x < epNDC)
     {
         float f = (abs(fragPos.y) - 0.935) / (1.0 - 0.935);
         f = sin(f * 3.14159265);
