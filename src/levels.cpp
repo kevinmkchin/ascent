@@ -230,7 +230,7 @@ INTERNAL void LoadAllLevelData()
         chapterOneRooms.at(roomRawData.type).push_back(roomRawData);
     }
 
-    ifs = std::ifstream(level_path("chapter2.json"));
+    ifs = std::ifstream(level_path("chapter1.json"));
     if (!ifs.is_open()) {
         std::cerr << " Failed to open level data..." << std::endl;
         assert(0);
@@ -251,7 +251,7 @@ INTERNAL void LoadAllLevelData()
         chapterTwoRooms.at(roomRawData.type).push_back(roomRawData);
     }
 
-    ifs = std::ifstream(level_path("chapter3.json"));
+    ifs = std::ifstream(level_path("chapter1.json"));
     if (!ifs.is_open()) {
         std::cerr << " Failed to open level data..." << std::endl;
         assert(0);
