@@ -347,12 +347,18 @@ struct DeathTimer
 //For entities that can hold items
 struct HolderComponent
 {
-    Entity held_weapon = Entity();
+    int current_item = -1;
     Entity near_weapon = Entity();
+    Entity held_weapon = Entity();
+
+    std::vector<Entity> carried_items;
+
     bool want_to_pick_up = false;
     bool want_to_drop = false;
     bool want_to_throw = false;
     bool want_to_shoot = false;
+    bool want_to_cycle_left = false;
+    bool want_to_cycle_right = false;
 };
 
 struct CollisionEvent
@@ -434,5 +440,6 @@ enum GAMETAGS : u8
     TAG_SPIKE,
     TAG_PLAYERBLOCKABLE,
     TAG_PLAYERMELEEATTACK,
+    TAG_SWORD,
     TAG_BOW,
 };

@@ -642,7 +642,7 @@ Entity CreateWormEnemy(vec2 position)
 
 Entity createSword(vec2 position)
 {
-    auto entity = Entity::CreateEntity();
+    auto entity = Entity::CreateEntity(TAG_SWORD);
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
