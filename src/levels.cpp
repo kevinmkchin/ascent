@@ -364,7 +364,8 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
             }break;
 
             case 'R': {
-                CreateShopKeeperNPC({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE, roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE });
+                CreateShopKeeperNPC({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + TILE_SIZE/2.f, 
+                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + TILE_SIZE/2.f});
             }break;
 
             case '2': {
