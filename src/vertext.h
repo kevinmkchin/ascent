@@ -348,6 +348,9 @@ enum _vtxt_config_flags_t
 */
 VTXT_DEF void vtxt_setflags(int newconfig);
 
+/**  */
+VTXT_DEF void vtxt_set_linegap_offset(float offset);
+
 /** ONLY IF YOU WANT CLIPSPACE COORDINATES INSTEAD OF SCREENSPACE COORDINATES
     Tells vertext.h the size of your application's backbuffer size. If the
     backbuffer size changes, then you should call this again to update the size.
@@ -432,6 +435,7 @@ _vtxt_internal int _vtxt_vertex_count = 0; // Each vertex takes up 4 places in t
 _vtxt_internal unsigned int _vtxt_index_buffer[VTXT_MAX_CHAR_IN_BUFFER * 6];
 _vtxt_internal int _vtxt_index_count = 0;
 _vtxt_internal int _vtxt_config = 0b0;
+_vtxt_internal float _vtxt_linegap_offset = 0.f;
 _vtxt_internal int _vtxt_cursor_x = 0;   // top left of the screen is pixel (0, 0), bot right of the screen is pixel (screen buffer width, screen buffer height)
 _vtxt_internal int _vtxt_cursor_y = 100; // cursor points to the base line at which to start drawing the glyph
 _vtxt_internal int _vtxt_screen_w_for_clipspace = 800;
@@ -447,6 +451,12 @@ vtxt_setflags(int newconfig)
     {
         vtxt_clear_buffer();
     }
+}
+
+VTXT_DEF void
+vtxt_set_linegap_offset(float offset)
+{
+    _vtxt_linegap_offset = offset;
 }
 
 VTXT_DEF void
@@ -583,27 +593,28 @@ vtxt_move_cursor(int x, int y)
 VTXT_DEF void
 vtxt_new_line(int x, vtxt_font* font)
 {
+    float linegap = font->linegap + _vtxt_linegap_offset;
     _vtxt_cursor_x = x;
     if(_vtxt_config & VTXT_NEWLINE_ABOVE)
     {
         if(_vtxt_config & VTXT_FLIP_Y)
         {
-            _vtxt_cursor_y += (int) (-font->descender + font->linegap + font->ascender);
+            _vtxt_cursor_y += (int) (-font->descender + linegap + font->ascender);
         }
         else
         {
-            _vtxt_cursor_y -= (int) (-font->descender + font->linegap + font->ascender);
+            _vtxt_cursor_y -= (int) (-font->descender + linegap + font->ascender);
         }
     }
     else
     {
         if(_vtxt_config & VTXT_FLIP_Y)
         {
-            _vtxt_cursor_y -= (int) (-font->descender + font->linegap + font->ascender);
+            _vtxt_cursor_y -= (int) (-font->descender + linegap + font->ascender);
         }
         else
         {
-            _vtxt_cursor_y += (int) (-font->descender + font->linegap + font->ascender);
+            _vtxt_cursor_y += (int) (-font->descender + linegap + font->ascender);
         }
     }
 }

@@ -409,7 +409,9 @@ void RenderSystem::DrawWorldText(const mat3& projection)
     {
         vtxt_clear_buffer();
         vtxt_move_cursor(1, 1);
+        vtxt_set_linegap_offset(-16.f);
         vtxt_append_line_centered(wt.text.c_str(), worldTextFontPtr, wt.size);
+        vtxt_set_linegap_offset(0.f);
         vtxt_vertex_buffer vb = vtxt_grab_buffer();
         RebindMeshBufferObjects(worldTextVAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
 
