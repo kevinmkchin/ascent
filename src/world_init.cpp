@@ -951,9 +951,12 @@ Entity createCoins(vec2 position)
 Entity CreateProximityWorldText(vec2 pos, float triggerRadius, u32 size, const char* text)
 {
     auto entity = Entity::CreateEntity();
-
-    registry.proximityTexts.insert(entity, { pos, 32.f, size, std::string(text) });
-
+    ProximityTextComponent& newText = registry.proximityTexts.emplace(entity);
+    newText.triggerPosition = pos;
+    newText.triggerRadius = triggerRadius;
+    newText.textPosition = pos;
+    newText.textSize = size;
+    newText.text = std::string(text);
     return entity;
 }
 
@@ -997,12 +1000,16 @@ Entity CreateShopKeeperNPC(vec2 position)
         "Come on in!\n",
         "Buy something will ya?\n",
         "Welcome to Tim's Discount Prices!\n",
-        "It's too dangerous to go alone.\n"
+        "It's too dangerous to go alone!\n"
     };
     int pick = rand()%(sizeof(shopKeeperNPCLines)/(sizeof(char*)));
 
-    registry.proximityTexts.insert(entity, { vec2(position.x, position.y), 80.f, 8, std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.") });
+    ProximityTextComponent& npcText = registry.proximityTexts.emplace(entity);
+    npcText.triggerPosition = position;
+    npcText.triggerRadius = 80.f;
+    npcText.textPosition = position + vec2(0.f, -20.f);
+    npcText.textSize = 8;
+    npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.");
 
     return entity;
 }
-

@@ -939,9 +939,9 @@ void WorldSystem::UpdateWorldTexts()
     for(int i = 0; i < registry.proximityTexts.size(); ++i)
     {
         ProximityTextComponent& proximText = registry.proximityTexts.components[i];
-        if(length(proximText.position - playerTransform.position) < proximText.triggerRadius)
+        if(length(proximText.triggerPosition - playerTransform.position) < proximText.triggerRadius)
         {
-            uiSystem->PushWorldText(proximText.position, proximText.text, proximText.size);
+            uiSystem->PushWorldText(proximText.textPosition, proximText.text, proximText.textSize);
         }
     }
 }

@@ -425,9 +425,10 @@ struct GoldBar
 
 struct ProximityTextComponent
 {
-    vec2 position = {0.f,0.f};
+    vec2 triggerPosition = {0.f,0.f};
     float triggerRadius = 32.f;
-    u32 size = 32;
+    vec2 textPosition = {0.f,0.f};
+    u32 textSize = 16;
     std::string text = "DEFAULT TEXT";
 };
 

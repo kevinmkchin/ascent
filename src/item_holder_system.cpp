@@ -29,7 +29,7 @@ INTERNAL void previousCurrentItem(HolderComponent& holderComponent)
 {
     holderComponent.current_item--;
     if (holderComponent.current_item < 0) {
-        holderComponent.current_item = holderComponent.carried_items.size() - 1;
+        holderComponent.current_item = ((int)holderComponent.carried_items.size()) - 1;
     }
 }
 
