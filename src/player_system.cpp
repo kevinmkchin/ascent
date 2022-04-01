@@ -276,15 +276,19 @@ INTERNAL void ResolveComplexMovement(float deltaTime, MotionComponent& playerMot
 
 INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
 {   
-    const bool bThrowKeyPressed = playerHolder.held_weapon != 0 ? Input::GamePickUpHasBeenPressed() : false;
-    const bool bPickUpKeyPressed = playerHolder.held_weapon == 0 ? Input::GamePickUpHasBeenPressed() : false;
-    const bool bDropKeyPressed = playerHolder.held_weapon != 0 && Input::GamePickUpHasBeenPressed() && Input::GameDownIsPressed();
-    const bool bAttackKeyPressed = playerHolder.held_weapon != 0 && Input::GameAttackHasBeenPressed();
+    const bool bThrowKeyPressed = Input::GamePickUpHasBeenPressed() && !Input::GameDownIsPressed() && playerHolder.current_item >= 0 && playerHolder.near_weapon == 0;
+    const bool bPickUpKeyPressed = Input::GamePickUpHasBeenPressed() && playerHolder.near_weapon != 0;
+    const bool bDropKeyPressed = Input::GamePickUpHasBeenPressed() && Input::GameDownIsPressed() && playerHolder.current_item >= 0 && playerHolder.near_weapon == 0;
+    const bool bAttackKeyPressed = Input::GameAttackHasBeenPressed() && playerHolder.current_item >= 0;
+    const bool bCycleLeftKeyPressed = Input::GameCycleItemLeftBeenPressed() && playerHolder.carried_items.size() > 1;
+    const bool bCycleRightKeyPressed = Input::GameCycleItemRightBeenPressed() && playerHolder.carried_items.size() > 1;
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;
     playerHolder.want_to_throw = bThrowKeyPressed;
     playerHolder.want_to_shoot = bAttackKeyPressed;
+    playerHolder.want_to_cycle_left = bCycleLeftKeyPressed;
+    playerHolder.want_to_cycle_right = bCycleRightKeyPressed;
 }
 #pragma endregion
 
@@ -401,8 +405,8 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
         }
     }
 
-    Entity held_weapon = registry.holders.get(playerEntity).held_weapon;
-    bool hasRangedWeapon = held_weapon.GetTag() != 0 && registry.weapons.has(held_weapon) && registry.weapons.get(held_weapon).ranged;
+    HolderComponent& holder = registry.holders.get(playerEntity);
+    bool hasRangedWeapon =  registry.weapons.has(holder.held_weapon) && registry.weapons.get(holder.held_weapon).ranged;
 
     if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed() && !hasRangedWeapon)
     {

@@ -95,6 +95,16 @@ bool Input::GamePauseHasBeenPressed()
     return Input::HasKeyBeenPressed(SDL_SCANCODE_ESCAPE) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_START);
 }
 
+bool Input::GameCycleItemLeftBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_Q) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_LB);
+}
+
+bool Input::GameCycleItemRightBeenPressed()
+{
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_E) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_RB);
+}
+
 //////////////////////////////////////////////////////////////////////
 // GENERIC CLASSES AND FUNCTIONS BELOW
 //////////////////////////////////////////////////////////////////////
