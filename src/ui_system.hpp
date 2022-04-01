@@ -19,6 +19,9 @@ public:
 
     void Step(float deltaTime);
 
+    // Push a world text to render this frame
+    void PushWorldText(vec2 pos, const std::string& text, u32 size);
+
     float* GlobalPauseForSeconds = nullptr;
 
     u8 cachedGameStage;

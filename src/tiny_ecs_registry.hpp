@@ -40,6 +40,7 @@ public:
 	ComponentContainer<Exp> exp;
 	ComponentContainer<Coin> coins;
 	ComponentContainer<GoldBar> goldBar;
+	ComponentContainer<ProximityTextComponent> proximityTexts;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -74,6 +75,7 @@ public:
 		registry_list.push_back(&exp);
 		registry_list.push_back(&coins);
 		registry_list.push_back(&goldBar);
+		registry_list.push_back(&proximityTexts);
 		
 	}
 

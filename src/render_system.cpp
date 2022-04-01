@@ -3,6 +3,7 @@
 #include "render_system.hpp"
 #include "world_system.hpp"
 #include "console.hpp"
+#include "vertext.h"
 
 #include "tiny_ecs_registry.hpp"
 
@@ -169,7 +170,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
     }
 
     // CAMERA TRANSFORM
-    Transform cameraTransform;
+    cameraTransform = Transform();
     Entity player = registry.players.entities[0];
     TransformComponent& playerTransform = registry.transforms.get(player);
     float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
@@ -391,6 +392,44 @@ void RenderSystem::Draw(float elapsed_ms)
         BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
 
+
+    // DRAW WORLD TEXT
+    vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS|VTXT_FLIP_Y);
+    vtxt_backbuffersize(2, 2);
+    for(WorldText& wt : worldTextsThisFrame)
+    {
+        vtxt_clear_buffer();
+        vtxt_move_cursor(1, 1);
+        vtxt_append_line(wt.text.c_str(), worldTextFontPtr, wt.size);
+        vtxt_vertex_buffer vb = vtxt_grab_buffer();
+        RebindMeshBufferObjects(worldTextVAO, vb.vertex_buffer, vb.index_buffer, vb.vertices_array_count, vb.indices_array_count);
+
+        GLint currProgram;
+        glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WORLDTEXT]);
+
+        Transform worldTextTransform;
+        worldTextTransform.translate(wt.pos*(float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL);
+        worldTextTransform.scale(vec2(0.5f * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL, 0.5f * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL));
+
+        glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+        GLuint projMatrix_loc = glGetUniformLocation(currProgram, "projectionMatrix");
+        glUniformMatrix3fv(projMatrix_loc, 1, false, (float*)&projection_2D);
+        GLuint viewMatrix_loc = glGetUniformLocation(currProgram, "viewMatrix");
+        glUniformMatrix3fv(viewMatrix_loc, 1, false, (float*)&cameraTransform.mat);
+        GLuint modelMatrix_loc = glGetUniformLocation(currProgram, "modelMatrix");
+        glUniformMatrix3fv(modelMatrix_loc, 1, false, (float*)&worldTextTransform.mat);
+
+        glBindTexture(GL_TEXTURE_2D, worldTextFontAtlas.textureId);
+        glActiveTexture(GL_TEXTURE0);
+        glBindVertexArray(worldTextVAO.idVAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, worldTextVAO.idIBO);
+                glDrawElements(GL_TRIANGLES, worldTextVAO.indicesCount, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+    worldTextsThisFrame.clear();
+
+
+    // DRAW UI
     DrawUI();
 
     FinalDrawToScreen(); // Truely render to the screen
