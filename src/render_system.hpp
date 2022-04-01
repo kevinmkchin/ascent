@@ -8,6 +8,7 @@
 #include "tiny_ecs.hpp"
 
 class WorldSystem;
+struct vtxt_font;
 
 struct SpriteTransformPair
 {
@@ -30,6 +31,13 @@ struct MeshHandle
     u32  idVBO          = 0;
     u32  idIBO          = 0;
     u32  indicesCount   = 0;
+};
+
+struct WorldText
+{
+    vec2 pos;
+    u32 size;
+    std::string text;
 };
 
 // System responsible for setting up OpenGL and for rendering all the
@@ -89,6 +97,11 @@ public:
     vec4            textLayer4Colour = vec4(1.f, 1.f, 1.f, 1.f);
     MeshHandle      textLayer4VAO;
 
+    TextureHandle   worldTextFontAtlas;
+    MeshHandle      worldTextVAO;
+    std::vector<WorldText> worldTextsThisFrame;
+    vtxt_font*      worldTextFontPtr;
+
     MeshHandle      healthBarBorder;
 
     MeshHandle      healthBar;
@@ -140,6 +153,8 @@ private:
     i32 backbufferHeight = 0;
     const i32 FRAMEBUFFER_WIDTH = GAME_RESOLUTION_WIDTH * FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
     const i32 FRAMEBUFFER_HEIGHT = GAME_RESOLUTION_HEIGHT * FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+
+    Transform cameraTransform;
 
 	// Screen texture handles
 	GLuint gameFrameBuffer;

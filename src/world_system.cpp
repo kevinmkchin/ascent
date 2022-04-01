@@ -165,23 +165,37 @@ WorldSystem::WorldSystem()
             }
             else
             {
-                console_printf("'restart' command only works while in game...");
+                console_printf("'restart' command only works while in game...\n");
             }
         });
 
     get_console().bind_cmd("next_stage",
         [this](std::istream& is, std::ostream& os){
-            StartNewStage((GAMELEVELENUM) ((u8) this->currentGameStage + 1));
+            if(this->currentGameMode == MODE_INGAME)
+            {
+                StartNewStage((GAMELEVELENUM) ((u8) this->currentGameStage + 1));
+            }
+            else
+            {
+                console_printf("'next_stage' command only works while in game...\n");
+            }
         });
 
     get_console().bind_cmd("godmode",
         [this](std::istream& is, std::ostream& os){
-            auto& playerHP = registry.healthBar.get(this->player);
-            playerHP.bInvincible = !playerHP.bInvincible;
-            if(playerHP.bInvincible) {
-                console_printf("godmode ON\n");
-            } else {
-                console_printf("godmode OFF\n");
+            if(this->currentGameMode == MODE_INGAME)
+            {
+                auto& playerHP = registry.healthBar.get(this->player);
+                playerHP.bInvincible = !playerHP.bInvincible;
+                if(playerHP.bInvincible) {
+                    console_printf("godmode ON\n");
+                } else {
+                    console_printf("godmode OFF\n");
+                }
+            }
+            else
+            {
+                console_printf("'next_stage' command only works while in game...\n");   
             }
         });
 }
@@ -262,6 +276,8 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     // Remove all entities that we created
     while (registry.transforms.entities.size() > 0)
         registry.remove_all_components_of(registry.transforms.entities.back());
+    while (registry.proximityTexts.entities.size() > 0)
+        registry.remove_all_components_of(registry.transforms.entities.back());
     // registry.list_all_components(); // Debugging for memory/component leaks
 
 // CHECK IF GAME SHOULD END
@@ -295,6 +311,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 void WorldSystem::SpawnLevelEntities() {
     // Create player
     player = createPlayer(currentLevelData.playerStart);
+    CreateProximityWorldText(currentLevelData.playerStart, 32.f, 8, "Hello World!");
 
     if (currentDifficulty == DIFFICULTY_EASY) {
         registry.healthBar.get(player).maxHealth += 50;
@@ -509,6 +526,8 @@ bool WorldSystem::step(float deltaTime) {
             registry.remove_all_components_of(playerProjectileRegistry.entities[i]);
         }
     }
+
+    UpdateWorldTexts();
 
 //  float min_counter_ms = 3000.f;
 //	for (Entity entity : registry.deathTimers.entities) {
@@ -837,8 +856,7 @@ void WorldSystem::handle_collisions() {
     }
 }
 
-void
-WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other, bool bounce_x, bool is_item) {
+void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other, bool bounce_x, bool is_item) {
     if (entity_other.GetTag() == TAG_PLAYERBLOCKABLE) {
         if (registry.colliders.has(entity_resolver) && registry.colliders.has(entity_other)) {
             CollisionComponent &resolverCollider = registry.colliders.get(entity_resolver);
@@ -889,6 +907,24 @@ WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_o
                     }
                 }
             }
+        }
+    }
+}
+
+void WorldSystem::UpdateWorldTexts()
+{
+    if(!registry.transforms.has(player))
+    {
+        return;
+    }
+        
+    TransformComponent& playerTransform = registry.transforms.get(player);
+    for(int i = 0; i < registry.proximityTexts.size(); ++i)
+    {
+        ProximityTextComponent& proximText = registry.proximityTexts.components[i];
+        if(length(proximText.position - playerTransform.position) < proximText.triggerRadius)
+        {
+            uiSystem->PushWorldText(proximText.position, proximText.text, proximText.size);
         }
     }
 }

@@ -118,6 +118,8 @@ USAGE:
         VTXT_NEWLINE_ABOVE:
             Sets the library to move the cursor above the current line instead of below
             when calling vtxt_new_line.
+        VTXT_FLIP_Y:
+            Flips y vertex position in case you are using a coordinate system where "up" is negative y.
 
     > By Default:
         - no indexed drawing (unless specified with flag VTXT_CREATE_INDEX_BUFFER)
@@ -337,7 +339,8 @@ enum _vtxt_config_flags_t
 {
     VTXT_CREATE_INDEX_BUFFER     = 1 << 0,
     VTXT_USE_CLIPSPACE_COORDS    = 1 << 1,
-    VTXT_NEWLINE_ABOVE           = 1 << 2
+    VTXT_NEWLINE_ABOVE           = 1 << 2,
+    VTXT_FLIP_Y                  = 1 << 3,
 };
 
 /** Configures this library to use the settings defined by _vtxt_config_flags_t.
@@ -615,6 +618,12 @@ vtxt_append_glyph(const char in_glyph, vtxt_font* font, int font_size)
     float bot = _vtxt_cursor_y + glyph.offset_y + glyph.height;
     float left = _vtxt_cursor_x + glyph.offset_x;
     float right = _vtxt_cursor_x + glyph.offset_x + glyph.width;
+    if(_vtxt_config & VTXT_FLIP_Y)
+    {
+        top = _vtxt_cursor_y - glyph.offset_y;
+        bot = _vtxt_cursor_y - glyph.offset_y - glyph.height;
+    }
+
     if(_vtxt_config & VTXT_USE_CLIPSPACE_COORDS)
     {
         top = (1.f - ((top / _vtxt_screen_h_for_clipspace) * 2.f));

@@ -947,3 +947,12 @@ Entity createCoins(vec2 position)
 
     return entity;
 }
+
+Entity CreateProximityWorldText(vec2 pos, float triggerRadius, u32 size, const char* text)
+{
+    auto entity = Entity::CreateEntity();
+
+    registry.proximityTexts.insert(entity, { pos, 32.f, size, std::string(text) });
+
+    return entity;
+}

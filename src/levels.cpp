@@ -514,7 +514,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     ClearLevelTiles();
     ClearCurrentLevelData();
 
-    std::unordered_map<std::string, std::vector<ns::RoomRawData>>& currentChapterRooms = chapterOneRooms;
+    std::unordered_map<std::string, std::vector<ns::RoomRawData>> currentChapterRooms;
     switch(stageToGenerate)
     {
         case CHAPTER_ONE_STAGE_ONE:{

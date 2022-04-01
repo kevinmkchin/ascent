@@ -41,11 +41,20 @@ void UISystem::Init(RenderSystem* render_sys_arg, WorldSystem* world_sys_arg, Pl
     world = world_sys_arg;
     playerSystem = player_sys_arg;
 
-    vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS);
-    vtxt_backbuffersize(UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
-
     LoadFont(&font_c64, &texture_c64, font_path("c64.ttf").c_str(), 32, true);
     LoadFont(&font_medusa_gothic, &texture_medusa_gothic, font_path("medusa-gothic.otf").c_str(), TEXT_SIZE);
+
+    renderer->worldTextFontPtr = &font_c64;
+    renderer->worldTextFontAtlas = texture_c64;
+}
+
+void UISystem::PushWorldText(vec2 pos, const std::string& text, u32 size)
+{
+    WorldText newWorldText;
+    newWorldText.pos = pos;
+    newWorldText.size = size;
+    newWorldText.text = text;
+    renderer->worldTextsThisFrame.push_back(newWorldText);
 }
 
 void UISystem::UpdateHealthBarUI(float dt)
@@ -93,6 +102,9 @@ void UISystem::UpdateExpUI(float dt)
 #pragma warning(disable : 4996)
 void UISystem::UpdateTextUI(float dt)
 {
+    vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS);
+    vtxt_backbuffersize(UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+
     vtxt_clear_buffer();
 
     switch(world->GetCurrentMode())

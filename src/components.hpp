@@ -125,6 +125,7 @@ enum class EFFECT_ASSET_ID : u8
     MUTATION_SELECT_UI,
     CONSOLE_UI,
     CONSOLE_TEXT_UI,
+    WORLDTEXT,
 
     EFFECT_COUNT
 };
@@ -143,6 +144,7 @@ const std::array<std::string, effect_count> effect_paths = {
         shader_path("mutation_select_ui"),
         shader_path("console_ui"),
         shader_path("console_text_ui"),
+        shader_path("worldtext")
 };
 
 /**
@@ -413,6 +415,14 @@ struct HealthBar
 struct GoldBar
 {
     float coins = 50.f;
+};
+
+struct ProximityTextComponent
+{
+    vec2 position = {0.f,0.f};
+    float triggerRadius = 32.f;
+    u32 size = 32;
+    std::string text = "DEFAULT TEXT";
 };
 
 enum GAMETAGS : u8
