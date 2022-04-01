@@ -960,6 +960,53 @@ Entity CreateProximityWorldText(vec2 pos, float triggerRadius, u32 size, const c
     return entity;
 }
 
+Entity CreateHelpSign(vec2 pos, float triggerRadius, vec2 textOffsetFromPos, u32 textSize, const char* text)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    vec2 dimensions = { 16, 16 };
+    transform.position = pos;
+    transform.center = dimensions/2.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+            dimensions,
+            0,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::WOODENSIGNS,
+            true,
+            false,
+            true,
+            48,
+            32,
+            0,
+            0,
+            0.f,
+            {
+                // idle
+                {
+                    1,
+                    0,
+                    0.f
+                }
+            },
+        }
+    );
+
+    ProximityTextComponent& newText = registry.proximityTexts.emplace(entity);
+    newText.triggerPosition = pos;
+    newText.triggerRadius = triggerRadius;
+    newText.textPosition = pos + textOffsetFromPos;
+    newText.textSize = textSize;
+    newText.text = std::string(text);
+    newText.bTyped = true;
+    newText.secondsBetweenTypedCharacters = 0.05f;
+
+    return entity;
+}
+
 Entity CreateShopKeeperNPC(vec2 position)
 {
     auto entity = Entity::CreateEntity();
@@ -972,19 +1019,19 @@ Entity CreateShopKeeperNPC(vec2 position)
     registry.sprites.insert(
         entity,
         {
-                dimensions,
-                0,
-                EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::GOBLIN_BOMBER,
-                true,
-                false,
-                true,
-                96,
-                64,
-                0,
-                0,
-                0.f,
-                {
+            dimensions,
+            0,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::GOBLIN_BOMBER,
+            true,
+            false,
+            true,
+            96,
+            64,
+            0,
+            0,
+            0.f,
+            {
                 // idle
                 {
                     4,
@@ -1010,6 +1057,8 @@ Entity CreateShopKeeperNPC(vec2 position)
     npcText.textPosition = position + vec2(0.f, -20.f);
     npcText.textSize = 8;
     npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.");
+    npcText.bTyped = true;
+    npcText.secondsBetweenTypedCharacters = 0.05f;
 
     return entity;
 }

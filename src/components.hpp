@@ -63,6 +63,7 @@ enum class TEXTURE_ASSET_ID : u16
     SWORDSWING_RIGHT,
     SWORDSWING_UP,
     SWORDSWING_DOWN,
+    WOODENSIGNS,
     BG_MENU_LAYER1,
     BG_MENU_LAYER2,
     BG_MENU_LAYER3,
@@ -105,6 +106,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("swing_right.png"),
         textures_path("swing_up.png"),
         textures_path("swing_down.png"),
+        textures_path("signs.png"),
         textures_path("menu_bg_layer1.png"),
         textures_path("menu_bg_layer2.png"),
         textures_path("menu_bg_layer3.png"),
@@ -430,6 +432,13 @@ struct ProximityTextComponent
     vec2 textPosition = {0.f,0.f};
     u32 textSize = 16;
     std::string text = "DEFAULT TEXT";
+
+    bool bTyped = false;
+    float secondsBetweenTypedCharacters = 0.05f;
+
+    bool __bCurrentlyTriggered = false;
+    float __typingTimer = 0.f;
+    std::string __currentTypedTextBuffer = "";
 };
 
 enum GAMETAGS : u8
