@@ -101,6 +101,9 @@ void console_initialize(vtxt_font* in_console_font_handle, TextureHandle in_cons
     console_font_atlas = in_console_font_atlas;
     renderSystem = renderer;
 
+    vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS);
+    vtxt_backbuffersize(UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+
     // INIT TEXT mesh_t OBJECTS
     vtxt_clear_buffer();
     vtxt_move_cursor(CONSOLE_INPUT_DRAW_X, CONSOLE_INPUT_DRAW_Y);
@@ -265,6 +268,9 @@ void console_update_messages()
             }
             // rebind vao
             {
+                vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS);
+                vtxt_backbuffersize(UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
+
                 vtxt_clear_buffer();
                 vtxt_move_cursor(CONSOLE_INPUT_DRAW_X, CONSOLE_INPUT_DRAW_Y);
                 for(int i = 0; i < line_len; ++i)
@@ -300,6 +306,9 @@ void console_update(float delta_time)
     {
         return;
     }
+    
+    vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS);
+    vtxt_backbuffersize(UI_LAYER_RESOLUTION_WIDTH, UI_LAYER_RESOLUTION_HEIGHT);
 
     switch(console_state)
     {

@@ -277,7 +277,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     while (registry.transforms.entities.size() > 0)
         registry.remove_all_components_of(registry.transforms.entities.back());
     while (registry.proximityTexts.entities.size() > 0)
-        registry.remove_all_components_of(registry.transforms.entities.back());
+        registry.remove_all_components_of(registry.proximityTexts.entities.back());
     // registry.list_all_components(); // Debugging for memory/component leaks
 
 // CHECK IF GAME SHOULD END
