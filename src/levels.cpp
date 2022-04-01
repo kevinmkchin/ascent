@@ -4,6 +4,7 @@
 #include <json.hpp>
 
 #include "common.hpp"
+#include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
 INTERNAL void AddTileSizedCollider(Entity tileEntity)
@@ -360,6 +361,10 @@ INTERNAL void ParseRoomData(const ns::RoomRawData& r, int roomXIndex, int roomYI
                 // shop items
                 currentLevelData.shopItemSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE,
                                                  roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE });
+            }break;
+
+            case 'R': {
+                CreateShopKeeperNPC({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE, roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE });
             }break;
 
             case '2': {

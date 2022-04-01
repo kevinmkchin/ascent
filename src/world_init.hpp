@@ -37,3 +37,5 @@ Entity CreateShopItem(vec2 position, u8 shopItemIndex);
 Entity createCoins(vec2 position);
 
 Entity CreateProximityWorldText(vec2 pos, float triggerRadius, u32 size, const char* text);
+
+Entity CreateShopKeeperNPC(vec2 position);

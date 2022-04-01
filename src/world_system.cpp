@@ -181,6 +181,26 @@ WorldSystem::WorldSystem()
             }
         });
 
+    get_console().bind_cmd("gotoshop",
+        [this](std::istream& is, std::ostream& os){
+            if(this->currentGameMode == MODE_INGAME)
+            {
+                if(currentLevelData.shopItemSpawns.empty())
+                {
+                    console_printf("There is no shop...\n");
+                }
+                else
+                {
+                    auto& playerTransform = registry.transforms.get(this->player);
+                    playerTransform.position = currentLevelData.shopItemSpawns[0];
+                }
+            }
+            else
+            {
+                console_printf("'gotoshop' command only works while in game...\n");
+            }
+        });
+
     get_console().bind_cmd("godmode",
         [this](std::istream& is, std::ostream& os){
             if(this->currentGameMode == MODE_INGAME)
@@ -311,7 +331,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 void WorldSystem::SpawnLevelEntities() {
     // Create player
     player = createPlayer(currentLevelData.playerStart);
-    CreateProximityWorldText(currentLevelData.playerStart, 32.f, 8, "Hello World!");
+    CreateProximityWorldText(currentLevelData.playerStart, 32.f, 8, "Make your way to the top of the mountain!");
 
     if (currentDifficulty == DIFFICULTY_EASY) {
         registry.healthBar.get(player).maxHealth += 50;

@@ -956,3 +956,52 @@ Entity CreateProximityWorldText(vec2 pos, float triggerRadius, u32 size, const c
 
     return entity;
 }
+
+Entity CreateShopKeeperNPC(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    vec2 dimensions = { 16, 16 };
+    transform.position = position;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                0,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::GOBLIN_BOMBER,
+                true,
+                false,
+                true,
+                96,
+                64,
+                0,
+                0,
+                0.f,
+                {
+                // idle
+                {
+                    4,
+                    12,
+                    100.f * 4.f
+                }
+            },
+        }
+    );
+
+    const char* shopKeeperNPCLines[] = 
+    {
+        "Come on in!\n",
+        "Buy something will ya?\n",
+        "Welcome to Tim's Discount Prices!\n",
+        "It's too dangerous to go alone.\n"
+    };
+    int pick = rand()%(sizeof(shopKeeperNPCLines)/(sizeof(char*)));
+
+    registry.proximityTexts.insert(entity, { vec2(position.x-32.f, position.y-16.f), 80.f, 8, std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.") });
+
+    return entity;
+}
+
