@@ -1,5 +1,6 @@
 #include "item_holder_system.hpp"
 #include "components.hpp"
+#include "physics_system.hpp"
 
 INTERNAL float itemGravity = 500.f;
 INTERNAL float itemThrowUpwardVelocity = -125.f;
@@ -16,25 +17,39 @@ INTERNAL void makeItemDisappear(Entity item)
     registry.transforms.get(item).position = {0, 0};
 }
 
+INTERNAL void nextCurrentItem(HolderComponent& holderComponent)
+{
+    holderComponent.current_item++;
+    holderComponent.current_item = holderComponent.current_item % holderComponent.carried_items.size();
+
+}
+
+INTERNAL void previousCurrentItem(HolderComponent& holderComponent)
+{
+    holderComponent.current_item--;
+    if (holderComponent.current_item < 0) {
+        holderComponent.current_item = holderComponent.carried_items.size() - 1;
+    }
+}
+
 INTERNAL void addToInventory(HolderComponent& holderComponent, Entity itemToPickUp)
 {
     for (Entity item : holderComponent.carried_items)
     {
-        if (item.GetTag() == itemToPickUp.GetTag())
+        if (item.GetTagAndID() == itemToPickUp.GetTagAndID())
         {
             return;
         }
     }
 
-    if (holderComponent.current_item >= 0)
+    if (holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        makeItemDisappear(holderComponent.carried_items.at(holderComponent.current_item));
+        makeItemDisappear(holderComponent.held_weapon);
     }
 
     holderComponent.carried_items.push_back(itemToPickUp);
-    holderComponent.current_item++;
+    nextCurrentItem(holderComponent);
 }
-
 
 INTERNAL Entity createArrow(vec2 position)
 {
@@ -87,33 +102,33 @@ INTERNAL Entity createArrow(vec2 position)
 }
 
 
-INTERNAL void ResolvePickUp(HolderComponent& holderComponent)
+INTERNAL void ResolvePickUp(HolderComponent& holderComponent, Entity holder)
 {
     if(holderComponent.want_to_pick_up && holderComponent.near_weapon.GetTagAndID() != 0 && (registry.items.has(holderComponent.near_weapon) || registry.weapons.has(holderComponent.near_weapon)))
     {
-        addToInventory(holderComponent, holderComponent.near_weapon);
+        if (registry.colliders.has(holder) && registry.colliders.has(holderComponent.near_weapon) && CheckCollision(registry.colliders.get(holder), registry.colliders.get(holderComponent.near_weapon)).collides)
+        {
+            addToInventory(holderComponent, holderComponent.near_weapon);
 
-        Entity held_weapon = holderComponent.carried_items.at(holderComponent.current_item);
+            Entity held_weapon = holderComponent.near_weapon;
 
-        Item& item = registry.items.get(held_weapon);
-        item.collidableWithEnvironment = false;
-        item.grounded = false;
+            Item& item = registry.items.get(held_weapon);
+            item.collidableWithEnvironment = false;
+            item.grounded = false;
 
-        MotionComponent& motion = registry.motions.get(held_weapon);
-        motion.velocity = {0.f, 0.f};
-        motion.acceleration = {0.f, 0.f};
+            MotionComponent& motion = registry.motions.get(held_weapon);
+            motion.velocity = {0.f, 0.f};
+            motion.acceleration = {0.f, 0.f};
+        }
     }
+    holderComponent.near_weapon = Entity();
 }
 
 INTERNAL void ResolveDrop(HolderComponent& holderComponent)
 {
-    if (holderComponent.current_item < 0) {
-        return;
-    }
-
-    if(holderComponent.want_to_drop)
+    if(holderComponent.want_to_drop && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        Entity held_weapon = holderComponent.carried_items.at(holderComponent.current_item);
+        Entity held_weapon = holderComponent.held_weapon;
 
         Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
@@ -128,19 +143,15 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
         motion.acceleration.y = itemGravity;
 
         holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
-        holderComponent.current_item--;
+        previousCurrentItem(holderComponent);
     }
 }
 
 INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& holderMotion)
 {
-    if (holderComponent.current_item < 0) {
-        return;
-    }
-
-    if(holderComponent.want_to_throw && holderComponent.near_weapon.GetTagAndID() == 0)
+    if(holderComponent.want_to_throw && holderComponent.near_weapon.GetTagAndID() == 0 && holderComponent.held_weapon.GetTagAndID() != 0)
     {
-        Entity held_weapon = holderComponent.carried_items.at(holderComponent.current_item);
+        Entity held_weapon = holderComponent.held_weapon;
 
         Item& item = registry.items.get(held_weapon);
         item.collidableWithEnvironment = true;
@@ -164,19 +175,15 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
         }
 
         holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
-        holderComponent.current_item--;
+        previousCurrentItem(holderComponent);
     }
 }
 
 INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
 {
-    if (holderComponent.current_item < 0) {
-        return;
-    }
+    Entity held_weapon = holderComponent.held_weapon;
 
-    Entity held_weapon = holderComponent.carried_items.at(holderComponent.current_item);
-
-    if(holderComponent.want_to_shoot && registry.weapons.has(held_weapon))
+    if(holderComponent.want_to_shoot && registry.weapons.has(held_weapon) && holderComponent.held_weapon.GetTagAndID() != 0)
     {
         Weapon& weapon = registry.weapons.get(held_weapon);
 
@@ -227,10 +234,13 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
 INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
 {
     if (holderComponent.current_item < 0) {
+        holderComponent.held_weapon = Entity();
         return;
     }
 
-    Entity weapon = holderComponent.carried_items.at(holderComponent.current_item);
+    holderComponent.held_weapon = holderComponent.carried_items.at(holderComponent.current_item);
+
+    Entity weapon = holderComponent.held_weapon;
     TransformComponent& weaponTransform = registry.transforms.get(weapon);
     weaponTransform.position = holderTransform.position;
     if(holderMotion.facingRight)
@@ -247,19 +257,16 @@ INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionCompon
 
 INTERNAL void ResolveCycle(HolderComponent& holderComponent)
 {
-    if (holderComponent.current_item < 0 || holderComponent.carried_items.size() < 2) {
+    if (holderComponent.held_weapon.GetTagAndID() == 0 || holderComponent.carried_items.size() < 2) {
         return;
     }
 
     if (holderComponent.want_to_cycle_right) {
-        makeItemDisappear(holderComponent.carried_items.at(holderComponent.current_item));
-        holderComponent.current_item = (holderComponent.current_item + 1) % holderComponent.carried_items.size();
+        makeItemDisappear(holderComponent.held_weapon);
+        nextCurrentItem(holderComponent);
     } else if (holderComponent.want_to_cycle_left) {
-        makeItemDisappear(holderComponent.carried_items.at(holderComponent.current_item));
-        holderComponent.current_item -= 1;
-        if (holderComponent.current_item < 0) {
-            holderComponent.current_item = holderComponent.carried_items.size() - 1;
-        }
+        makeItemDisappear(holderComponent.held_weapon);
+        previousCurrentItem(holderComponent);
     }
 }
 
@@ -272,9 +279,9 @@ void ItemHolderSystem::Step(float deltaTime)
         MotionComponent& holderMotion = registry.motions.get(holder);
         TransformComponent& holderTransform = registry.transforms.get(holder);
 
-        if (holderComponent.current_item >= 0)
+        if (holderComponent.held_weapon.GetTagAndID() != 0)
         {
-            Entity held_weapon = holderComponent.carried_items.at(holderComponent.current_item);
+            Entity held_weapon = holderComponent.held_weapon;
 
             if (registry.weapons.has(held_weapon))
             {
@@ -283,9 +290,9 @@ void ItemHolderSystem::Step(float deltaTime)
             }
         }
 
-        ResolvePickUp(holderComponent);
-//        ResolveDrop(holderComponent);
-//        ResolveThrow(holderComponent, holderMotion);
+        ResolvePickUp(holderComponent, holder);
+        ResolveDrop(holderComponent);
+        ResolveThrow(holderComponent, holderMotion);
         ResolveShoot(holderComponent, holderMotion, holderTransform);
         ResolveCycle(holderComponent);
         ResolveItemMovement(holderComponent, holderMotion, holderTransform);

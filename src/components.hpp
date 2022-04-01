@@ -347,6 +347,7 @@ struct HolderComponent
 {
     int current_item = -1;
     Entity near_weapon = Entity();
+    Entity held_weapon = Entity();
 
     std::vector<Entity> carried_items;
 

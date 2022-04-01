@@ -763,12 +763,9 @@ void WorldSystem::handle_collisions() {
         if (registry.holders.has(entity)) {
             HolderComponent &holder = registry.holders.get(entity);
 
-            if (entity_other != 0 && registry.items.has(entity_other) && !registry.playerProjectiles.has(entity_other) && (holder.current_item < 0 || holder.carried_items.at(holder.current_item) != entity_other))
+            if (entity_other.GetTagAndID() != 0 && entity_other != holder.held_weapon && registry.items.has(entity_other) && !registry.playerProjectiles.has(entity_other))
             {
                 holder.near_weapon = entity_other;
-            } else {
-                // Assign to fake entity
-                holder.near_weapon = Entity();
             }
         }
 

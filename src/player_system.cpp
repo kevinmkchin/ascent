@@ -406,7 +406,7 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
     }
 
     HolderComponent& holder = registry.holders.get(playerEntity);
-    bool hasRangedWeapon = holder.current_item >= 0 && registry.weapons.has(holder.carried_items.at(holder.current_item)) && registry.weapons.get(holder.carried_items.at(holder.current_item)).ranged;
+    bool hasRangedWeapon =  registry.weapons.has(holder.held_weapon) && registry.weapons.get(holder.held_weapon).ranged;
 
     if(playerMeleeAttackCooldownTimer <= 0.f && Input::GameAttackHasBeenPressed() && !hasRangedWeapon)
     {
