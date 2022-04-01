@@ -140,7 +140,7 @@ private:
 
     void CheckCollisionWithBlockable(Entity entity_resolver, Entity entity_other, bool bounce_x = false, bool is_item = false);
 
-    void UpdateWorldTexts();
+    void UpdateWorldTexts(float dt);
 
 	// OpenGL window handle
 	SDL_Window* window;

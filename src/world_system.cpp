@@ -331,7 +331,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 void WorldSystem::SpawnLevelEntities() {
     // Create player
     player = createPlayer(currentLevelData.playerStart);
-    CreateProximityWorldText(currentLevelData.playerStart, 32.f, 8, "Make your way to the top of the mountain!");
+    CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your way to the top of the mountain!");
 
     if (currentDifficulty == DIFFICULTY_EASY) {
         registry.healthBar.get(player).maxHealth += 50;
@@ -547,7 +547,7 @@ bool WorldSystem::step(float deltaTime) {
         }
     }
 
-    UpdateWorldTexts();
+    UpdateWorldTexts(deltaTime);
 
 //  float min_counter_ms = 3000.f;
 //	for (Entity entity : registry.deathTimers.entities) {
@@ -928,7 +928,7 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
     }
 }
 
-void WorldSystem::UpdateWorldTexts()
+void WorldSystem::UpdateWorldTexts(float dt)
 {
     if(!registry.transforms.has(player))
     {
@@ -941,7 +941,32 @@ void WorldSystem::UpdateWorldTexts()
         ProximityTextComponent& proximText = registry.proximityTexts.components[i];
         if(length(proximText.triggerPosition - playerTransform.position) < proximText.triggerRadius)
         {
-            uiSystem->PushWorldText(proximText.textPosition, proximText.text, proximText.textSize);
+            proximText.__bCurrentlyTriggered = true;
+
+            if(proximText.bTyped)
+            {
+                proximText.__typingTimer += dt;
+                if(proximText.__typingTimer > proximText.secondsBetweenTypedCharacters)
+                {
+                    proximText.__typingTimer = 0.f;
+                    if(proximText.__currentTypedTextBuffer.size() < proximText.text.size())
+                    {
+                        char cat = proximText.text.at(proximText.__currentTypedTextBuffer.size());
+                        proximText.__currentTypedTextBuffer.push_back(cat);
+                    }
+                }
+            }
+            else
+            {
+                proximText.__currentTypedTextBuffer = proximText.text;
+            }
+
+            uiSystem->PushWorldText(proximText.textPosition, proximText.__currentTypedTextBuffer, proximText.textSize);
+        }
+        else
+        {
+            proximText.__bCurrentlyTriggered = false;
+            proximText.__currentTypedTextBuffer = "";
         }
     }
 }
