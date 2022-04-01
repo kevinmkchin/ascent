@@ -964,6 +964,7 @@ Entity CreateShopKeeperNPC(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     vec2 dimensions = { 16, 16 };
     transform.position = position;
+    transform.center = dimensions/2.f;
 
     registry.sprites.insert(
         entity,
