@@ -140,6 +140,8 @@ private:
 
     void DrawBackground(TEXTURE_ASSET_ID texId, float offset);
 
+    void DrawWorldText(const mat3& projection);
+
     void DrawUI();
 
 	void FinalDrawToScreen();

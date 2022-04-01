@@ -392,8 +392,17 @@ void RenderSystem::Draw(float elapsed_ms)
         BatchDrawAllSprites(sortedSpriteArray, projection_2D);
     }
 
-
     // DRAW WORLD TEXT
+    DrawWorldText(projection_2D);
+
+    // DRAW UI
+    DrawUI();
+
+    FinalDrawToScreen(); // Truely render to the screen
+}
+
+void RenderSystem::DrawWorldText(const mat3& projection)
+{
     vtxt_setflags(VTXT_CREATE_INDEX_BUFFER|VTXT_USE_CLIPSPACE_COORDS|VTXT_FLIP_Y);
     vtxt_backbuffersize(2, 2);
     for(WorldText& wt : worldTextsThisFrame)
@@ -413,7 +422,7 @@ void RenderSystem::Draw(float elapsed_ms)
 
         glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
         GLuint projMatrix_loc = glGetUniformLocation(currProgram, "projectionMatrix");
-        glUniformMatrix3fv(projMatrix_loc, 1, false, (float*)&projection_2D);
+        glUniformMatrix3fv(projMatrix_loc, 1, false, (float*)&projection);
         GLuint viewMatrix_loc = glGetUniformLocation(currProgram, "viewMatrix");
         glUniformMatrix3fv(viewMatrix_loc, 1, false, (float*)&cameraTransform.mat);
         GLuint modelMatrix_loc = glGetUniformLocation(currProgram, "modelMatrix");
@@ -427,12 +436,6 @@ void RenderSystem::Draw(float elapsed_ms)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     worldTextsThisFrame.clear();
-
-
-    // DRAW UI
-    DrawUI();
-
-    FinalDrawToScreen(); // Truely render to the screen
 }
 
 void RenderSystem::DrawUI()

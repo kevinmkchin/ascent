@@ -582,11 +582,25 @@ vtxt_new_line(int x, vtxt_font* font)
     _vtxt_cursor_x = x;
     if(_vtxt_config & VTXT_NEWLINE_ABOVE)
     {
-        _vtxt_cursor_y -= (int) (-font->descender + font->linegap + font->ascender);
+        if(_vtxt_config & VTXT_FLIP_Y)
+        {
+            _vtxt_cursor_y += (int) (-font->descender + font->linegap + font->ascender);
+        }
+        else
+        {
+            _vtxt_cursor_y -= (int) (-font->descender + font->linegap + font->ascender);
+        }
     }
     else
     {
-        _vtxt_cursor_y += (int) (-font->descender + font->linegap + font->ascender);
+        if(_vtxt_config & VTXT_FLIP_Y)
+        {
+            _vtxt_cursor_y -= (int) (-font->descender + font->linegap + font->ascender);
+        }
+        else
+        {
+            _vtxt_cursor_y += (int) (-font->descender + font->linegap + font->ascender);
+        }
     }
 }
 
