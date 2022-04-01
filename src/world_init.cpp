@@ -1000,7 +1000,7 @@ Entity CreateShopKeeperNPC(vec2 position)
     };
     int pick = rand()%(sizeof(shopKeeperNPCLines)/(sizeof(char*)));
 
-    registry.proximityTexts.insert(entity, { vec2(position.x-32.f, position.y-16.f), 80.f, 8, std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.") });
+    registry.proximityTexts.insert(entity, { vec2(position.x, position.y), 80.f, 8, std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.") });
 
     return entity;
 }
