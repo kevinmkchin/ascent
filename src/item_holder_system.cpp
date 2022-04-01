@@ -14,6 +14,7 @@ ItemHolderSystem::ItemHolderSystem()
 
 INTERNAL void makeItemDisappear(Entity item)
 {
+    //TODO: Make another way to do this
     registry.transforms.get(item).position = {0, 0};
 }
 
