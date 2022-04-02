@@ -265,7 +265,7 @@ void WorldSystem::StartNewRun() {
     u32 seed = rand() % 1000000000;
     SetRandomizerSeed(seed);
 
-    StartNewStage(CHAPTER_ONE_STAGE_ONE);
+    StartNewStage(CHAPTER_TUTORIAL);
 }
 
 void WorldSystem::HelpMode() {
@@ -284,7 +284,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     auto playerHealthComponent = HealthBar();
     auto playerGoldComponent = GoldBar();
     auto playerActiveMutationsComponent = ActiveMutationsComponent();
-    if (stage != CHAPTER_ONE_STAGE_ONE) {
+    if (stage > CHAPTER_ONE_STAGE_ONE) {
         playerPlayerComponent = registry.players.get(player);
         playerHealthComponent = registry.healthBar.get(player);
         playerGoldComponent = registry.goldBar.get(player);
@@ -320,7 +320,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     SpawnLevelEntities();
 
 // LOAD PLAYER DATA
-    if (stage != CHAPTER_ONE_STAGE_ONE) {
+    if (stage > CHAPTER_ONE_STAGE_ONE) {
         registry.players.get(player) = playerPlayerComponent;
         registry.healthBar.get(player) = playerHealthComponent;
         registry.goldBar.get(player) = playerGoldComponent;
@@ -339,12 +339,13 @@ void WorldSystem::SpawnLevelEntities() {
         registry.players.get(player).attackPower += 10;
     }
 
-    createSword(currentLevelData.playerStart);
 
+    createSword(currentLevelData.playerStart);
     createBow(currentLevelData.playerStart + vec2({10.f, 0}));
 
+
     // Create enemies
-    for (vec2 groundEnemySpawn: currentLevelData.groundMonsterSpawns) {
+    for (vec2 groundEnemySpawn : currentLevelData.groundMonsterSpawns) {
 
         int spawnType = rand() % 2;
         
@@ -364,13 +365,16 @@ void WorldSystem::SpawnLevelEntities() {
                 CreateWormEnemy(groundEnemySpawn);
             }
         }
-        else {
+        else if (currentGameStage == CHAPTER_THREE_STAGE_ONE) {
             if (spawnType == 0) {
                 CreateGoblinBomberEnemy(groundEnemySpawn);
             }
             else {
                 CreateMushroomEnemy(groundEnemySpawn);
             }
+        }
+        else if (currentGameStage == CHAPTER_TUTORIAL) {
+            CreateGoblinEnemy(groundEnemySpawn);
         }
     }
     for (vec2 flyingEnemySpawn: currentLevelData.flyingMonsterSpawns) {
@@ -455,9 +459,9 @@ void WorldSystem::unloadAllContent() {
 
 std::vector<std::vector<int>> WorldSystem::levelForAI() {
     std::vector<std::vector<int>> newLevelTiles;
-    for (int i = 0; i < NUMTILESWIDE; i++) {
+    for (int i = 0; i < levelTiles.size(); i++) {
         std::vector<int> currentLayer;
-        for (int j = 0; j < NUMTILESTALL; j++) {
+        for (int j = 0; j < levelTiles[0].size(); j++) {
             currentLayer.push_back((levelTiles[i][j] != 0) ? 1 : 0);
         }
         newLevelTiles.push_back(currentLayer);
@@ -856,12 +860,6 @@ void WorldSystem::handle_collisions() {
     // Remove all collisions from this simulation Step
     registry.collisionEvents.clear();
 
-    if(bGoToNextStage)
-    {
-        StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
-    }
-
-
     if (playerHealth.health <= 0.f && !playerComponent.bDead) {
         // DEAD
         if (Mix_PlayChannel(-1, player_death_sound, 0) == -1) {
@@ -870,6 +868,11 @@ void WorldSystem::handle_collisions() {
         playerComponent.bDead = true;
         darkenGameFrame = true;
         *GlobalPauseForSeconds = 3.f;
+    }
+
+    if(bGoToNextStage)
+    {
+        StartNewStage((GAMELEVELENUM) ((u8) currentGameStage + 1));
     }
 }
 
