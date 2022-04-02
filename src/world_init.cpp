@@ -420,8 +420,8 @@ Entity CreateMushroomEnemy(vec2 position)
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
 
-    collider.collision_pos = dimensions / 2.f;
-    collider.collision_neg = dimensions / 2.f;
+    collider.collision_pos = { 7, 8 };
+    collider.collision_neg = { 7, 6 };
 
     float maxMoveSpeed = 64.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
