@@ -311,7 +311,14 @@ void PlayerSystem::CheckIfLevelUp()
     }
 }
 
-INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMotion, SpriteComponent& playerSprite) {
+INTERNAL void HandleDamageCooldown(float deltaTime, Player& playerComponent) {
+    if (playerComponent.damageCooldown > 0.f)
+    {
+        playerComponent.damageCooldown -= deltaTime;
+    }
+}
+
+INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMotion, SpriteComponent& playerSprite, Player& playerComponent) {
 
     /* NOTES:
     Row 1: Death animation
@@ -337,6 +344,7 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
     6 - Jump Down Right
     7 - Jump Up Left
     8 - Jump Up Right
+    9 - Taking damage
 
     */
 
@@ -351,7 +359,13 @@ INTERNAL void HandleSpriteSheetFrame(float deltaTime, MotionComponent& playerMot
     }
 
     int state;
-    if (y_velocity != 0.f) {
+
+    if (playerComponent.damageCooldown > 0.f) {
+        playerSprite.selected_animation = 4;
+        state = 9;
+        playerSprite.current_frame = (player_animation_state == state) ? playerSprite.current_frame : 0;
+    }
+    else if (y_velocity != 0.f) {
         if (bJumping && y_velocity > 0.f) {
             // jump up
             playerSprite.selected_animation = 3;
@@ -538,6 +552,7 @@ void PlayerSystem::Step(float deltaTime)
 {
     if(registry.players.entities.empty()) { return; }
 
+    Player& playerComponent = registry.players.get(playerEntity);
     MotionComponent& playerMotion = registry.motions.get(playerEntity);
     SpriteComponent& playerSprite = registry.sprites.get(playerEntity);
     TransformComponent& playerTransform = registry.transforms.get(playerEntity);
@@ -550,5 +565,6 @@ void PlayerSystem::Step(float deltaTime)
     HandleBasicMovementInput(playerMotion, *playerComponentPtr);
     HandleItemInteractionInput(playerHolder);
     ResolveComplexMovement(deltaTime, playerMotion, playerComponentPtr);
-    HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite);
+    HandleDamageCooldown(deltaTime, playerComponent);
+    HandleSpriteSheetFrame(deltaTime, playerMotion, playerSprite, playerComponent);
 }

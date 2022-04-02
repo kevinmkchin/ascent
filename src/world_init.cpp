@@ -92,6 +92,11 @@ Entity createPlayer(vec2 position)
                     3,
                     56,
                     100.f * 3.f
+                },
+                { // take damage
+                    3,
+                    64,
+                    100.f * 3.f
                 }
             },
         }
