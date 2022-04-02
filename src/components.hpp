@@ -168,6 +168,7 @@ struct Player
     i16 meleeAttackRange = 16;
     i16 meleeAttackArc = 12;
     float meleeAttackCooldown = 0.8f;   // TODO: maybe make this a percentage decrease than a flat number?
+    float damageCooldown = 0.0f;
 
     i32 maxJumps = 1;
 };
