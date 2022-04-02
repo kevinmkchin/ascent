@@ -161,7 +161,7 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
         MotionComponent& motion = registry.motions.get(held_weapon);
         motion.acceleration.y = itemGravity;
 
-        if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
+        if (registry.weapons.has(held_weapon) && !registry.weapons.get(held_weapon).ranged && !registry.activePlayerProjectiles.has(held_weapon))
         {
             registry.activePlayerProjectiles.emplace(held_weapon);
         }
@@ -182,54 +182,80 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 
 INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
 {
+    if (!holderComponent.want_to_melee && !holderComponent.want_to_shoot)
+    {
+        return;
+    }
+
     Entity held_weapon = holderComponent.held_weapon;
 
-    if(holderComponent.want_to_shoot && registry.weapons.has(held_weapon) && holderComponent.held_weapon.GetTagAndID() != 0)
+    if(registry.weapons.has(held_weapon) && holderComponent.held_weapon.GetTagAndID() != 0)
     {
         Weapon& weapon = registry.weapons.get(held_weapon);
 
-        if (weapon.cooldown > 0)
+        if (holderComponent.want_to_shoot && weapon.ranged)
         {
-            return;
-        }
-
-        weapon.cooldown = bowCooldown;
-
-        Entity projectile;
-
-        switch (held_weapon.GetTag()) {
-            case (TAG_BOW):
-            {
-                projectile = createArrow(holderTransform.position);
-                SpriteComponent& sprite = registry.sprites.get(held_weapon);
-                sprite.selected_animation = 0;
-                sprite.animations[0].played = false;
-                break;
-            }
-            default:
+            if (weapon.cooldown > 0)
             {
                 return;
             }
+
+            weapon.cooldown = bowCooldown;
+
+            Entity projectile;
+
+            switch (held_weapon.GetTag()) {
+                case (TAG_BOW):
+                {
+                    projectile = createArrow(holderTransform.position);
+                    SpriteComponent& sprite = registry.sprites.get(held_weapon);
+                    sprite.selected_animation = 0;
+                    sprite.animations[0].played = false;
+                    break;
+                }
+                default:
+                {
+                    return;
+                }
+            }
+
+            Item& item = registry.items.get(projectile);
+            item.collidableWithEnvironment = true;
+            item.grounded = false;
+
+            MotionComponent& motion = registry.motions.get(projectile);
+            motion.acceleration.y = itemGravity;
+
+            if(holderMotion.facingRight)
+            {
+                motion.velocity = {itemShootSideVelocity, itemThrowUpwardVelocity};
+                registry.sprites.get(projectile).reverse = false;
+            }
+            else
+            {
+                motion.velocity = {-itemShootSideVelocity, itemThrowUpwardVelocity};
+                registry.sprites.get(projectile).reverse = true;
+            }
         }
-
-        Item& item = registry.items.get(projectile);
-        item.collidableWithEnvironment = true;
-        item.grounded = false;
-
-        MotionComponent& motion = registry.motions.get(projectile);
-        motion.acceleration.y = itemGravity;
-
-        if(holderMotion.facingRight)
+        else if (holderComponent.want_to_melee && !weapon.ranged)
         {
-            motion.velocity = {itemShootSideVelocity, itemThrowUpwardVelocity};
-            registry.sprites.get(projectile).reverse = false;
-        }
-        else
-        {
-            motion.velocity = {-itemShootSideVelocity, itemThrowUpwardVelocity};
-            registry.sprites.get(projectile).reverse = true;
+            switch (held_weapon.GetTag()) {
+                case (TAG_SWORD):
+                {
+                    SpriteComponent& sprite = registry.sprites.get(held_weapon);
+                    sprite.selected_animation = 0;
+                    sprite.animations[0].played = false;
+                    break;
+                }
+                default:
+                {
+                    return;
+                }
+            }
         }
     }
+    holderComponent.want_to_shoot = false;
+    holderComponent.want_to_melee = false;
 }
 
 INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
