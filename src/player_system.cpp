@@ -519,6 +519,8 @@ void PlayerSystem::PlayerAttackPrePhysicsStep(float deltaTime)
             attackBox
         );
 
+        registry.holders.get(playerEntity).want_to_melee = true;
+
         if(Mix_PlayChannel(-1, world->sword_sound, 0) == -1) 
         {
             printf("Mix_PlayChannel: %s\n",Mix_GetError());

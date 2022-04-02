@@ -655,7 +655,7 @@ Entity createSword(vec2 position)
     registry.weapons.emplace(entity);
     registry.items.emplace(entity);
 
-    vec2 dimensions = { 15, 20 };
+    vec2 dimensions = { 25, 28 };
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
@@ -672,7 +672,24 @@ Entity createSword(vec2 position)
                     dimensions,
                     15,
                     EFFECT_ASSET_ID::SPRITE,
-                    TEXTURE_ASSET_ID::SWORD
+                    TEXTURE_ASSET_ID::SWORD,
+                    true,
+                    false,
+                    true,
+                    75,
+                    28,
+                    0,
+                    0,
+                    0.f,
+                    {
+                            {
+                                    3,
+                                    0,
+                                    200.f,
+                                    false,
+                                    true
+                            }
+                    },
             }
     );
 

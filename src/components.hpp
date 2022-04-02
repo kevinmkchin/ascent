@@ -87,7 +87,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("fire.png"),
         textures_path("lob_projectile.png"),
         textures_path("player.png"),
-        textures_path("sword.png"),
+        textures_path("sword_swing.png"),
         textures_path("bg_layer1.png"),
         textures_path("bg_layer2.png"),
         textures_path("bg_layer3.png"),
@@ -360,6 +360,7 @@ struct HolderComponent
     bool want_to_drop = false;
     bool want_to_throw = false;
     bool want_to_shoot = false;
+    bool want_to_melee = false;
     bool want_to_cycle_left = false;
     bool want_to_cycle_right = false;
 };
