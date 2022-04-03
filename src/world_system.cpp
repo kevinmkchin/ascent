@@ -402,6 +402,7 @@ void WorldSystem::loadAllContent() {
     player_jump_on_enemy_sound = Mix_LoadWAV(audio_path("player_jump_on_enemy_sound.wav").c_str());
     coins_pickup_sound = Mix_LoadWAV(audio_path("coins_pickup.wav").c_str());
     points_pickup_sound = Mix_LoadWAV(audio_path("points_pickup.wav").c_str());
+    bow_and_arrow_sound = Mix_LoadWAV(audio_path("bow_and_arrow.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
         || sword_sound == nullptr
@@ -414,7 +415,8 @@ void WorldSystem::loadAllContent() {
         || blip_select_sound == nullptr
         || player_jump_on_enemy_sound == nullptr
         || coins_pickup_sound == nullptr
-        || points_pickup_sound == nullptr) {
+        || points_pickup_sound == nullptr
+        || bow_and_arrow_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
@@ -451,6 +453,8 @@ void WorldSystem::unloadAllContent() {
         Mix_FreeChunk(coins_pickup_sound);
     if (points_pickup_sound != nullptr)
         Mix_FreeChunk(points_pickup_sound);
+    if (bow_and_arrow_sound != nullptr)
+        Mix_FreeChunk(bow_and_arrow_sound);
     Mix_CloseAudio();
 
     // Destroy all created components

@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
     ui.Init(&renderer, &world, &playerSystem);
     ui.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     playerSystem.Init(&world, &ui);
+    itemHolderSystem.Init(&world);
 
     LoadFont(&g_font_handle_c64, &g_font_atlas_c64, font_path("SourceCodePro.ttf").c_str(), 20, false); //CONSOLE_TEXT_SIZE
     console_initialize(&g_font_handle_c64, g_font_atlas_c64, &renderer);

@@ -1,6 +1,7 @@
 #include "item_holder_system.hpp"
 #include "components.hpp"
 #include "physics_system.hpp"
+#include "world_system.hpp"
 
 INTERNAL float itemGravity = 500.f;
 INTERNAL float itemThrowUpwardVelocity = -125.f;
@@ -11,6 +12,11 @@ INTERNAL float bowCooldown = 0.5;
 
 ItemHolderSystem::ItemHolderSystem()
 = default;
+
+void ItemHolderSystem::Init(WorldSystem* world_sys_arg)
+{
+    world = world_sys_arg;
+}
 
 INTERNAL void makeItemDisappear(Entity item)
 {
@@ -180,7 +186,7 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
     }
 }
 
-INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
+void ItemHolderSystem::ResolveShoot(HolderComponent& holderComponent, MotionComponent& holderMotion, TransformComponent& holderTransform)
 {
     if (!holderComponent.want_to_melee && !holderComponent.want_to_shoot)
     {
@@ -211,6 +217,10 @@ INTERNAL void ResolveShoot(HolderComponent& holderComponent, MotionComponent& ho
                     SpriteComponent& sprite = registry.sprites.get(held_weapon);
                     sprite.selected_animation = 0;
                     sprite.animations[0].played = false;
+
+                    if (Mix_PlayChannel(-1, world->bow_and_arrow_sound, 0) == -1) {
+                        printf("Mix_PlayChannel: %s\n", Mix_GetError());
+                    }
                     break;
                 }
                 default:
