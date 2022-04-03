@@ -282,8 +282,8 @@ INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
     const bool bAttackKeyPressed = Input::GameAttackHasBeenPressed() && playerHolder.current_item >= 0;
     const bool bCycleLeftKeyPressed = Input::GameCycleItemLeftBeenPressed() && playerHolder.carried_items.size() > 1;
     const bool bCycleRightKeyPressed = Input::GameCycleItemRightBeenPressed() && playerHolder.carried_items.size() > 1;
-    const bool bUpKeyPressed = Input::GameUpIsPressed() && bAttackKeyPressed;
-    const bool bDownKeyPressed = Input::GameDownIsPressed() && bAttackKeyPressed;
+    const bool bUpKeyPressed = Input::GameUpIsPressed();
+    const bool bDownKeyPressed = Input::GameDownIsPressed();
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;

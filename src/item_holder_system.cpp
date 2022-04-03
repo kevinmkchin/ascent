@@ -182,6 +182,15 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
         {
             motion.velocity = {-itemThrowSideVelocity, itemNormalYVelocity};
         }
+        if (holderComponent.want_to_shoot_up)
+        {
+            motion.velocity.x *= 0.7;
+            motion.velocity.y = itemUpwardsYVelocity;
+        } else if (holderComponent.want_to_shoot_down)
+        {
+            motion.velocity.x *= 0.7;
+            motion.velocity.y = itemDownwardsYVelocity;
+        }
 
         holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
         previousCurrentItem(holderComponent);
