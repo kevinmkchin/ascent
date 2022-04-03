@@ -655,7 +655,7 @@ Entity createSword(vec2 position)
     registry.weapons.emplace(entity);
     registry.items.emplace(entity);
 
-    vec2 dimensions = { 25, 28 };
+    vec2 dimensions = { 17, 19 };
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
@@ -676,8 +676,8 @@ Entity createSword(vec2 position)
                     true,
                     false,
                     true,
-                    75,
-                    28,
+                    51,
+                    19,
                     0,
                     0,
                     0.f,
