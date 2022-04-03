@@ -282,6 +282,8 @@ INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
     const bool bAttackKeyPressed = Input::GameAttackHasBeenPressed() && playerHolder.current_item >= 0;
     const bool bCycleLeftKeyPressed = Input::GameCycleItemLeftBeenPressed() && playerHolder.carried_items.size() > 1;
     const bool bCycleRightKeyPressed = Input::GameCycleItemRightBeenPressed() && playerHolder.carried_items.size() > 1;
+    const bool bUpKeyPressed = Input::GameUpIsPressed() && bAttackKeyPressed;
+    const bool bDownKeyPressed = Input::GameDownIsPressed() && bAttackKeyPressed;
 
     playerHolder.want_to_pick_up = bPickUpKeyPressed;
     playerHolder.want_to_drop = bDropKeyPressed;
@@ -289,6 +291,8 @@ INTERNAL void HandleItemInteractionInput(HolderComponent& playerHolder)
     playerHolder.want_to_shoot = bAttackKeyPressed;
     playerHolder.want_to_cycle_left = bCycleLeftKeyPressed;
     playerHolder.want_to_cycle_right = bCycleRightKeyPressed;
+    playerHolder.want_to_shoot_up = bUpKeyPressed;
+    playerHolder.want_to_shoot_down = bDownKeyPressed;
 }
 #pragma endregion
 

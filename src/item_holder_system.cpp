@@ -4,7 +4,9 @@
 #include "world_system.hpp"
 
 INTERNAL float itemGravity = 500.f;
-INTERNAL float itemThrowUpwardVelocity = -125.f;
+INTERNAL float itemNormalYVelocity = -50.f;
+INTERNAL float itemUpwardsYVelocity = -250.f;
+INTERNAL float itemDownwardsYVelocity = 250.f;
 INTERNAL float itemThrowSideVelocity = 150.f;
 INTERNAL float itemShootSideVelocity = 250.f;
 
@@ -174,11 +176,11 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
 
         if(holderMotion.facingRight)
         {
-            motion.velocity = {itemThrowSideVelocity, itemThrowUpwardVelocity};
+            motion.velocity = {itemThrowSideVelocity, itemNormalYVelocity};
         }
         else
         {
-            motion.velocity = {-itemThrowSideVelocity, itemThrowUpwardVelocity};
+            motion.velocity = {-itemThrowSideVelocity, itemNormalYVelocity};
         }
 
         holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
@@ -238,14 +240,24 @@ void ItemHolderSystem::ResolveShoot(HolderComponent& holderComponent, MotionComp
 
             if(holderMotion.facingRight)
             {
-                motion.velocity = {itemShootSideVelocity, itemThrowUpwardVelocity};
+                motion.velocity = {itemShootSideVelocity, itemNormalYVelocity};
                 registry.sprites.get(projectile).reverse = false;
             }
             else
             {
-                motion.velocity = {-itemShootSideVelocity, itemThrowUpwardVelocity};
+                motion.velocity = {-itemShootSideVelocity, itemNormalYVelocity};
                 registry.sprites.get(projectile).reverse = true;
             }
+            if (holderComponent.want_to_shoot_up)
+            {
+                motion.velocity.x *= 0.7;
+                motion.velocity.y = itemUpwardsYVelocity;
+            } else if (holderComponent.want_to_shoot_down)
+            {
+                motion.velocity.x *= 0.7;
+                motion.velocity.y = itemDownwardsYVelocity;
+            }
+
         }
         else if (holderComponent.want_to_melee && !weapon.ranged)
         {

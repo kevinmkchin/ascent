@@ -363,6 +363,8 @@ struct HolderComponent
     bool want_to_melee = false;
     bool want_to_cycle_left = false;
     bool want_to_cycle_right = false;
+    bool want_to_shoot_up = false;
+    bool want_to_shoot_down = false;
 };
 
 struct CollisionEvent
