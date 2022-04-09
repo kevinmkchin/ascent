@@ -1024,7 +1024,7 @@ Entity CreateHelpSign(vec2 pos, float triggerRadius, vec2 textOffsetFromPos, u32
     newText.textSize = textSize;
     newText.text = std::string(text);
     newText.bTyped = true;
-    newText.secondsBetweenTypedCharacters = 0.05f;
+    newText.secondsBetweenTypedCharacters = 0.04f;
 
     return entity;
 }
@@ -1080,7 +1080,7 @@ Entity CreateShopKeeperNPC(vec2 position)
     npcText.textSize = 8;
     npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.");
     npcText.bTyped = true;
-    npcText.secondsBetweenTypedCharacters = 0.05f;
+    npcText.secondsBetweenTypedCharacters = 0.04f;
 
     return entity;
 }

@@ -153,6 +153,15 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
 
     AddTileSizedCollider(entity);
 
+    ProximityTextComponent& newText = registry.proximityTexts.emplace(entity);
+    newText.triggerPosition = transform.position + vec2(TILE_SIZE/2.f, TILE_SIZE/2.f);
+    newText.triggerRadius = 12.f;
+    newText.textPosition = newText.triggerPosition + vec2(0.f, -9.f);
+    newText.textSize = 8;
+    newText.text = std::string("Press UP to go to next stage");
+    newText.bTyped = true;
+    newText.secondsBetweenTypedCharacters = 0.025f;
+
     return entity;
 }
 
