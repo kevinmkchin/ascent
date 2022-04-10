@@ -742,14 +742,7 @@ void WorldSystem::handle_collisions() {
             if (registry.enemy.has(entity_other)) {
                 Enemy &enemy = registry.enemy.get(entity_other);
 
-                // Check if player is moving vertically downwards
-                if (playerMotion.velocity.y > 100.f && !(registry.flyingBehaviors.has(entity_other))) {
-                    // player does not take damage & just bounces off
-                    playerMotion.velocity = {0.f, -playerMotion.velocity.y};
-                    if (Mix_PlayChannel(-1, player_jump_on_enemy_sound, 0) == -1) {
-                        printf("Mix_PlayChannel: %s\n", Mix_GetError());
-                    }
-                } else if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f) && registry.meleeBehaviors.has(entity_other) && playerComponent.damageCooldown <= 0.f) {
+                if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f) && registry.meleeBehaviors.has(entity_other) && playerComponent.damageCooldown <= 0.f) {
                     const MeleeBehavior enemyMeleeBehavior = registry.meleeBehaviors.get(entity_other);
                     enemy.playerHurtCooldown = 2.f;
                     playerComponent.damageCooldown = 0.5f;
