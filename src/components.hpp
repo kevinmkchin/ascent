@@ -70,6 +70,7 @@ enum class TEXTURE_ASSET_ID : u16
     BG_MENU_LAYER4,
     BG_MENU_LAYER5,
     HELP_MENU,
+    HEALTH_POTION,
 
     TEXTURE_COUNT
 };
@@ -112,7 +113,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("menu_bg_layer3.png"),
         textures_path("menu_bg_layer4.png"),
         textures_path("menu_bg_layer5.png"),
-        textures_path("help.png")
+        textures_path("help.png"),
+        textures_path("health_potion.png")
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -200,7 +202,12 @@ struct Exp
 
 struct Coin
 {
-    float counter_seconds_coin = 999999.f;
+    float counter_seconds_coin = 6.f;
+};
+
+struct HealthPotion
+{
+    float counter_seconds_health = 6.f;
 };
 
 struct PathingBehavior {

@@ -402,6 +402,7 @@ void WorldSystem::loadAllContent() {
     player_jump_on_enemy_sound = Mix_LoadWAV(audio_path("player_jump_on_enemy_sound.wav").c_str());
     coins_pickup_sound = Mix_LoadWAV(audio_path("coins_pickup.wav").c_str());
     points_pickup_sound = Mix_LoadWAV(audio_path("points_pickup.wav").c_str());
+    health_pickup_sound = Mix_LoadWAV(audio_path("health_pickup.wav").c_str());
     bow_and_arrow_sound = Mix_LoadWAV(audio_path("bow_and_arrow.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
@@ -416,6 +417,7 @@ void WorldSystem::loadAllContent() {
         || player_jump_on_enemy_sound == nullptr
         || coins_pickup_sound == nullptr
         || points_pickup_sound == nullptr
+        || health_pickup_sound == nullptr
         || bow_and_arrow_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
@@ -453,6 +455,8 @@ void WorldSystem::unloadAllContent() {
         Mix_FreeChunk(coins_pickup_sound);
     if (points_pickup_sound != nullptr)
         Mix_FreeChunk(points_pickup_sound);
+    if (health_pickup_sound != nullptr)
+        Mix_FreeChunk(health_pickup_sound);
     if (bow_and_arrow_sound != nullptr)
         Mix_FreeChunk(bow_and_arrow_sound);
     Mix_CloseAudio();
@@ -608,10 +612,21 @@ bool WorldSystem::step(float deltaTime) {
     for (Entity entity : registry.coins.entities) {
         // progress timer
         Coin& counter1 = registry.coins.get(entity);
-        counter1.counter_seconds_coin -= 2.f;
+        counter1.counter_seconds_coin -= deltaTime;
 
         if (counter1.counter_seconds_coin < 0.f) {
-            registry.exp.remove(entity);
+            registry.coins.remove(entity);
+            registry.remove_all_components_of(entity);
+        }
+    }
+
+    for (Entity entity : registry.healthPotion.entities) {
+        // progress timer
+        HealthPotion& counter1 = registry.healthPotion.get(entity);
+        counter1.counter_seconds_health -= deltaTime;
+
+        if (counter1.counter_seconds_health < 0.f) {
+            registry.healthPotion.remove(entity);
             registry.remove_all_components_of(entity);
         }
     }
@@ -676,13 +691,17 @@ void WorldSystem::handle_collisions() {
                     motion.velocity = {0.f, 0.f};
 
                     vec2 expPosition = registry.transforms.get(entity).position;
-                    int coin_or_exp = RandomInt(0, 3);
-                    if (coin_or_exp == 2) {
+                    int coin_or_exp_or_potion = RandomInt(0, 4);
+                    if (coin_or_exp_or_potion == 2) {
                         int random_count = RandomInt(1, 3);
                         for (int i = 1; i <= random_count; i++) 
                         {
                             createCoins(expPosition);
                         }
+                    }
+                    else if (coin_or_exp_or_potion == 0) {
+                        createHealthPotion(expPosition);
+                        
                     }
                     else 
                     {
@@ -762,6 +781,16 @@ void WorldSystem::handle_collisions() {
 
             }
 
+            if (registry.healthPotion.has(entity_other))
+            {
+                playerHealth.health += 5.f;
+                if (Mix_PlayChannel(-1, health_pickup_sound, 0) == -1) {
+                    printf("Mix_PlayChannel: %s\n", Mix_GetError());
+                }
+                registry.remove_all_components_of(entity_other);
+
+            }
+
             if (registry.shopItems.has(entity_other))
             {
                 if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN) && registry.activeShopItems.size() == 0) {
@@ -803,7 +832,7 @@ void WorldSystem::handle_collisions() {
             CheckCollisionWithBlockable(entity, entity_other);
         }
 
-        if (registry.exp.has(entity) || registry.coins.has(entity))
+        if (registry.exp.has(entity) || registry.coins.has(entity) || registry.healthPotion.has(entity))
         {
             CheckCollisionWithBlockable(entity, entity_other);
         }
