@@ -172,6 +172,10 @@ INTERNAL void CheckAllCollisions()
     std::vector<Entity> coinEntities = registry.coins.entities;
     entitiesToCheck.insert(entitiesToCheck.end(), coinEntities.begin(), coinEntities.end());
 
+
+    std::vector<Entity> healthPotionEntities = registry.healthPotion.entities;
+    entitiesToCheck.insert(entitiesToCheck.end(), healthPotionEntities.begin(), healthPotionEntities.end());
+
     std::vector<ColEventWrapper> colEventSortingVector;
 
     for(auto entity : entitiesToCheck)

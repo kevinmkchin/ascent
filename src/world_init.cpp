@@ -1084,3 +1084,59 @@ Entity CreateShopKeeperNPC(vec2 position)
 
     return entity;
 }
+
+Entity createHealthPotion(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.healthPotion.emplace(entity);
+
+    vec2 dimensions = { 8, 8 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_neg = { 6, 8 };
+    collider.collision_pos = { 6, 7 };
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    motion.velocity.x = (float)RandomInt(-150, 150);
+    motion.velocity.y = (float)RandomInt(-160, -80);
+    motion.drag.x = 300.f;
+    motion.acceleration.y = 320.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+            dimensions,
+            15,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::HEALTH_POTION,
+            false,
+            false,
+            false,
+            48,
+            8,
+            0,
+            0,
+            0.f,
+            {
+                {
+                    1,
+                    0,
+                    100.f,
+                    true,
+                    false
+                }
+            },
+        }
+    );
+
+
+    return entity;
+}
