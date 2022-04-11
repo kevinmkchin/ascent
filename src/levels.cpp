@@ -185,26 +185,26 @@ INTERNAL Entity CreateEndPointTile(i32 col, i32 row)
     return entity;
 }
 
-INTERNAL Entity CreateShopBackground(i32 col, i32 row)
-{
-    Entity entity = Entity::CreateEntity();
+// INTERNAL Entity CreateShopBackground(i32 col, i32 row)
+// {
+//     Entity entity = Entity::CreateEntity();
 
-    auto& transform = registry.transforms.emplace(entity);
-    transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
-    transform.center = { 0.f,0.f };
+//     auto& transform = registry.transforms.emplace(entity);
+//     transform.position = vec2(col * TILE_SIZE, row * TILE_SIZE);
+//     transform.center = { 0.f,0.f };
 
-    registry.sprites.insert(
-        entity,
-        {
-            { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
-            -128,
-            EFFECT_ASSET_ID::SPRITE,
-            TEXTURE_ASSET_ID::SHOPBG
-        }
-    );
+//     registry.sprites.insert(
+//         entity,
+//         {
+//             { TILE_SIZE * ROOM_DIMENSION_X , TILE_SIZE * ROOM_DIMENSION_Y},
+//             -128,
+//             EFFECT_ASSET_ID::SPRITE,
+//             TEXTURE_ASSET_ID::SHOPBG
+//         }
+//     );
 
-    return entity;
-}
+//     return entity;
+// }
 
 namespace ns
 {
@@ -355,10 +355,10 @@ INTERNAL void ClearLevelTiles()
 INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIndex)
 {
     // Check room type
-    if (r.type == "shop")
-    {
-        CreateShopBackground(roomXIndex * r.width, roomYIndex * r.height);
-    }
+    // if (r.type == "shop")
+    // {
+    //     CreateShopBackground(roomXIndex * r.width, roomYIndex * r.height);
+    // }
 
     // Check individual tiles
     for (int i = 0; i < r.height; ++i)
