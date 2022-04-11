@@ -379,6 +379,7 @@ struct CurrentLevelData
     vec2 playerStart;
     std::vector<vec2> groundMonsterSpawns;
     std::vector<vec2> flyingMonsterSpawns;
+    std::vector<vec2> stationaryMonsterSpawns;
     std::vector<vec2> treasureSpawns;
     std::vector<vec2> shopItemSpawns;
 };
@@ -446,6 +447,10 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                 }break;
                 case 'N': {
                     currentLevelData.flyingMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                                     roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
+                }break;
+                case 'O': {
+                    currentLevelData.stationaryMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
                 }break;
 
