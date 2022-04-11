@@ -29,31 +29,23 @@ void AISystem::Step(float deltaTime)
 
 	for (int i = 0; i < registry.enemy.size(); ++i)
 	{
+		Entity enemyEntity = registry.enemy.entities[i];
 		Enemy& enemyComponent = registry.enemy.components[i];
-		const Entity& enemy = registry.enemy.entities[i];
 
-		// Attacks
-		if (enemyComponent.elapsedTime >= enemyComponent.attackCooldown) {
-			if (!registry.deathTimers.has(enemy)) {
-				EnemyAttack(enemy);
-				enemyComponent.elapsedTime = 0.f;
-			}
-		}
-		else {
-			TransformComponent& enemyTransform = registry.transforms.get(enemy);
-			if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
-				enemyComponent.elapsedTime += elapsedTime;
+		if (registry.rangedBehaviors.has(enemyEntity) || registry.meleeBehaviors.has(enemyEntity)) {
+			if (!registry.deathTimers.has(enemyEntity)) {
+				EnemyAttack(enemyEntity, elapsedTime);
 			}
 		}
 
 		// Dying / colliding with player
-		if (registry.deathTimers.has(enemy)) {
-			DeathTimer& time = registry.deathTimers.get(enemy);
+		if (registry.deathTimers.has(enemyEntity)) {
+			DeathTimer& time = registry.deathTimers.get(enemyEntity);
 			time.elapsed_ms -= deltaTime * 1000.f;
 			enemyComponent.playerHurtCooldown = time.elapsed_ms;
 
 			if (time.elapsed_ms <= 0.f) {
-				registry.remove_all_components_of(enemy);
+				registry.remove_all_components_of(enemyEntity);
 			}
 
 		}
@@ -62,14 +54,26 @@ void AISystem::Step(float deltaTime)
 			{
 				enemyComponent.playerHurtCooldown -= deltaTime;
 			}
-			if (registry.walkingBehaviors.has(enemy)) {
-				EnemyJumping(enemy, deltaTime);
+			if (registry.walkingBehaviors.has(enemyEntity)) {
+				EnemyJumping(enemyEntity, deltaTime);
 			}
+		}
+		std::vector<Entity> toDeleteList;
+		for (int i = 0; i < registry.enemyMeleeAttacks.size(); i++) {
+			if (registry.enemyMeleeAttacks.components[i].elapsedTime > registry.enemyMeleeAttacks.components[i].existenceTime) {
+				toDeleteList.push_back(registry.enemyMeleeAttacks.entities[i]);
+			}
+			else {
+				registry.enemyMeleeAttacks.components[i].elapsedTime += elapsedTime;
+			}
+		}
+		for (int i = 0; i < toDeleteList.size(); i++) {
+			registry.remove_all_components_of(toDeleteList[i]);
 		}
 	}
 
 	// Pathing
-	if (elapsedAICycleTime >= 30.0f) {
+	if (elapsedAICycleTime >= 0.0f) {
 		for (int i = 0; i < registry.enemy.size(); ++i)
 		{
 			Enemy& enemyComponent = registry.enemy.components[i];
@@ -125,8 +129,10 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 	}
 }
 
-void AISystem::EnemyAttack(Entity enemy_entity) {
+void AISystem::EnemyAttack(Entity enemy_entity, float elapsedTime) {
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
+	Entity playerEntity = registry.players.entities[0];
+	TransformComponent& playerTransform = registry.transforms.get(playerEntity);
 	vec2 pos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 	if (pos[0] < levelTiles.size() && pos[1] < levelTiles[0].size() && pos[0] >= 0 && pos[1] >= 0) {
 		if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[(int)pos[0]][(int)pos[1]] == 0)
@@ -137,32 +143,142 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 			Entity playerEntity = registry.players.entities.front();
 			MotionComponent& playerMotion = registry.motions.get(playerEntity);
 			TransformComponent& player_transform = registry.transforms.get(playerEntity);
-			TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
-			vec2 diff_distance = player_transform.position - enemy_transform.position;
+			vec2 diff_distance = player_transform.position - enemyTransformComponent.position;
 			if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
-				if (enemyRangedBehavior.lobbing) {
+				if (enemyRangedBehavior.elapsedTime > enemyRangedBehavior.attackCooldown) {
+					if (enemyRangedBehavior.lobbing) {
 
-					vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
-					vec2 acceleration = vec2(0.f, 250.f);
+						vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
+						vec2 acceleration = vec2(0.f, 250.f);
 
-					float random_change = 15.f;
-					float percent_diff = (float)rand() / RAND_MAX;
-					int direction = rand() % 2;
-					if (direction) {
-						random_change *= -1.f;
+						float random_change = 15.f;
+						float percent_diff = (float)rand() / RAND_MAX;
+						int direction = rand() % 2;
+						if (direction) {
+							random_change *= -1.f;
+						}
+						velocity.x += random_change * percent_diff;
+
+						vec2 neg_velocity = { -velocity.x, velocity.y };
+
+						createEnemyLobbingProjectile(enemyTransformComponent.position, velocity, acceleration, enemy_entity);
+						createEnemyLobbingProjectile(enemyTransformComponent.position, neg_velocity, acceleration, enemy_entity);
 					}
-					velocity.x += random_change * percent_diff;
-
-					vec2 neg_velocity = { -velocity.x, velocity.y };
-
-					createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
-					createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
+					else {
+						float angle = atan2(diff_distance.y, diff_distance.x);
+						vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
+						createEnemyProjectile(enemyTransformComponent.position, velocity, enemy_entity);
+					}
 				}
-				else {
-					float angle = atan2(diff_distance.y, diff_distance.x);
-					vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
-					createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+			}
+			else {
+				TransformComponent& enemyTransform = registry.transforms.get(enemy_entity);
+				if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
+					enemyRangedBehavior.elapsedTime += elapsedTime;
 				}
+			}
+		}
+		if (registry.meleeBehaviors.has(enemy_entity)) {
+			Enemy& enemy = registry.enemy.get(enemy_entity);
+			MeleeBehavior& enemyMeleeBehavior = registry.meleeBehaviors.get(enemy_entity);
+			if (enemyMeleeBehavior.elapsedTime > 0) { //enemyMeleeBehavior.attackCooldown) {
+				enemyMeleeBehavior.elapsedTime = 0;
+				MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
+				Entity playerEntity = registry.players.entities.front();
+				MotionComponent& playerMotion = registry.motions.get(playerEntity);
+				TransformComponent& player_transform = registry.transforms.get(playerEntity);
+				float diff_distance = player_transform.position.x - enemyTransformComponent.position.x;
+				if (enemyMeleeBehavior.requestingAttack) {
+					if (diff_distance > 0) {
+						if (enemyMotion.velocity.x > 0) {
+							// set some acceleration in other direction
+							// attack
+							//playerMeleeAttackCooldownTimer = playerComponentPtr->meleeAttackCooldown; // reset timer
+							//playerMeleeAttackLengthTimer = 0.03f;     // reset timer
+
+							Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_ENEMYMELEEATTACK);
+							auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
+							attack.attackPower = enemyMeleeBehavior.attackPower;
+							attack.existenceTime = 1;
+							auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
+							auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
+
+							i16 meleeBoxWidth = 12;
+							i16 meleeBoxHeight = 12;
+
+							SpriteComponent attackBox = {
+								{0,0},
+								20,
+								EFFECT_ASSET_ID::SPRITE,
+								TEXTURE_ASSET_ID::SWORDSWING_RIGHT
+							};
+
+							shortvec2& dimensions = attackBox.dimensions;
+							transform.position.x = enemyTransformComponent.position.x + 8;
+							transform.position.y = enemyTransformComponent.position.y;
+							dimensions = { meleeBoxWidth, meleeBoxHeight };
+							transform.center = { meleeBoxWidth, meleeBoxHeight / 2 };
+							collider.collider_position = transform.position;
+							collider.collision_pos = { 0, (i16)(meleeBoxHeight / 2) };
+							collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight / 2) };
+							attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_RIGHT;
+							registry.sprites.insert(
+								enemyMeleeAttackEntity,
+								attackBox
+								);
+						}
+						else {
+							// set some acceleration in other direction
+						}
+					}
+					else {
+						if (enemyMotion.velocity.x <= 0) {
+							// set some acceleration in other direction
+							// attack
+							// set some acceleration in other direction
+							// attack
+							//playerMeleeAttackCooldownTimer = playerComponentPtr->meleeAttackCooldown; // reset timer
+							//playerMeleeAttackLengthTimer = 0.03f;     // reset timer
+
+							Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_ENEMYMELEEATTACK);
+							auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
+							auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
+							auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
+							attack.attackPower = enemyMeleeBehavior.attackPower;
+							attack.existenceTime = 1;
+
+							i16 meleeBoxWidth = 12;
+							i16 meleeBoxHeight = 12;
+
+							SpriteComponent attackBox = {
+								{12,12},
+								20,
+								EFFECT_ASSET_ID::SPRITE,
+								TEXTURE_ASSET_ID::SWORDSWING_LEFT
+							};
+
+							shortvec2& dimensions = attackBox.dimensions;
+							transform.position.x = enemyTransformComponent.position.x - 8;
+							transform.position.y = enemyTransformComponent.position.y;
+							dimensions = { meleeBoxWidth, meleeBoxHeight };
+							transform.center = { meleeBoxWidth, meleeBoxHeight / 2 };
+							collider.collider_position = transform.position;
+							collider.collision_pos = { 0, (i16)(meleeBoxHeight / 2) };
+							collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight / 2) };
+							attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_LEFT;
+							registry.sprites.insert(
+								enemyMeleeAttackEntity,
+								attackBox
+							);
+						}
+						else {
+							// set some acceleration in other direction
+						}
+					}
+				}
+			}
+			else {
+				enemyMeleeBehavior.elapsedTime += elapsedTime;
 			}
 		}
 	}
@@ -214,204 +330,62 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 		TransformComponent& playerTransformComponent = registry.transforms.get(player_entity);
 		TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
 		MotionComponent& enemyMotionComponent = registry.motions.get(enemy_entity);
+		MeleeBehavior& enemyMeleeBehavior = registry.meleeBehaviors.get(enemy_entity);
+		bool hasMelee = registry.meleeBehaviors.has(enemy_entity);
+		if (hasMelee) {
+			enemyMeleeBehavior.requestingAttack = false;
+		}
 
 		enemyMotionComponent.terminalVelocity.x = enemyPathingBehavior.pathSpeed;
 		enemyMotionComponent.terminalVelocity.y = enemyMaxFallSpeed;
+		bool multiFind = false;
+		int goalsToFind = 1;
 
-		if (registry.flyingBehaviors.has(enemy_entity)) {
-			struct ListEntry {
-				vec2 position;
-				int parent;
-				int cost;
-			};
-
-			// GOAL POS IS NOT CORRECTLY CONSIDERED HERE! be aware.
-			vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
-			vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
-
-			if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
-				return;
-			}
-
-			std::vector<ListEntry> openList;
-			std::vector<ListEntry> closedList;
-			ListEntry startPos = { enemyPos, NULL, 0 };
-			openList.push_back(startPos);
-
-			// TODO update this to use binary search/insert for speed if its a problem speed wise
-			uint8 maxIter = 50;
-			uint8 currIter = 0;
-			std::vector<ListEntry> entriesSoFar;
-			while (!openList.empty())
-			{
-				if (maxIter < currIter) {
-					return;
-				}
-				int lowestIndexSoFar = 0;
-				ListEntry currentPos = { enemyPos, NULL, 999 };
-				for (int k = 0; k < openList.size(); k++) {
-					if (openList[k].cost + Heuristic(openList[k].position, goalPos) < currentPos.cost + Heuristic(currentPos.position, goalPos)) {
-						currentPos = openList[k];
-						lowestIndexSoFar = k;
-					}
-				}
-				entriesSoFar.push_back(currentPos);
-				openList.erase(openList.begin() + lowestIndexSoFar);
-				closedList.push_back(currentPos);
-				if (currentPos.position == goalPos) {
-					// goal found
-					// go to the start of the path, and set direction as next step to take
-					ListEntry currentEntry = currentPos;
-					vec2 prevPos = currentEntry.position;
-					currentEntry.parent = currentPos.parent;
-					while (currentEntry.position != entriesSoFar[currentEntry.parent].position) {
-						prevPos = currentEntry.position;
-						currentEntry = entriesSoFar[currentEntry.parent];
-					}
-					/* TODO make the open air A* feel better
-					desire for A* :
-						if we want to go from Y to A and Z is on the path, and if the tiles to the right and below
-						Y are open, go diagonal. still need to check for clipping. this should go after setting default direction, for elegance sake
-						XXXXX
-						XYXXX
-						XXZXA
-						XXXXX
-					possible solution: draw a line from Y to A, if its not obstructed then perform the optimal.
-					alternate solution: use acceleration. I forsee this breaking tight searching
-					if (currIter >= 2) {
-						vec2 secondLastEntryPosition = entriesSoFar[currIter - 1].position;
-						vec2 thirdLastEntryPosition  = entriesSoFar[currIter - 2].position;
-						// NW on path
-						// SW on path
-						// SE on path
-						// NE on path
-					}
-					*/
-
-					vec2 direction = prevPos - enemyPos;
-
-					// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
-					enemyMotionComponent.velocity = direction * 25.f;
-					auto& enemyCollider = registry.colliders.get(enemy_entity);
-					float spriteWidth = enemyCollider.collision_pos.x;
-					float spriteHeight = enemyCollider.collision_pos.y;
-					vec2 enemyPosR = { ((int)((enemyTransformComponent.position.x + spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
-					vec2 enemyPosL = { ((int)((enemyTransformComponent.position.x - spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
-					vec2 enemyPosB = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y + spriteHeight) / 16)) };
-					vec2 enemyPosA = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y - spriteHeight) / 16)) };
-					bool isClippingTLL = direction.x < 0 && enemyPosA != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
-					bool isClippingTLU = direction.y < 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
-					bool isClippingTRR = direction.x > 0 && enemyPosA != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
-					bool isClippingTRU = direction.y < 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
-					bool isClippingBLL = direction.x < 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
-					bool isClippingBLD = direction.y > 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
-					bool isClippingBRR = direction.x > 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
-					bool isClippingBRD = direction.y > 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
-					float clipVelocity = 15.f;
-					if (isClippingBRD || isClippingTRU) {
-						enemyMotionComponent.velocity.x = -clipVelocity;
-					}
-					else if (isClippingBLD || isClippingTLU) {
-						enemyMotionComponent.velocity.x = clipVelocity;
-					}
-					else if (isClippingBRR || isClippingBLL) {
-						enemyMotionComponent.velocity.y = -clipVelocity;
-					}
-					else if (isClippingTRR || isClippingTLL) {
-						enemyMotionComponent.velocity.y = clipVelocity;
-					}
-					enemyMotionComponent.acceleration.x = 0;
-					enemyMotionComponent.acceleration.y = 0;
-					return;
-				}
-
-				std::vector<vec2> adjacentSquares;
-				vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
-				vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
-				vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
-				vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
-
-				adjacentSquares.push_back(above);
-				adjacentSquares.push_back(right);
-				adjacentSquares.push_back(below);
-				adjacentSquares.push_back(left);
-
-				for (vec2 adjacentSquare : adjacentSquares) {
-					if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
-						// if its a free tile
-						if (levelTiles[(size_t)adjacentSquare[0]][(size_t)adjacentSquare[1]] == 0) {
-							bool inClosedList = false;
-							for (const ListEntry& closedEntry : closedList) {
-								vec2 position = closedEntry.position;
-								if (position[0] == adjacentSquare[0] && position[1] == adjacentSquare[1]) {
-									inClosedList = true;
-									break;
-								}
-							}
-							if (inClosedList) {
-								continue;
-							}
-							bool inOpenList = false;
-							ListEntry* openListVersion;
-							for (ListEntry listEntry : openList) {
-								if (listEntry.position[0] == adjacentSquare[0] && listEntry.position[1] == adjacentSquare[1]) {
-									inClosedList = true;
-									openListVersion = &listEntry;
-									break;
-								}
-							}
-							if (inOpenList) {
-								if (currentPos.cost + 1 < openListVersion->cost) {
-									openListVersion->parent = currIter;
-								}
-							}
-							else {
-								ListEntry addEntry = { adjacentSquare, currIter, currentPos.cost + 1 };
-								openList.push_back(addEntry);
-							}
-						}
-					}
-				}
-				currIter++;
-			}
+		if (enemyPathingBehavior.goalFromPlayer.x != 0 || enemyPathingBehavior.goalFromPlayer.y != 0) {
+			goalsToFind = 2; // technically, this is lazy, it should check seperately on x and y and set goals# by that.
+			multiFind = true;
 		}
-		else if (registry.walkingBehaviors.has(enemy_entity)) {
-			// if dumb, else
-			auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
-			if (walkingBehavior.stupid) {
-				enemyMotionComponent.acceleration.y = enemyGravity;
-				if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
-					// decelerate faster than accelerate, use the global level var?
-					if (enemyMotionComponent.velocity.x > 0) {
-						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
-					}
-					else {
-						enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.3f;
-					}
-				}
-				else {
-					if (enemyMotionComponent.velocity.x < 0) {
-						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
-					}
-					else {
-						enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.3f;
-					}
-				}
-			}
-			else {
-				enemyMotionComponent.acceleration.y = enemyGravity;
-				// smart walker
+
+		int closestGoalSoFar = 99999;
+
+		for (int goalsFound = 0; goalsFound < goalsToFind; goalsFound++) {
+			if (registry.flyingBehaviors.has(enemy_entity)) {
 				struct ListEntry {
 					vec2 position;
 					int parent;
 					int cost;
 				};
+				vec2 goalPos;
+				if (goalsToFind != 1) {
+					if (goalsFound == 0) {
+						goalPos = { (int)((playerTransformComponent.position.x + 1) / 16) + enemyPathingBehavior.goalFromPlayer.x, (int)((playerTransformComponent.position.y + 1) / 16) };
+					}
+					else {
+						goalPos = { (int)((playerTransformComponent.position.x + 1) / 16) - enemyPathingBehavior.goalFromPlayer.x, (int)((playerTransformComponent.position.y + 1) / 16) };
+					}
+				}
+				else {
+					goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
+				}
 
-				vec2 goalPos = { (int)((playerTransformComponent.position.x + 1) / 16), (int)((playerTransformComponent.position.y + 1) / 16) };
 				vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 
+				// on top of goal already
 				if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
+					if (hasMelee) {
+						enemyMeleeBehavior.requestingAttack = true;
+					}
 					return;
+				}
+
+				// goal is out of bounds
+				if (goalPos[0] < 0 || goalPos[0] > levelTiles.size() || goalPos[1] < 0 || goalPos[1] > levelTiles[0].size()) {
+					continue;
+				}
+
+				// goal is unachievable
+				if (levelTiles[(size_t)goalPos[0]][(size_t)goalPos[1]] != 0) {
+					continue;
 				}
 
 				std::vector<ListEntry> openList;
@@ -420,7 +394,7 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				openList.push_back(startPos);
 
 				// TODO update this to use binary search/insert for speed if its a problem speed wise
-				uint8 maxIter = 25;
+				uint8 maxIter = 50;
 				uint8 currIter = 0;
 				std::vector<ListEntry> entriesSoFar;
 				while (!openList.empty())
@@ -449,22 +423,63 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 							prevPos = currentEntry.position;
 							currentEntry = entriesSoFar[currentEntry.parent];
 						}
+						/* TODO make the open air A* feel better (do after 15th if available)
+						desire for A* :
+							if we want to go from Y to A and Z is on the path, and if the tiles to the right and below
+							Y are open, go diagonal. still need to check for clipping. this should go after setting default direction, for elegance sake
+							XXXXX
+							XYXXX
+							XXZXA
+							XXXXX
+						possible solution: draw a line from Y to A, if its not obstructed then perform the optimal.
+						alternate solution: use acceleration. I forsee this breaking tight searching
+						if (currIter >= 2) {
+							vec2 secondLastEntryPosition = entriesSoFar[currIter - 1].position;
+							vec2 thirdLastEntryPosition  = entriesSoFar[currIter - 2].position;
+							// NW on path
+							// SW on path
+							// SE on path
+							// NE on path
+						}
+						*/
 
 						vec2 direction = prevPos - enemyPos;
-						// decelerate faster than accelerate, use the global level var?
-						walkingBehavior.jumpRequest = false;
-						if (direction.x != 0) {
-							enemyMotionComponent.acceleration.x = direction.x * enemyPathingBehavior.pathSpeed;
-							if (direction.x > 0 && enemyMotionComponent.velocity.x < 0 || direction.x < 0 && enemyMotionComponent.velocity.x > 0) {
-								enemyMotionComponent.acceleration.x *= 1.75;
+
+						// Clipping (being unable to path properly because of tile hitting non center of enemy) resolving section
+						if (entriesSoFar.size() < closestGoalSoFar) {
+							enemyMotionComponent.velocity = direction * 25.f;
+							auto& enemyCollider = registry.colliders.get(enemy_entity);
+							float spriteWidth = enemyCollider.collision_pos.x;
+							float spriteHeight = enemyCollider.collision_pos.y;
+							vec2 enemyPosR = { ((int)((enemyTransformComponent.position.x + spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
+							vec2 enemyPosL = { ((int)((enemyTransformComponent.position.x - spriteWidth) / 16)),  ((int)(enemyTransformComponent.position.y / 16)) };
+							vec2 enemyPosB = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y + spriteHeight) / 16)) };
+							vec2 enemyPosA = { ((int)(enemyTransformComponent.position.x / 16)),  ((int)((enemyTransformComponent.position.y - spriteHeight) / 16)) };
+							bool isClippingTLL = direction.x < 0 && enemyPosA != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
+							bool isClippingTLU = direction.y < 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y - 1] != 0;
+							bool isClippingTRR = direction.x > 0 && enemyPosA != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
+							bool isClippingTRU = direction.y < 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y - 1] != 0;
+							bool isClippingBLL = direction.x < 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
+							bool isClippingBLD = direction.y > 0 && enemyPosL != enemyPos && levelTiles[(size_t)enemyPos.x - 1][(size_t)enemyPos.y + 1] != 0;
+							bool isClippingBRR = direction.x > 0 && enemyPosB != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+							bool isClippingBRD = direction.y > 0 && enemyPosR != enemyPos && levelTiles[(size_t)enemyPos.x + 1][(size_t)enemyPos.y + 1] != 0;
+							float clipVelocity = 15.f;
+							if (isClippingBRD || isClippingTRU) {
+								enemyMotionComponent.velocity.x = -clipVelocity;
 							}
-						}
-						else {
-							if (direction.y < 0) {
-								walkingBehavior.jumpRequest = true;
+							else if (isClippingBLD || isClippingTLU) {
+								enemyMotionComponent.velocity.x = clipVelocity;
 							}
+							else if (isClippingBRR || isClippingBLL) {
+								enemyMotionComponent.velocity.y = -clipVelocity;
+							}
+							else if (isClippingTRR || isClippingTLL) {
+								enemyMotionComponent.velocity.y = clipVelocity;
+							}
+							enemyMotionComponent.acceleration.x = 0;  // this probably shouldn't need to be here but it does...
+							enemyMotionComponent.acceleration.y = 0;
 						}
-						return;
+						break;
 					}
 
 					std::vector<vec2> adjacentSquares;
@@ -472,15 +487,10 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
 					vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
 					vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
-					if (below.x >= 0 && below.y >= 0 && below.x < levelTiles.size() && below.y < levelTiles[0].size()) {
-						if (levelTiles[(int)below.x][(int)below.y] == 0) { // if current tile has no floor
-							adjacentSquares.push_back(below);
-						}
-						else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
-							adjacentSquares.push_back(above);        // if current has floor
-						}
-					}
+
+					adjacentSquares.push_back(above);
 					adjacentSquares.push_back(right);
+					adjacentSquares.push_back(below);
 					adjacentSquares.push_back(left);
 
 					for (vec2 adjacentSquare : adjacentSquares) {
@@ -521,11 +531,183 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 					}
 					currIter++;
 				}
-
 			}
-		}
-		else {
-			// you can't do any sort of movement but you want to path - you're not set properly.
+			else if (registry.walkingBehaviors.has(enemy_entity)) {
+				// if dumb, else
+				auto& walkingBehavior = registry.walkingBehaviors.get(enemy_entity);
+				if (walkingBehavior.stupid) {
+					enemyMotionComponent.acceleration.y = enemyGravity;
+					if (playerTransformComponent.position.x > enemyTransformComponent.position.x) {
+						// decelerate faster than accelerate, use the global level var?
+						if (enemyMotionComponent.velocity.x > 0) {
+							enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed;
+						}
+						else {
+							enemyMotionComponent.acceleration.x = enemyPathingBehavior.pathSpeed * 1.3f;
+						}
+					}
+					else {
+						if (enemyMotionComponent.velocity.x < 0) {
+							enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed;
+						}
+						else {
+							enemyMotionComponent.acceleration.x = -enemyPathingBehavior.pathSpeed * 1.3f;
+						}
+					}
+				}
+				else {
+					enemyMotionComponent.acceleration.y = enemyGravity;
+					// smart walker
+					struct ListEntry {
+						vec2 position;
+						int parent;
+						int cost;
+					};
+
+					vec2 goalPos;
+					enemyPathingBehavior.goalFromPlayer;
+					if (goalsFound == 0) {
+						goalPos = { (int)((playerTransformComponent.position.x + 1) / 16) + 1, (int)((playerTransformComponent.position.y + 1) / 16) };
+					}
+					else {
+						goalPos = { (int)((playerTransformComponent.position.x + 1) / 16) - 1, (int)((playerTransformComponent.position.y + 1) / 16) };
+					}
+
+					vec2 enemyPos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
+
+					// on top of goal already
+					if (goalPos[0] == enemyPos[0] && goalPos[1] == enemyPos[1]) {
+						if (hasMelee) {
+							enemyMeleeBehavior.requestingAttack = true;
+						}
+						return;
+					}
+
+					// goal is out of bounds
+					if (goalPos[0] < 0 || goalPos[0] > levelTiles.size() || goalPos[1] < 0 || goalPos[1] > levelTiles[0].size()) {
+						continue;
+					}
+
+					// goal is unachievable
+					if (levelTiles[(size_t)goalPos[0]][(size_t)goalPos[1]] != 0) {
+						continue;
+					}
+
+					std::vector<ListEntry> openList;
+					std::vector<ListEntry> closedList;
+					ListEntry startPos = { enemyPos, NULL, 0 };
+					openList.push_back(startPos);
+
+					// TODO update this to use binary search/insert for speed if its a problem speed wise
+					uint8 maxIter = 25;
+					uint8 currIter = 0;
+					std::vector<ListEntry> entriesSoFar;
+					while (!openList.empty())
+					{
+						if (maxIter < currIter) {
+							return;
+						}
+						int lowestIndexSoFar = 0;
+						ListEntry currentPos = { enemyPos, NULL, 999 };
+						for (int k = 0; k < openList.size(); k++) {
+							if (openList[k].cost + Heuristic(openList[k].position, goalPos) < currentPos.cost + Heuristic(currentPos.position, goalPos)) {
+								currentPos = openList[k];
+								lowestIndexSoFar = k;
+							}
+						}
+						entriesSoFar.push_back(currentPos);
+						openList.erase(openList.begin() + lowestIndexSoFar);
+						closedList.push_back(currentPos);
+						if (currentPos.position == goalPos) {
+							// goal found
+							// go to the start of the path, and set direction as next step to take
+							ListEntry currentEntry = currentPos;
+							vec2 prevPos = currentEntry.position;
+							currentEntry.parent = currentPos.parent;
+							while (currentEntry.position != entriesSoFar[currentEntry.parent].position) {
+								prevPos = currentEntry.position;
+								currentEntry = entriesSoFar[currentEntry.parent];
+							}
+
+							vec2 direction = prevPos - enemyPos;
+							if (entriesSoFar.size() < closestGoalSoFar) {
+								// decelerate faster than accelerate, use the global level var?
+								walkingBehavior.jumpRequest = false;
+								if (direction.x != 0) {
+									enemyMotionComponent.acceleration.x = direction.x * enemyPathingBehavior.pathSpeed;
+									if (direction.x > 0 && enemyMotionComponent.velocity.x < 0 || direction.x < 0 && enemyMotionComponent.velocity.x > 0) {
+										enemyMotionComponent.acceleration.x *= 1.75;
+									}
+								}
+								else {
+									if (direction.y < 0) {
+										walkingBehavior.jumpRequest = true;
+									}
+								}
+							}
+							continue;
+						}
+
+						std::vector<vec2> adjacentSquares;
+						vec2 above = { currentPos.position[0],     currentPos.position[1] - 1 };
+						vec2 right = { currentPos.position[0] + 1, currentPos.position[1] };
+						vec2 below = { currentPos.position[0],     currentPos.position[1] + 1 };
+						vec2 left = { currentPos.position[0] - 1, currentPos.position[1] };
+						if (below.x >= 0 && below.y >= 0 && below.x < levelTiles.size() && below.y < levelTiles[0].size()) {
+							if (levelTiles[(int)below.x][(int)below.y] == 0) { // if current tile has no floor
+								adjacentSquares.push_back(below);
+							}
+							else { // current tile has a floor (PROBABLY DOESNT WORK WITH LADDERS HERE..)
+								adjacentSquares.push_back(above);        // if current has floor
+							}
+						}
+						adjacentSquares.push_back(right);
+						adjacentSquares.push_back(left);
+
+						for (vec2 adjacentSquare : adjacentSquares) {
+							if (adjacentSquare[0] >= 0 && adjacentSquare[1] >= 0 && adjacentSquare[0] < levelTiles.size() && adjacentSquare[1] < levelTiles[0].size()) {
+								// if its a free tile
+								if (levelTiles[(size_t)adjacentSquare[0]][(size_t)adjacentSquare[1]] == 0) {
+									bool inClosedList = false;
+									for (const ListEntry& closedEntry : closedList) {
+										vec2 position = closedEntry.position;
+										if (position[0] == adjacentSquare[0] && position[1] == adjacentSquare[1]) {
+											inClosedList = true;
+											break;
+										}
+									}
+									if (inClosedList) {
+										continue;
+									}
+									bool inOpenList = false;
+									ListEntry* openListVersion;
+									for (ListEntry listEntry : openList) {
+										if (listEntry.position[0] == adjacentSquare[0] && listEntry.position[1] == adjacentSquare[1]) {
+											inClosedList = true;
+											openListVersion = &listEntry;
+											break;
+										}
+									}
+									if (inOpenList) {
+										if (currentPos.cost + 1 < openListVersion->cost) {
+											openListVersion->parent = currIter;
+										}
+									}
+									else {
+										ListEntry addEntry = { adjacentSquare, currIter, currentPos.cost + 1 };
+										openList.push_back(addEntry);
+									}
+								}
+							}
+						}
+						currIter++;
+					}
+
+				}
+			}
+			else {
+				// you can't do any sort of movement but you want to path - you're not set properly.
+			}
 		}
 	}
 }

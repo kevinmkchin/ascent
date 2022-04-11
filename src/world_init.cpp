@@ -215,10 +215,10 @@ Entity CreateKnightEnemy(vec2 position)
     collider.collision_neg = dimensions / 2.f;
 
     float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.goalFromPlayer = { 0, 0 }; // ?
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
@@ -348,10 +348,10 @@ Entity CreateGoblinBomberEnemy(vec2 position)
 
     // TODO: Change Goblin Bomber behavior
     float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.goalFromPlayer = { 3, 0 }; //?
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = true;
 
@@ -429,10 +429,10 @@ Entity CreateMushroomEnemy(vec2 position)
     collider.collision_neg = { 7, 6 };
 
     float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.goalFromPlayer = { 0, 0 }; //  ?
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
@@ -514,7 +514,7 @@ Entity CreateSlimeEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
@@ -594,7 +594,7 @@ Entity CreateWormEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
