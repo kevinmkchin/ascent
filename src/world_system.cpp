@@ -319,6 +319,47 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     renderer->cameraBoundMax = currentLevelData.cameraBoundMax;
     SpawnLevelEntities();
 
+    switch (stage) {
+        case CHAPTER_TUTORIAL: {
+            renderer->bgTexId = {
+                { TEXTURE_ASSET_ID::BG_LAYER1, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER2, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER3, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER4, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER5, 0.4f }
+            };
+        }break;
+        case CHAPTER_ONE_STAGE_ONE: {
+            renderer->bgTexId = {
+                { TEXTURE_ASSET_ID::BG_LAYER1, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER2, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER3, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER4, 0.8f },
+                { TEXTURE_ASSET_ID::BG_LAYER5, 0.4f }
+            };
+        }break;
+        case CHAPTER_TWO_STAGE_ONE: {
+            renderer->bgTexId = {
+                { TEXTURE_ASSET_ID::BG_FOREST_LAYER1, 0.8f },
+                { TEXTURE_ASSET_ID::BG_FOREST_LAYER2, 0.8f },
+                { TEXTURE_ASSET_ID::BG_FOREST_LAYER3, 0.8f },
+                { TEXTURE_ASSET_ID::BG_FOREST_LAYER4, 0.8f },
+            };
+        }break;
+        case CHAPTER_THREE_STAGE_ONE: {
+            renderer->bgTexId = {
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER1, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER2, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER3, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER4, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER5, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER6, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER7, 0.5f },
+                { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER8, 0.3f },
+            };
+        }break;
+    }
+
 // LOAD PLAYER DATA
     if (stage > CHAPTER_ONE_STAGE_ONE) {
         registry.players.get(player) = playerPlayerComponent;
@@ -483,30 +524,20 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
     switch (mode) {
         case MODE_MAINMENU: {
             renderer->bgTexId = {
-                    TEXTURE_ASSET_ID::BG_MENU_LAYER1,
-                    TEXTURE_ASSET_ID::BG_MENU_LAYER2,
-                    TEXTURE_ASSET_ID::BG_MENU_LAYER3,
-                    TEXTURE_ASSET_ID::BG_MENU_LAYER4,
-                    TEXTURE_ASSET_ID::BG_MENU_LAYER5
+                { TEXTURE_ASSET_ID::BG_MENU_LAYER1, 1.f },
+                { TEXTURE_ASSET_ID::BG_MENU_LAYER2, 1.f },
+                { TEXTURE_ASSET_ID::BG_MENU_LAYER3, 1.f },
+                { TEXTURE_ASSET_ID::BG_MENU_LAYER4, 1.f },
+                { TEXTURE_ASSET_ID::BG_MENU_LAYER5, 1.f },
             };
-        }
-            break;
+        }break;
         case MODE_INGAME: {
-            renderer->bgTexId = {
-                    TEXTURE_ASSET_ID::BG_LAYER1,
-                    TEXTURE_ASSET_ID::BG_LAYER2,
-                    TEXTURE_ASSET_ID::BG_LAYER3,
-                    TEXTURE_ASSET_ID::BG_LAYER4,
-                    TEXTURE_ASSET_ID::BG_LAYER5
-            };
-        }
-            break;
+        }break;
         case MODE_HELP: {
             renderer->bgTexId = {
-                    TEXTURE_ASSET_ID::HELP_MENU,
+                { TEXTURE_ASSET_ID::HELP_MENU, 1.f }
             };
-        }
-            break;
+        }break;
     }
 }
 
