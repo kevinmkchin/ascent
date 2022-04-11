@@ -22,5 +22,6 @@ public:
 	void PatrolBehavior(Entity enemy_entity, float elapsedTime);
 	void Init(std::vector<std::vector<int>> levelTiles);
 	float Heuristic(vec2 pos1, vec2 pos2);
+	void BossStep(float deltaTime);
 };
 

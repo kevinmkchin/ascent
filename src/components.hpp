@@ -235,6 +235,13 @@ struct Enemy
     //std::vector<Behavior> behaviors;
 };
 
+struct Boss
+{
+    i32 meleeAttackPower = 15;
+    i32 rangedAttackPower = 10;
+    bool summonState = false;
+};
+
 struct Behavior {
 
 };

@@ -240,8 +240,9 @@ Entity CreateKnightEnemy(vec2 position)
 
 Entity CreateStationaryEnemy(vec2 position)
 {
+    CreateBoss(position);
     auto entity = Entity::CreateEntity();
-
+    /*
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
@@ -301,6 +302,88 @@ Entity CreateStationaryEnemy(vec2 position)
                     },
                     
                 },
+        }
+    );
+    */
+
+    return entity;
+}
+
+Entity CreateBoss(vec2 position) {
+    
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+    hb.health = 500.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    vec2 collisionDimension = { 32, 32 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = collisionDimension / 2.f;
+    collider.collision_neg = collisionDimension / 2.f;
+
+    float maxMoveSpeed = 0.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+
+    patrollingBehavior.standStill = true;
+
+    walkingBehavior.stupid = false;
+
+    visualComponent.sightRadius = 48.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                16,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::GOBLIN,
+                true,
+                false,
+                true,
+                96,
+                80,
+                0,
+                0,
+                0.f,
+                {
+
+            // idle
+            {
+                4,
+                18,
+                100.f * 4.f
+            },
+
+        // run
+        {
+            6,
+            0,
+            100.f * 6.f
+        },
+
+        // death
+        {
+            6,
+            6,
+            100.f * 6.f
+        },
+
+    },
         }
     );
 
