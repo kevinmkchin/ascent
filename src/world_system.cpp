@@ -322,11 +322,16 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     switch (stage) {
         case CHAPTER_TUTORIAL: {
             renderer->bgTexId = {
-                { TEXTURE_ASSET_ID::BG_LAYER1, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER2, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER3, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER4, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER5, 0.4f }
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER1, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER2, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER3, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER4, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER5, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER6, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER7, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER8, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER9, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER10, 0.3f },
             };
         }break;
         case CHAPTER_ONE_STAGE_ONE: {
@@ -375,9 +380,9 @@ void WorldSystem::SpawnLevelEntities() {
     CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your way to the top of the mountain!");
 
     if (currentDifficulty == DIFFICULTY_EASY) {
-        registry.healthBar.get(player).maxHealth += 50;
-        registry.healthBar.get(player).health += 50;
-        registry.players.get(player).attackPower += 10;
+        registry.healthBar.get(player).maxHealth += 25;
+        registry.healthBar.get(player).health += 25;
+        registry.players.get(player).attackPower += 6;
     }
 
 
@@ -827,7 +832,7 @@ void WorldSystem::handle_collisions() {
             if (registry.enemyProjectiles.has(entity_other)) {
                 if (playerHealth.health > 0 && playerComponent.damageCooldown <= 0.f) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
-                    playerHealth.TakeDamage((float) enemyProjectile.attackPower, 5.f);
+                    playerHealth.TakeDamage((float) enemyProjectile.attackPower, 2.f);
                     playerComponent.damageCooldown = 0.5f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());

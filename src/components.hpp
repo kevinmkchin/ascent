@@ -69,6 +69,16 @@ enum class TEXTURE_ASSET_ID : u16
     BG_MENU_LAYER3,
     BG_MENU_LAYER4,
     BG_MENU_LAYER5,
+    BG_VILLAGE_LAYER1,
+    BG_VILLAGE_LAYER2,
+    BG_VILLAGE_LAYER3,
+    BG_VILLAGE_LAYER4,
+    BG_VILLAGE_LAYER5,
+    BG_VILLAGE_LAYER6,
+    BG_VILLAGE_LAYER7,
+    BG_VILLAGE_LAYER8,
+    BG_VILLAGE_LAYER9,
+    BG_VILLAGE_LAYER10,
     BG_FOREST_LAYER1,
     BG_FOREST_LAYER2,
     BG_FOREST_LAYER3,
@@ -86,6 +96,7 @@ enum class TEXTURE_ASSET_ID : u16
     TILES_CAVE,
     TILES_FOREST,
     TILES_SNOWY,
+    TILES_DECORATIONS,
 
     TEXTURE_COUNT
 };
@@ -128,6 +139,16 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("menu_bg_layer3.png"),
         textures_path("menu_bg_layer4.png"),
         textures_path("menu_bg_layer5.png"),
+        textures_path("village background/Background.png"),
+        textures_path("village background/1.png"),
+        textures_path("village background/2.png"),
+        textures_path("village background/3.png"),
+        textures_path("village background/4.png"),
+        textures_path("village background/5.png"),
+        textures_path("village background/6.png"),
+        textures_path("village background/7.png"),
+        textures_path("village background/8.png"),
+        textures_path("village background/Foreground.png"),
         textures_path("forest background/parallax-demon-woods-bg.png"),
         textures_path("forest background/parallax-demon-woods-far-trees.png"),
         textures_path("forest background/parallax-demon-woods-mid-trees.png"),
@@ -145,6 +166,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("tiles_cave.png"),
         textures_path("tiles_forest.png"),
         textures_path("tiles_snowy.png"),
+        textures_path("tiles_decorations.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -261,7 +283,7 @@ struct WalkingBehavior : Behavior {
 
 struct RangedBehavior : Behavior {
     bool lobbing = false;
-    i32 attackPower = 5;
+    i32 attackPower = 4;
 };
 
 struct MeleeBehavior : Behavior {
