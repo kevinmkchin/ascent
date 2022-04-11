@@ -765,6 +765,7 @@ void WorldSystem::handle_collisions() {
             }
         }
 
+
         if (registry.players.has(entity)) {
             CheckCollisionWithBlockable(entity, entity_other);
 
@@ -778,6 +779,12 @@ void WorldSystem::handle_collisions() {
                     }
                 }
             }
+
+            if (entity_other.GetTag() == TAG_ENEMYMELEEATTACK) {
+                playerHealth.health -= registry.enemyMeleeAttacks.get(entity_other).attackPower;
+                registry.remove_all_components_of(entity_other);
+            }
+
 
             if (registry.enemy.has(entity_other)) {
                 Enemy &enemy = registry.enemy.get(entity_other);
