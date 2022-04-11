@@ -85,6 +85,7 @@ enum class TEXTURE_ASSET_ID : u16
     HEALTH_POTION,
     TILES_CAVE,
     TILES_FOREST,
+    TILES_SNOWY,
 
     TEXTURE_COUNT
 };
@@ -143,6 +144,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("health_potion.png"),
         textures_path("tiles_cave.png"),
         textures_path("tiles_forest.png"),
+        textures_path("tiles_snowy.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
