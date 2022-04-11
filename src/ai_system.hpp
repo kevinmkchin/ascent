@@ -14,7 +14,7 @@ class AISystem
 public:
 	void Step(float deltaTime);
 	void HandleSpriteSheetFrame(float deltaTime);
-	void EnemyAttack(Entity enemy_entity);
+	void EnemyAttack(Entity enemy_entity, float elapsedTime);
 	void Pathfind(Entity enemy_entity, float elapsedTime);
 	void EnemyJumping(Entity enemy_entity, float deltaTime);
 	bool PlayerInAwarenessBubble(Entity enemy_entity);

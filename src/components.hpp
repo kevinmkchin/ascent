@@ -204,8 +204,6 @@ struct Enemy
 {
     float projectile_speed = 120.f;
     float playerHurtCooldown = 0.f;
-    float attackCooldown = 2000.f;
-    float elapsedTime = 0.f;
     //std::vector<Behavior> behaviors;
 };
 
@@ -216,6 +214,12 @@ struct Behavior {
 struct EnemyProjectile {
     Entity enemy_projectile;
     i32 attackPower = 0;
+};
+
+struct EnemyMeleeAttack {
+    i32 attackPower = 0;
+    float elapsedTime = 0;
+    float existenceTime = 0;
 };
 
 struct Exp
@@ -256,10 +260,15 @@ struct WalkingBehavior : Behavior {
 struct RangedBehavior : Behavior {
     bool lobbing = false;
     i32 attackPower = 5;
+    float attackCooldown = 2000.f;
+    float elapsedTime = 0.f;
 };
 
 struct MeleeBehavior : Behavior {
     i32 attackPower = 8;
+    bool requestingAttack = false;
+    float attackCooldown = 500;
+    float elapsedTime = 0;
 };
 
 struct Weapon
@@ -487,4 +496,5 @@ enum GAMETAGS : u8
     TAG_PLAYERMELEEATTACK,
     TAG_SWORD,
     TAG_BOW,
+    TAG_ENEMYMELEEATTACK,
 };
