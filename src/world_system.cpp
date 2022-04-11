@@ -730,9 +730,10 @@ void WorldSystem::handle_collisions() {
             CheckCollisionWithBlockable(entity, entity_other);
 
             if (entity_other.GetTag() == TAG_SPIKE) {
-                if (playerMotion.velocity.y > 0.f) // only hurt when falling on spikes
+                if (playerMotion.velocity.y > 0.f && playerComponent.damageCooldown <= 0.f) // only hurt when falling on spikes
                 {
                     playerHealth.health += -10.f;
+                    playerComponent.damageCooldown = 0.5f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -793,9 +794,10 @@ void WorldSystem::handle_collisions() {
             }
 
             if (registry.enemyProjectiles.has(entity_other)) {
-                if (playerHealth.health > 0) {
+                if (playerHealth.health > 0 && playerComponent.damageCooldown <= 0.f) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
                     playerHealth.TakeDamage((float) enemyProjectile.attackPower, 5.f);
+                    playerComponent.damageCooldown = 0.5f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
