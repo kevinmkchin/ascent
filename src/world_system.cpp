@@ -236,11 +236,11 @@ void WorldSystem::HandleMutations() {
     }
 }
 
-void WorldSystem::init(RenderSystem *renderer_arg, PlayerSystem *player_sys_arg, AISystem *ai_sys_arg) {
+void WorldSystem::init(SDL_Window* window_arg, RenderSystem *renderer_arg, PlayerSystem *player_sys_arg, AISystem *ai_sys_arg) {
     this->renderer = renderer_arg;
     this->playerSystem = player_sys_arg;
     this->aiSystem = ai_sys_arg;
-
+    this->window = window_arg;
     loadAllContent();
 
     SetCurrentMode(MODE_MAINMENU);
@@ -322,11 +322,16 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     switch (stage) {
         case CHAPTER_TUTORIAL: {
             renderer->bgTexId = {
-                { TEXTURE_ASSET_ID::BG_LAYER1, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER2, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER3, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER4, 0.8f },
-                { TEXTURE_ASSET_ID::BG_LAYER5, 0.4f }
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER1, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER2, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER3, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER4, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER5, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER6, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER7, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER8, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER9, 0.3f },
+                { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER10, 0.3f },
             };
         }break;
         case CHAPTER_ONE_STAGE_ONE: {
@@ -375,9 +380,9 @@ void WorldSystem::SpawnLevelEntities() {
     CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your way to the top of the mountain!");
 
     if (currentDifficulty == DIFFICULTY_EASY) {
-        registry.healthBar.get(player).maxHealth += 50;
-        registry.healthBar.get(player).health += 50;
-        registry.players.get(player).attackPower += 10;
+        registry.healthBar.get(player).maxHealth += 25;
+        registry.healthBar.get(player).health += 25;
+        registry.players.get(player).attackPower += 6;
     }
 
 
@@ -420,6 +425,9 @@ void WorldSystem::SpawnLevelEntities() {
     }
     for (vec2 flyingEnemySpawn: currentLevelData.flyingMonsterSpawns) {
         CreateBatEnemy(flyingEnemySpawn);
+    }
+    for (vec2 stationaryEnemySpawn: currentLevelData.stationaryMonsterSpawns) {
+        CreateStationaryEnemy(stationaryEnemySpawn);
     }
 
     // Create shop items
@@ -627,14 +635,14 @@ bool WorldSystem::step(float deltaTime) {
                 continue;
             }
 
-            if(counter.counter_seconds_exp < (counter.counter_seconds_exp_default - 2.f))
+            if(counter.counter_seconds_exp < (counter.counter_seconds_exp_default - 0.6f))
             {
                 auto& expTransform = registry.transforms.get(entity);
                 auto& expMotion = registry.motions.get(entity);
                 vec2 toPlayerVec = playerTransform.position - expTransform.position;
                 if(length(toPlayerVec) < playerExpPickUpRange)
                 {
-                    expMotion.velocity = normalize(toPlayerVec) * 100.f;
+                    expMotion.velocity = normalize(toPlayerVec) * 128.f;
                 }
             }
         }
@@ -700,6 +708,7 @@ void WorldSystem::handle_collisions() {
                         auto &playerMotion = registry.motions.get(player);
                         playerMotion.velocity.y = std::min(-playerMotion.velocity.y, -180.f);
                         playerMotion.velocity.x *= 1.7f;
+                        playerMotion.velocity.x = std::max(std::min(playerMotion.velocity.x, 400.f), -400.f);
                     } else if (playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1) {
                         auto &playerMotion = registry.motions.get(player);
                         float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
@@ -722,25 +731,24 @@ void WorldSystem::handle_collisions() {
                     motion.velocity = {0.f, 0.f};
 
                     vec2 expPosition = registry.transforms.get(entity).position;
-                    int coin_or_exp_or_potion = RandomInt(0, 4);
-                    if (coin_or_exp_or_potion == 2) {
+                    int coin_or_potion = RandomInt(1, 10);
+                    if (coin_or_potion <= 2)
+                    {
+                        createHealthPotion(expPosition);
+                    }
+                    else if (coin_or_potion <= 6)
+                    {
                         int random_count = RandomInt(1, 3);
                         for (int i = 1; i <= random_count; i++) 
                         {
                             createCoins(expPosition);
                         }
                     }
-                    else if (coin_or_exp_or_potion == 0) {
-                        createHealthPotion(expPosition);
-                        
-                    }
-                    else 
+
+                    int random_exp_count = RandomInt(3, 7);
+                    for (int i = 1; i <= random_exp_count; i++) 
                     {
-                        int random_count = RandomInt(6, 8);
-                        for (int i = 1; i <= random_count; i++) 
-                        {
-                            createExp(expPosition);
-                        }
+                        createExp(expPosition);
                     }
 
                     if (Mix_PlayChannel(-1, monster_death_sound, 0) == -1) {
@@ -794,7 +802,7 @@ void WorldSystem::handle_collisions() {
 
             if (registry.exp.has(entity_other))
             {
-                int random_weight = RandomInt(6, 10);
+                int random_weight = RandomInt(3, 7);
                 playerComponent.experience += random_weight;
                 if (Mix_PlayChannel(-1, points_pickup_sound, 0) == -1) {
                     printf("Mix_PlayChannel: %s\n", Mix_GetError());
@@ -815,7 +823,7 @@ void WorldSystem::handle_collisions() {
 
             if (registry.healthPotion.has(entity_other))
             {
-                playerHealth.health += 5.f;
+                playerHealth.Heal(registry.healthPotion.get(entity_other).healthRestoreAmount);
                 if (Mix_PlayChannel(-1, health_pickup_sound, 0) == -1) {
                     printf("Mix_PlayChannel: %s\n", Mix_GetError());
                 }
@@ -825,7 +833,7 @@ void WorldSystem::handle_collisions() {
 
             if (registry.shopItems.has(entity_other))
             {
-                if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN) && registry.activeShopItems.size() == 0) {
+                if (Input::GameInteractButtonHasBeenPressed() && registry.activeShopItems.size() == 0) {
                     auto& activeItem = registry.activeShopItems.emplace(entity_other);
                     activeItem.linkedEntity.push_back(entity_other);
                 }
@@ -834,7 +842,7 @@ void WorldSystem::handle_collisions() {
             if (registry.enemyProjectiles.has(entity_other)) {
                 if (playerHealth.health > 0 && playerComponent.damageCooldown <= 0.f) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
-                    playerHealth.TakeDamage((float) enemyProjectile.attackPower, 5.f);
+                    playerHealth.TakeDamage((float) enemyProjectile.attackPower, 2.f);
                     playerComponent.damageCooldown = 0.5f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
@@ -846,7 +854,7 @@ void WorldSystem::handle_collisions() {
                 registry.remove_all_components_of(fire_entity);
             }
 
-            if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameUpHasBeenPressed()) {
+            if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameInteractButtonHasBeenPressed()) {
                 bGoToNextStage = true;
                 continue;
             }
@@ -1064,49 +1072,53 @@ void WorldSystem::SDLProcessEvents() {
                     console_keydown(event.key);
                     break;
                 }
+
+                if(event.key.keysym.sym == SDLK_F1)
+                {
+                    SDL_SetWindowFullscreen(window, 0);
+                }
+                if(event.key.keysym.sym == SDLK_F2)
+                {
+                    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                }
+                // if(event.key.keysym.sym == SDLK_F3)
+                // {
+                //     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+                // }
             }break;
 
             case SDL_KEYUP: {
                 Input::ProcessSDLKeyUpEvent(event.key);
-            }
-                break;
+            }break;
 
             case SDL_CONTROLLERBUTTONDOWN: {
                 Input::ProcessSDLControllerButtonDownEvent(event.cbutton);
-            }
-                break;
+            }break;
             case SDL_CONTROLLERBUTTONUP: {
                 Input::ProcessSDLControllerButtonUpEvent(event.cbutton);
-            }
-                break;
+            }break;
             case SDL_CONTROLLERAXISMOTION: {
                 Input::ProcessSDLControllerAxisEvent(event.caxis);
-            }
-                break;
+            }break;
             case SDL_CONTROLLERDEVICEADDED: {
                 Input::SDLControllerConnected(event.cdevice.which);
-            }
-                break;
+            }break;
             case SDL_CONTROLLERDEVICEREMOVED: {
                 Input::SDLControllerRemoved(event.cdevice.which);
-            }
-                break;
+            }break;
 
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
                     case SDL_WINDOWEVENT_SIZE_CHANGED: {
                         renderer->UpdateBackBufferSize();
-                    }
-                        break;
+                    }break;
                 }
-            }
-                break;
+            }break;
 
             case SDL_QUIT: {
                 gameIsRunning = false;
-            }
-                break;
+            }break;
         }
     }
 }

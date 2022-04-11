@@ -110,4 +110,5 @@ bool gl_has_errors();
 
 void PickThreeRandomInts(int* x, int* y, int* z, int cap);
 
+// min max inclusive
 int RandomInt(int min, int max);

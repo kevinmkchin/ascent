@@ -69,6 +69,16 @@ enum class TEXTURE_ASSET_ID : u16
     BG_MENU_LAYER3,
     BG_MENU_LAYER4,
     BG_MENU_LAYER5,
+    BG_VILLAGE_LAYER1,
+    BG_VILLAGE_LAYER2,
+    BG_VILLAGE_LAYER3,
+    BG_VILLAGE_LAYER4,
+    BG_VILLAGE_LAYER5,
+    BG_VILLAGE_LAYER6,
+    BG_VILLAGE_LAYER7,
+    BG_VILLAGE_LAYER8,
+    BG_VILLAGE_LAYER9,
+    BG_VILLAGE_LAYER10,
     BG_FOREST_LAYER1,
     BG_FOREST_LAYER2,
     BG_FOREST_LAYER3,
@@ -83,6 +93,10 @@ enum class TEXTURE_ASSET_ID : u16
     BG_MOUNTAIN_LAYER8,
     HELP_MENU,
     HEALTH_POTION,
+    TILES_CAVE,
+    TILES_FOREST,
+    TILES_SNOWY,
+    TILES_DECORATIONS,
 
     TEXTURE_COUNT
 };
@@ -125,6 +139,16 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("menu_bg_layer3.png"),
         textures_path("menu_bg_layer4.png"),
         textures_path("menu_bg_layer5.png"),
+        textures_path("village background/Background.png"),
+        textures_path("village background/1.png"),
+        textures_path("village background/2.png"),
+        textures_path("village background/3.png"),
+        textures_path("village background/4.png"),
+        textures_path("village background/5.png"),
+        textures_path("village background/6.png"),
+        textures_path("village background/7.png"),
+        textures_path("village background/8.png"),
+        textures_path("village background/Foreground.png"),
         textures_path("forest background/parallax-demon-woods-bg.png"),
         textures_path("forest background/parallax-demon-woods-far-trees.png"),
         textures_path("forest background/parallax-demon-woods-mid-trees.png"),
@@ -138,7 +162,11 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("mountain background/7.png"),
         textures_path("mountain background/8.png"),
         textures_path("help.png"),
-        textures_path("health_potion.png")
+        textures_path("health_potion.png"),
+        textures_path("tiles_cave.png"),
+        textures_path("tiles_forest.png"),
+        textures_path("tiles_snowy.png"),
+        textures_path("tiles_decorations.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -236,6 +264,7 @@ struct Coin
 struct HealthPotion
 {
     float counter_seconds_health = 6.f;
+    float healthRestoreAmount = 5.f;
 };
 
 struct PathingBehavior {
@@ -259,7 +288,7 @@ struct WalkingBehavior : Behavior {
 
 struct RangedBehavior : Behavior {
     bool lobbing = false;
-    i32 attackPower = 5;
+    i32 attackPower = 4;
     float attackCooldown = 2000.f;
     float elapsedTime = 0.f;
 };
@@ -449,6 +478,11 @@ struct HealthBar
     float maxHealth = 100.f;
     bool bInvincible = false;
 
+    void Heal(float amount)
+    {
+        health = min(health + amount, maxHealth);
+    }
+
     float TakeDamage(float base, float variance = 0.f)
     {
         if(bInvincible)
@@ -483,6 +517,11 @@ struct ProximityTextComponent
     bool __bCurrentlyTriggered = false;
     float __typingTimer = 0.f;
     std::string __currentTypedTextBuffer = "";
+};
+
+struct LightSource
+{
+
 };
 
 enum GAMETAGS : u8

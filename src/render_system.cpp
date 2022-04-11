@@ -52,6 +52,33 @@ void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     gl_has_errors();
 
+    vec2 cameraPosition = { 0.f, 0.f };
+
+    int lightSize = 0;
+    float lightArray[50] = { };
+    if (registry.players.size() > 0 && ((world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE) || (world->GetCurrentStage() == CHAPTER_TWO_STAGE_ONE))) {
+        Entity player = registry.players.entities[0];
+        TransformComponent& playerTransform = registry.transforms.get(player);
+        float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
+        float playerPositionY = clamp(playerTransform.position.y, cameraBoundMin.y, cameraBoundMax.y);
+        cameraPosition = vec2(playerPositionX, playerPositionY);
+
+        lightSize = registry.lightSources.size();
+        for (int i = 0; i < registry.lightSources.size(); i++) {
+            vec2 pos = registry.transforms.get(registry.lightSources.entities[i]).position;
+            lightArray[(i * 2)] = pos.x;
+            lightArray[(i * 2) + 1] = pos.y;
+        }
+    }
+
+    GLuint lightNum_loc = glGetUniformLocation(currProgram, "lightSize");
+    GLuint lightArray_loc = glGetUniformLocation(currProgram, "lightSources");
+    GLuint camerapos_loc = glGetUniformLocation(currProgram, "cameraPosition");
+
+    glUniform1i(lightNum_loc, lightSize);
+    glUniform2fv(lightArray_loc, 25, lightArray);
+    glUniform2fv(camerapos_loc, 1, (float*)&cameraPosition);
+
     GLuint offset_loc = glGetUniformLocation(currProgram, "bg_offset");
     glUniform1f(offset_loc, offset);
 
@@ -128,6 +155,7 @@ void RenderSystem::DrawAllBackgrounds(float elapsed_ms)
             Entity player = registry.players.entities[0];
             TransformComponent& playerTransform = registry.transforms.get(player);
             float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
+
             playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
             playerPositionX = playerPositionX / GAME_RESOLUTION_WIDTH;
             offset = playerPositionX / ((float)bgTexId.size());
@@ -177,11 +205,23 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
     TransformComponent& playerTransform = registry.transforms.get(player);
     float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
     float playerPositionY = clamp(playerTransform.position.y, cameraBoundMin.y, cameraBoundMax.y);
+    vec2 cameraPosition = vec2(playerPositionX, playerPositionY);
     playerPositionX = playerPositionX - (GAME_RESOLUTION_WIDTH / 2.0f);
     playerPositionY = playerPositionY - (GAME_RESOLUTION_HEIGHT / 2.0f);
     vec2 playerPosition = vec2(playerPositionX, playerPositionY);
     vec2 scaledPlayerPosition = playerPosition * (float)FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
     cameraTransform.translate(-scaledPlayerPosition);
+
+    int lightSize = 0;
+    float lightArray[50] = { };
+    if ((world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE) || (world->GetCurrentStage() == CHAPTER_TWO_STAGE_ONE)) {
+        lightSize = registry.lightSources.size();
+        for (int i = 0; i < registry.lightSources.size(); i++) {
+            vec2 pos = registry.transforms.get(registry.lightSources.entities[i]).position;
+            lightArray[(i * 2)] = pos.x;
+            lightArray[(i * 2) + 1] = pos.y;
+        }
+    }
 
     // STD::VECTORS TO HOLD VERTICES AND INDICES BATCH
     u32 renderState = sortedSprites[0].renderState;
@@ -214,6 +254,10 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
             glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*) &projection);
             GLuint fcolor_loc = glGetUniformLocation(currProgram, "fcolor");
             glUniform3f(fcolor_loc, 1.f, 1.f, 1.f);
+            GLuint lightNum_loc = glGetUniformLocation(currProgram, "lightSize");
+            GLuint lightArray_loc = glGetUniformLocation(currProgram, "lightSources");
+            glUniform1i(lightNum_loc, lightSize);
+            glUniform2fv(lightArray_loc, 25, lightArray);
             gl_has_errors();
 
             // REBIND VBO & IBO
