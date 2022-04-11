@@ -29,31 +29,23 @@ void AISystem::Step(float deltaTime)
 
 	for (int i = 0; i < registry.enemy.size(); ++i)
 	{
+		Entity enemyEntity = registry.enemy.entities[i];
 		Enemy& enemyComponent = registry.enemy.components[i];
-		const Entity& enemy = registry.enemy.entities[i];
 
-		// Attacks
-		if (enemyComponent.elapsedTime >= enemyComponent.attackCooldown) {
-			if (!registry.deathTimers.has(enemy)) {
-				EnemyAttack(enemy);
-				enemyComponent.elapsedTime = 0.f;
-			}
-		}
-		else {
-			TransformComponent& enemyTransform = registry.transforms.get(enemy);
-			if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
-				enemyComponent.elapsedTime += elapsedTime;
+		if (registry.rangedBehaviors.has(enemyEntity) || registry.meleeBehaviors.has(enemyEntity)) {
+			if (!registry.deathTimers.has(enemyEntity)) {
+				EnemyAttack(enemyEntity, elapsedTime);
 			}
 		}
 
 		// Dying / colliding with player
-		if (registry.deathTimers.has(enemy)) {
-			DeathTimer& time = registry.deathTimers.get(enemy);
+		if (registry.deathTimers.has(enemyEntity)) {
+			DeathTimer& time = registry.deathTimers.get(enemyEntity);
 			time.elapsed_ms -= deltaTime * 1000.f;
 			enemyComponent.playerHurtCooldown = time.elapsed_ms;
 
 			if (time.elapsed_ms <= 0.f) {
-				registry.remove_all_components_of(enemy);
+				registry.remove_all_components_of(enemyEntity);
 			}
 
 		}
@@ -62,14 +54,26 @@ void AISystem::Step(float deltaTime)
 			{
 				enemyComponent.playerHurtCooldown -= deltaTime;
 			}
-			if (registry.walkingBehaviors.has(enemy)) {
-				EnemyJumping(enemy, deltaTime);
+			if (registry.walkingBehaviors.has(enemyEntity)) {
+				EnemyJumping(enemyEntity, deltaTime);
 			}
+		}
+		std::vector<Entity> toDeleteList;
+		for (int i = 0; i < registry.enemyMeleeAttacks.size(); i++) {
+			if (registry.enemyMeleeAttacks.components[i].elapsedTime > registry.enemyMeleeAttacks.components[i].existenceTime) {
+				toDeleteList.push_back(registry.enemyMeleeAttacks.entities[i]);
+			}
+			else {
+				registry.enemyMeleeAttacks.components[i].elapsedTime += elapsedTime;
+			}
+		}
+		for (int i = 0; i < toDeleteList.size(); i++) {
+			registry.remove_all_components_of(toDeleteList[i]);
 		}
 	}
 
 	// Pathing
-	if (elapsedAICycleTime >= 30.0f) {
+	if (elapsedAICycleTime >= 0.0f) {
 		for (int i = 0; i < registry.enemy.size(); ++i)
 		{
 			Enemy& enemyComponent = registry.enemy.components[i];
@@ -125,8 +129,10 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 	}
 }
 
-void AISystem::EnemyAttack(Entity enemy_entity) {
+void AISystem::EnemyAttack(Entity enemy_entity, float elapsedTime) {
 	TransformComponent& enemyTransformComponent = registry.transforms.get(enemy_entity);
+	Entity playerEntity = registry.players.entities[0];
+	TransformComponent& playerTransform = registry.transforms.get(playerEntity);
 	vec2 pos = { (int)((enemyTransformComponent.position.x + 1) / 16), (int)((enemyTransformComponent.position.y + 1) / 16) };
 	if (pos[0] < levelTiles.size() && pos[1] < levelTiles[0].size() && pos[0] >= 0 && pos[1] >= 0) {
 		if (registry.rangedBehaviors.has(enemy_entity) && levelTiles[(int)pos[0]][(int)pos[1]] == 0)
@@ -137,32 +143,142 @@ void AISystem::EnemyAttack(Entity enemy_entity) {
 			Entity playerEntity = registry.players.entities.front();
 			MotionComponent& playerMotion = registry.motions.get(playerEntity);
 			TransformComponent& player_transform = registry.transforms.get(playerEntity);
-			TransformComponent& enemy_transform = registry.transforms.get(enemy_entity);
-			vec2 diff_distance = player_transform.position - enemy_transform.position;
+			vec2 diff_distance = player_transform.position - enemyTransformComponent.position;
 			if (diff_distance.x < 100 && diff_distance.x > -100 && diff_distance.y > -50 && diff_distance.y < 50) {
-				if (enemyRangedBehavior.lobbing) {
+				if (enemyRangedBehavior.elapsedTime > enemyRangedBehavior.attackCooldown) {
+					if (enemyRangedBehavior.lobbing) {
 
-					vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
-					vec2 acceleration = vec2(0.f, 250.f);
+						vec2 velocity = vec2(0.2f * enemy.projectile_speed, -2.0f * enemy.projectile_speed);
+						vec2 acceleration = vec2(0.f, 250.f);
 
-					float random_change = 15.f;
-					float percent_diff = (float)rand() / RAND_MAX;
-					int direction = rand() % 2;
-					if (direction) {
-						random_change *= -1.f;
+						float random_change = 15.f;
+						float percent_diff = (float)rand() / RAND_MAX;
+						int direction = rand() % 2;
+						if (direction) {
+							random_change *= -1.f;
+						}
+						velocity.x += random_change * percent_diff;
+
+						vec2 neg_velocity = { -velocity.x, velocity.y };
+
+						createEnemyLobbingProjectile(enemyTransformComponent.position, velocity, acceleration, enemy_entity);
+						createEnemyLobbingProjectile(enemyTransformComponent.position, neg_velocity, acceleration, enemy_entity);
 					}
-					velocity.x += random_change * percent_diff;
-
-					vec2 neg_velocity = { -velocity.x, velocity.y };
-
-					createEnemyLobbingProjectile(enemy_transform.position, velocity, acceleration, enemy_entity);
-					createEnemyLobbingProjectile(enemy_transform.position, neg_velocity, acceleration, enemy_entity);
+					else {
+						float angle = atan2(diff_distance.y, diff_distance.x);
+						vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
+						createEnemyProjectile(enemyTransformComponent.position, velocity, enemy_entity);
+					}
 				}
-				else {
-					float angle = atan2(diff_distance.y, diff_distance.x);
-					vec2 velocity = vec2(cos(angle) * enemy.projectile_speed, sin(angle) * enemy.projectile_speed);
-					createEnemyProjectile(enemy_transform.position, velocity, enemy_entity);
+			}
+			else {
+				TransformComponent& enemyTransform = registry.transforms.get(enemy_entity);
+				if (abs(playerTransform.position.x - enemyTransform.position.x) < 600 && abs(playerTransform.position.y - enemyTransform.position.y) < 600) {
+					enemyRangedBehavior.elapsedTime += elapsedTime;
 				}
+			}
+		}
+		if (registry.meleeBehaviors.has(enemy_entity)) {
+			Enemy& enemy = registry.enemy.get(enemy_entity);
+			MeleeBehavior& enemyMeleeBehavior = registry.meleeBehaviors.get(enemy_entity);
+			if (enemyMeleeBehavior.elapsedTime > 0) { //enemyMeleeBehavior.attackCooldown) {
+				enemyMeleeBehavior.elapsedTime = 0;
+				MotionComponent& enemyMotion = registry.motions.get(enemy_entity);
+				Entity playerEntity = registry.players.entities.front();
+				MotionComponent& playerMotion = registry.motions.get(playerEntity);
+				TransformComponent& player_transform = registry.transforms.get(playerEntity);
+				float diff_distance = player_transform.position.x - enemyTransformComponent.position.x;
+				if (enemyMeleeBehavior.requestingAttack) {
+					if (diff_distance > 0) {
+						if (enemyMotion.velocity.x > 0) {
+							// set some acceleration in other direction
+							// attack
+							//playerMeleeAttackCooldownTimer = playerComponentPtr->meleeAttackCooldown; // reset timer
+							//playerMeleeAttackLengthTimer = 0.03f;     // reset timer
+
+							Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_ENEMYMELEEATTACK);
+							auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
+							attack.attackPower = enemyMeleeBehavior.attackPower;
+							attack.existenceTime = 1;
+							auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
+							auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
+
+							i16 meleeBoxWidth = 12;
+							i16 meleeBoxHeight = 12;
+
+							SpriteComponent attackBox = {
+								{0,0},
+								20,
+								EFFECT_ASSET_ID::SPRITE,
+								TEXTURE_ASSET_ID::SWORDSWING_RIGHT
+							};
+
+							shortvec2& dimensions = attackBox.dimensions;
+							transform.position.x = enemyTransformComponent.position.x + 8;
+							transform.position.y = enemyTransformComponent.position.y;
+							dimensions = { meleeBoxWidth, meleeBoxHeight };
+							transform.center = { meleeBoxWidth, meleeBoxHeight / 2 };
+							collider.collider_position = transform.position;
+							collider.collision_pos = { 0, (i16)(meleeBoxHeight / 2) };
+							collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight / 2) };
+							attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_RIGHT;
+							registry.sprites.insert(
+								enemyMeleeAttackEntity,
+								attackBox
+								);
+						}
+						else {
+							// set some acceleration in other direction
+						}
+					}
+					else {
+						if (enemyMotion.velocity.x <= 0) {
+							// set some acceleration in other direction
+							// attack
+							// set some acceleration in other direction
+							// attack
+							//playerMeleeAttackCooldownTimer = playerComponentPtr->meleeAttackCooldown; // reset timer
+							//playerMeleeAttackLengthTimer = 0.03f;     // reset timer
+
+							Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_ENEMYMELEEATTACK);
+							auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
+							auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
+							auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
+							attack.attackPower = enemyMeleeBehavior.attackPower;
+							attack.existenceTime = 1;
+
+							i16 meleeBoxWidth = 12;
+							i16 meleeBoxHeight = 12;
+
+							SpriteComponent attackBox = {
+								{12,12},
+								20,
+								EFFECT_ASSET_ID::SPRITE,
+								TEXTURE_ASSET_ID::SWORDSWING_LEFT
+							};
+
+							shortvec2& dimensions = attackBox.dimensions;
+							transform.position.x = enemyTransformComponent.position.x - 8;
+							transform.position.y = enemyTransformComponent.position.y;
+							dimensions = { meleeBoxWidth, meleeBoxHeight };
+							transform.center = { meleeBoxWidth, meleeBoxHeight / 2 };
+							collider.collider_position = transform.position;
+							collider.collision_pos = { 0, (i16)(meleeBoxHeight / 2) };
+							collider.collision_neg = { meleeBoxWidth, (i16)(meleeBoxHeight / 2) };
+							attackBox.texId = TEXTURE_ASSET_ID::SWORDSWING_LEFT;
+							registry.sprites.insert(
+								enemyMeleeAttackEntity,
+								attackBox
+							);
+						}
+						else {
+							// set some acceleration in other direction
+						}
+					}
+				}
+			}
+			else {
+				enemyMeleeBehavior.elapsedTime += elapsedTime;
 			}
 		}
 	}
@@ -205,7 +321,6 @@ void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 		}
 	}
 }
-
 void AISystem::PathBehavior(Entity enemy_entity) {
 	// TODO abstract this for easier extension (probably focus on the expanding squares option!)
 	if (registry.pathingBehaviors.has(enemy_entity)) {

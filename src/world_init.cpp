@@ -219,7 +219,7 @@ Entity CreateKnightEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
@@ -421,7 +421,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = true;
 
@@ -502,7 +502,7 @@ Entity CreateMushroomEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
@@ -584,7 +584,7 @@ Entity CreateSlimeEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
@@ -664,7 +664,7 @@ Entity CreateWormEnemy(vec2 position)
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.maxPatrolTime = 200.f;
+    patrollingBehavior.maxPatrolTime = 300.f;
     patrollingBehavior.patrolSpeed = maxMoveSpeed / 4.f;
     patrollingBehavior.standStill = false;
 
