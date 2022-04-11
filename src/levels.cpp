@@ -40,7 +40,7 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
             tileSetToUse = TEXTURE_ASSET_ID::TILES_FOREST;
         }break;
         case CHAPTER_THREE_STAGE_ONE:{
-            tileSetToUse = TEXTURE_ASSET_ID::TILES_FOREST;
+            tileSetToUse = TEXTURE_ASSET_ID::TILES_SNOWY;
         }break;
     }
 
