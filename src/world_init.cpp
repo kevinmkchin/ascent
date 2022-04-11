@@ -104,6 +104,7 @@ Entity createPlayer(vec2 position)
 
     auto& player = registry.players.emplace(entity);
     registry.mutations.emplace(entity);
+    registry.lightSources.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
     auto cb = registry.goldBar.emplace(entity);
     cb.coins = 50.f;
