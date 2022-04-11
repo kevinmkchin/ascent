@@ -238,6 +238,75 @@ Entity CreateKnightEnemy(vec2 position)
 	return entity;
 }
 
+Entity CreateStationaryEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    hb.health = 50000.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    vec2 collisionDimension = { 12, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = collisionDimension / 2.f;
+    collider.collision_neg = collisionDimension / 2.f;
+
+    visualComponent.sightRadius = 48.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                4,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::GOBLIN,
+                true,
+                false,
+                true,
+                96,
+                80,
+                0,
+                0,
+                0.f,
+                {
+                    
+                    // idle
+                    {
+                        4,
+                        18,
+                        100.f * 4.f
+                    },
+                    
+                    // run
+                    {
+                        6,
+                        0,
+                        100.f * 6.f
+                    },
+
+                    // death
+                    {
+                        6,
+                        6,
+                        100.f * 6.f
+                    },
+                    
+                },
+        }
+    );
+
+    return entity;
+}
+
 Entity CreateGoblinEnemy(vec2 position)
 {
     auto entity = Entity::CreateEntity();

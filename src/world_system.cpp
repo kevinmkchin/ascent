@@ -426,6 +426,9 @@ void WorldSystem::SpawnLevelEntities() {
     for (vec2 flyingEnemySpawn: currentLevelData.flyingMonsterSpawns) {
         CreateBatEnemy(flyingEnemySpawn);
     }
+    for (vec2 stationaryEnemySpawn: currentLevelData.stationaryMonsterSpawns) {
+        CreateStationaryEnemy(stationaryEnemySpawn);
+    }
 
     // Create shop items
     for (vec2 shopItemSpawn: currentLevelData.shopItemSpawns) {

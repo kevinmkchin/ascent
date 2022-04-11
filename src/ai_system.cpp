@@ -76,7 +76,7 @@ void AISystem::Step(float deltaTime)
 			const Entity& enemy = registry.enemy.entities[i];
 			// if entity in range of some amount of player (to reduce issues w/ run time) 
 
-			if (!registry.deathTimers.has(enemy)) {
+			if (!registry.deathTimers.has(enemy) && registry.pathingBehaviors.has(enemy)) {
 				TransformComponent& enemyTransform = registry.transforms.get(enemy);
 				if (abs(playerTransform.position.x - enemyTransform.position.x) < 500 && abs(playerTransform.position.y - enemyTransform.position.y) < 500) {
 					Pathfind(enemy, elapsedTime);
