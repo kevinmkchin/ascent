@@ -830,3 +830,45 @@ void AISystem::EnemyJumping(Entity enemy_entity, float deltaTime) {
 		}
 	}
 }
+
+void BossStep(float deltaTime) {
+	// do all of this on a cooldown
+	// melee attacks should be on a delay, with a notice to player
+	// DO WE ALSO MAKE BOSS AN ENEMY?
+	// check if its in boss level (do this above, not in this function)
+		// check if player within some distance
+			// if player is within some distance, FOR FIRST TIME, BLOCK OFF EXIT TO BOSS ARENA, play a sound cue?, set boss into fight mode, it doesnt turn off
+			// alternative, fall into arena so you cant get out
+			// how to live edit level ?
+		// check current state (1, 2)
+	Entity& bossEntity   = registry.boss.entities[0];
+	Boss& bossComponent  = registry.boss.components[0];
+	TransformComponent& bossTransform   = registry.transforms.get(bossEntity);
+	TransformComponent& playerTransform = registry.transforms.get(registry.players.entities[0]);
+	vec2 distance = bossTransform.position - playerTransform.position;
+	float bossMeleeRange = 200; // ???
+	float bossHeight = 200;		// ???
+	if (bossComponent.summonState) {
+		// summon state
+			// summon 2-3 bats, then cycle back to state 1
+	}
+	else {
+		if (abs(distance.x) > bossMeleeRange + 8 || distance.y > bossHeight || distance.y < 0) {
+			// do mushroom attack! maybe mix it up with direct projectiles?
+		}
+		else {
+			// attack state (has 30% chance to go from attack state to summon state)
+				// if player is close, attack using slice
+				// if player is far,   attack using projectiles
+			if (distance.x > 0) {
+				// attack right
+			}
+			else {
+				// attack left
+			}
+		}
+	}
+	
+
+
+}
