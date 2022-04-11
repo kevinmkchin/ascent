@@ -8,33 +8,6 @@
 - Sara Mohamed 95590519
 - Suzuran Takikawa 79766572
 
-### Features implemented in Milestone 3:
+### Features implemented in Milestone 4:
 
-- Parallax background in main menu: 
-	- Visible in worldSystem.cpp -> SetCurrentMode()
-	- Visible in RenderSystem.cpp -> DrawAllBackgrounds()
 
-- Bouncing off of ground enemies:
-	- Visible in WorldSystem.cpp -> handle_collisions()
-
-- Various enemy assets & animations:
-	- Enemy animation system in ai_system.cpp
-	- Visible in world_init.cpp
-
-- Enemy death animations:
-	- ai_system.cpp, world_system.cpp
-
-- Buying mutations from shop:
-	- ui_system.cpp, world_system.cpp -> handle_collisions()
-
-- Coins and exp drop after enemy death + animation 
-	- Visible in world_init.cpp (Lines 834-942)
-	- Visible in worldSystem.cpp
-	- Visible in components.hpp
-
-- Pathing etc.
-	- Visible in ai_system.cpp primarily, supported by components system and world_init
-
-- multiple difficulties:
-	- Visible everywhere enum DIFFICULTY (found in world_system.cpp) members are used, primarily world_system.cpp
-	- button is in ui system and main
