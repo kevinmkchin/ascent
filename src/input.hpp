@@ -59,6 +59,7 @@ namespace Input {
     bool GamePauseHasBeenPressed();
     bool GameCycleItemLeftBeenPressed();
     bool GameCycleItemRightBeenPressed();
+    bool GameInteractButtonHasBeenPressed();
 
 //////////////////////////////////////////////////////////////////////
 // GENERIC CLASSES AND FUNCTIONS BELOW

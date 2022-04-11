@@ -41,6 +41,7 @@ public:
 	ComponentContainer<Coin> coins;
 	ComponentContainer<GoldBar> goldBar;
 	ComponentContainer<ProximityTextComponent> proximityTexts;
+	ComponentContainer<LightSource> lightSources;
 	ComponentContainer<HealthPotion> healthPotion;
 	ComponentContainer<EnemyMeleeAttack> enemyMeleeAttacks;
 
@@ -78,6 +79,7 @@ public:
 		registry_list.push_back(&coins);
 		registry_list.push_back(&goldBar);
 		registry_list.push_back(&proximityTexts);
+		registry_list.push_back(&lightSources);
 		registry_list.push_back(&healthPotion);
 		registry_list.push_back(&enemyMeleeAttacks);
 		

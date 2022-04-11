@@ -104,11 +104,12 @@ Entity createPlayer(vec2 position)
 
     auto& player = registry.players.emplace(entity);
     registry.mutations.emplace(entity);
+    registry.lightSources.emplace(entity);
     auto& hb = registry.healthBar.emplace(entity);
     auto cb = registry.goldBar.emplace(entity);
     cb.coins = 50.f;
-    hb.health = 100.f;
-    hb.maxHealth = 100.f;
+    hb.health = 50.f;
+    hb.maxHealth = 50.f;
 
     return entity;
 }
@@ -147,7 +148,7 @@ Entity CreateBatEnemy(vec2 position)
             entity,
             {
                     dimensions,
-                    0,
+                    4,
                     EFFECT_ASSET_ID::SPRITE,
                     TEXTURE_ASSET_ID::FLYING_ENEMY,
                     true,
@@ -214,8 +215,8 @@ Entity CreateKnightEnemy(vec2 position)
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
 
-    float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 0, 0 }; // ?
+    float maxMoveSpeed = 23.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
     patrollingBehavior.maxPatrolTime = 300.f;
@@ -228,13 +229,82 @@ Entity CreateKnightEnemy(vec2 position)
 		entity,
 		{
 				dimensions,
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
 				TEXTURE_ASSET_ID::MONSTER
 		}
 	);
 
 	return entity;
+}
+
+Entity CreateStationaryEnemy(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    hb.health = 50000.f;
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 16, 16 };
+    vec2 collisionDimension = { 12, 16 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = dimensions / 2.f;
+
+    collider.collision_pos = collisionDimension / 2.f;
+    collider.collision_neg = collisionDimension / 2.f;
+
+    visualComponent.sightRadius = 48.f;
+
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                4,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::GOBLIN,
+                true,
+                false,
+                true,
+                96,
+                80,
+                0,
+                0,
+                0.f,
+                {
+                    
+                    // idle
+                    {
+                        4,
+                        18,
+                        100.f * 4.f
+                    },
+                    
+                    // run
+                    {
+                        6,
+                        0,
+                        100.f * 6.f
+                    },
+
+                    // death
+                    {
+                        6,
+                        6,
+                        100.f * 6.f
+                    },
+                    
+                },
+        }
+    );
+
+    return entity;
 }
 
 Entity CreateGoblinEnemy(vec2 position)
@@ -263,7 +333,7 @@ Entity CreateGoblinEnemy(vec2 position)
     collider.collision_pos = collisionDimension / 2.f;
     collider.collision_neg = collisionDimension / 2.f;
 
-    float maxMoveSpeed = 64.f;
+    float maxMoveSpeed = 26.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
@@ -280,7 +350,7 @@ Entity CreateGoblinEnemy(vec2 position)
         entity,
         {
                 dimensions,
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::GOBLIN,
                 true,
@@ -347,8 +417,8 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     collider.collision_neg = dimensions / 2.f;
 
     // TODO: Change Goblin Bomber behavior
-    float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 3, 0 }; //?
+    float maxMoveSpeed = 20.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
     patrollingBehavior.maxPatrolTime = 300.f;
@@ -361,7 +431,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
         entity,
         {
                 dimensions,
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::GOBLIN_BOMBER,
                 true,
@@ -428,8 +498,8 @@ Entity CreateMushroomEnemy(vec2 position)
     collider.collision_pos = { 7, 8 };
     collider.collision_neg = { 7, 6 };
 
-    float maxMoveSpeed = 64.f;
-    pathingBehavior.goalFromPlayer = { 0, 0 }; //  ?
+    float maxMoveSpeed = 23.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
     patrollingBehavior.maxPatrolTime = 300.f;
@@ -444,7 +514,7 @@ Entity CreateMushroomEnemy(vec2 position)
         entity,
         {
                 dimensions,
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::MUSHROOM,
                 true,
@@ -510,7 +580,7 @@ Entity CreateSlimeEnemy(vec2 position)
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
 
-    float maxMoveSpeed = 64.f;
+    float maxMoveSpeed = 22.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
@@ -524,7 +594,7 @@ Entity CreateSlimeEnemy(vec2 position)
         entity,
         {
                 dimensions,
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::SLIME,
                 true,
@@ -590,7 +660,7 @@ Entity CreateWormEnemy(vec2 position)
     collider.collision_pos = dimensions / 2.f;
     collider.collision_neg = dimensions / 2.f;
 
-    float maxMoveSpeed = 64.f;
+    float maxMoveSpeed = 16.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
@@ -604,7 +674,7 @@ Entity CreateWormEnemy(vec2 position)
         entity,
         {
                 dimensions,
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::WORM,
                 true,
@@ -830,7 +900,7 @@ Entity CreateShopItem(vec2 position, u8 shopItemIndex) // remove later - just a 
             entity,
             {
                 { 16, 16 },
-                0,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::ASCENT_MUTATIONS_SHEET,
                 true, false, true, 128, 128,
@@ -995,7 +1065,7 @@ Entity CreateHelpSign(vec2 pos, float triggerRadius, vec2 textOffsetFromPos, u32
         entity,
         {
             dimensions,
-            0,
+            3,
             EFFECT_ASSET_ID::SPRITE,
             TEXTURE_ASSET_ID::WOODENSIGNS,
             true,
@@ -1078,7 +1148,7 @@ Entity CreateShopKeeperNPC(vec2 position)
     npcText.triggerRadius = 80.f;
     npcText.textPosition = position + vec2(0.f, -20.f);
     npcText.textSize = 8;
-    npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.");
+    npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press UP to buy something.");
     npcText.bTyped = true;
     npcText.secondsBetweenTypedCharacters = 0.04f;
 
@@ -1092,7 +1162,8 @@ Entity createHealthPotion(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
-    registry.healthPotion.emplace(entity);
+    auto& healthPotion = registry.healthPotion.emplace(entity);
+    healthPotion.healthRestoreAmount = 5.f;
 
     vec2 dimensions = { 8, 8 };
     transform.position = position;
