@@ -7,6 +7,8 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+INTERNAL GAMELEVELENUM __currentStage;
+
 INTERNAL void AddTileSizedCollider(Entity tileEntity)
 {
     auto& transform = registry.transforms.get(tileEntity);
@@ -24,13 +26,31 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
     transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
     transform.center = { 0.f,0.f };
 
+    TEXTURE_ASSET_ID tileSetToUse;
+
+    switch(__currentStage)
+    {
+        case CHAPTER_TUTORIAL:{
+            tileSetToUse = TEXTURE_ASSET_ID::TILES_CAVE;
+        }break;
+        case CHAPTER_ONE_STAGE_ONE:{
+            tileSetToUse = TEXTURE_ASSET_ID::TILES_CAVE;
+        }break;
+        case CHAPTER_TWO_STAGE_ONE:{
+            tileSetToUse = TEXTURE_ASSET_ID::TILES_FOREST;
+        }break;
+        case CHAPTER_THREE_STAGE_ONE:{
+            tileSetToUse = TEXTURE_ASSET_ID::TILES_FOREST;
+        }break;
+    }
+
     registry.sprites.insert(
         entity,
         {
             { TILE_SIZE, TILE_SIZE },
             10,
             EFFECT_ASSET_ID::SPRITE,
-            TEXTURE_ASSET_ID::TILES_CAVE,
+            tileSetToUse,
             true, false, true, 80, 128,
             0,
             0,
@@ -738,6 +758,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
 {
     ClearLevelTiles();
     ClearCurrentLevelData();
+    __currentStage = stageToGenerate;
 
     std::unordered_map<std::string, std::vector<ns::RoomRawData>> currentChapterRooms;
     switch(stageToGenerate)
