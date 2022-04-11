@@ -63,7 +63,7 @@ public:
 	WorldSystem();
 
 	// starts the game
-	void init(RenderSystem* renderer_arg, PlayerSystem* player_sys_arg, AISystem* ai_sys_arg);
+	void init(SDL_Window* window_arg, RenderSystem* renderer_arg, PlayerSystem* player_sys_arg, AISystem* ai_sys_arg);
 
     void cleanUp();
 

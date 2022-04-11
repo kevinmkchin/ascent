@@ -260,6 +260,7 @@ struct Coin
 struct HealthPotion
 {
     float counter_seconds_health = 6.f;
+    float healthRestoreAmount = 5.f;
 };
 
 struct PathingBehavior {
@@ -467,6 +468,11 @@ struct HealthBar
 	float health = 100.f;
     float maxHealth = 100.f;
     bool bInvincible = false;
+
+    void Heal(float amount)
+    {
+        health = min(health + amount, maxHealth);
+    }
 
     float TakeDamage(float base, float variance = 0.f)
     {
