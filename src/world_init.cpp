@@ -1079,7 +1079,7 @@ Entity CreateShopKeeperNPC(vec2 position)
     npcText.triggerRadius = 80.f;
     npcText.textPosition = position + vec2(0.f, -20.f);
     npcText.textSize = 8;
-    npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press Enter to buy something.");
+    npcText.text = std::string(shopKeeperNPCLines[pick]) + std::string("Press UP to buy something.");
     npcText.bTyped = true;
     npcText.secondsBetweenTypedCharacters = 0.04f;
 
@@ -1093,7 +1093,8 @@ Entity createHealthPotion(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
-    registry.healthPotion.emplace(entity);
+    auto& healthPotion = registry.healthPotion.emplace(entity);
+    healthPotion.healthRestoreAmount = 5.f;
 
     vec2 dimensions = { 8, 8 };
     transform.position = position;

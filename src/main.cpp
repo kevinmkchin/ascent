@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
 	// Initialize the main systems
     renderer.Init(window, &world);
-	world.init(&renderer, &playerSystem, &ai);
+	world.init(window, &renderer, &playerSystem, &ai);
     world.GlobalPauseForSeconds = &GlobalPauseForSeconds;
     world.uiSystem = &ui;
     ui.Init(&renderer, &world, &playerSystem);
