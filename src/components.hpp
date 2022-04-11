@@ -478,6 +478,11 @@ struct ProximityTextComponent
     std::string __currentTypedTextBuffer = "";
 };
 
+struct LightSource
+{
+
+};
+
 enum GAMETAGS : u8
 {
     TAG_DEFAULT,
