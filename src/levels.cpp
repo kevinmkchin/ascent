@@ -30,8 +30,8 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
             { TILE_SIZE, TILE_SIZE },
             10,
             EFFECT_ASSET_ID::SPRITE,
-            TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
-            true, false, true, 256, 256,
+            TEXTURE_ASSET_ID::TILES_CAVE,
+            true, false, true, 80, 128,
             0,
             0,
             0.f,
@@ -408,7 +408,9 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
 
                 case 'B': {
                     // wooden tiles
-                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 6);
+                    // Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i, 6);
+                    // levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
+                    Entity tile = CreateBasicLevelTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                     levelTiles[roomXIndex * r.width + j][roomYIndex * r.height + i] = tile;
                 }break;
 
@@ -427,41 +429,130 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
         return;
     }
 
-    bool topClear = row - 1 >= 0 && levelTiles[col][row - 1] == 0;
-    bool botClear = row + 1 < levelTiles[0].size() && levelTiles[col][row + 1] == 0;
-    if (topClear && botClear)
+    bool topClear = (row - 1 >= 0 && (col >= 0 && col < levelTiles.size())) && levelTiles[col][row - 1] == 0;
+    bool botClear = (row + 1 < levelTiles[0].size() && (col >= 0 && col < levelTiles.size())) && levelTiles[col][row + 1] == 0;
+    bool leftClear = (col - 1 >= 0 && (row >= 0 && row < levelTiles[0].size())) && levelTiles[col - 1][row] == 0;
+    bool rightClear = (col + 1 < levelTiles.size() && (row >= 0 && row < levelTiles[0].size())) && levelTiles[col + 1][row] == 0;
+
+    bool tlCornerClear = (row - 1 >= 0 && col - 1 >= 0) && levelTiles[col - 1][row - 1] == 0;
+    bool trCornerClear = (row - 1 >= 0 && col + 1 < levelTiles.size()) && levelTiles[col + 1][row - 1] == 0;
+    bool blCornerClear = (row + 1 < levelTiles[0].size() && col - 1 >= 0) && levelTiles[col - 1][row + 1] == 0;
+    bool brCornerClear = (row + 1 < levelTiles[0].size() && col + 1 < levelTiles.size()) && levelTiles[col + 1][row + 1] == 0;
+
+    if (topClear && botClear && leftClear && rightClear)
     {
-        spr.SetStartFrame(3);
-        spr.dimensions.y += 3;
-        registry.transforms.get(e).center.y += 2;
+        spr.SetStartFrame(7);
     }
-    else if (botClear)
+    else if (topClear && botClear && leftClear)
     {
         spr.SetStartFrame(1);
-        spr.dimensions.y += 1;
+    }
+    else if (topClear && botClear && rightClear)
+    {
+        spr.SetStartFrame(3);
+    }
+    else if (topClear && leftClear && rightClear)
+    {
+        spr.SetStartFrame(6);
+    }
+    else if (botClear && leftClear && rightClear)
+    {
+        spr.SetStartFrame(8);
+    }
+    else if (topClear && botClear)
+    {
+        spr.SetStartFrame(14);
+    }
+    else if (leftClear && rightClear)
+    {
+        spr.SetStartFrame(10);
+    }
+    else if (botClear && rightClear)
+    {
+        spr.SetStartFrame(9);
+    }
+    else if (botClear && leftClear)
+    {
+        spr.SetStartFrame(5);
+    }
+    else if (topClear && leftClear)
+    {
+        spr.SetStartFrame(0);
+    }
+    else if (topClear && rightClear)
+    {
+        spr.SetStartFrame(4);
     }
     else if (topClear)
     {
         spr.SetStartFrame(2);
-        spr.dimensions.y += 2;
-        registry.transforms.get(e).center.y += 2;
+    }
+    else if (botClear)
+    {
+        spr.SetStartFrame(12);
+    }
+    else if (leftClear)
+    {
+        spr.SetStartFrame(11);
+    }
+    else if (rightClear)
+    {
+        spr.SetStartFrame(13);
     }
     else
     {
-        // mid
-        int which = rand() % 10;
-        switch (which)
+        if(tlCornerClear)
         {
-        case 0: {
-            spr.SetStartFrame(4);
-        }break;
-        case 1: {
-            spr.SetStartFrame(5);
-        }break;
-        default: {
-        }break;
+            spr.SetStartFrame(16);
         }
+        else if(trCornerClear)
+        {
+            spr.SetStartFrame(17);
+        }
+        else if(blCornerClear)
+        {
+            spr.SetStartFrame(18);
+        }
+        else if(brCornerClear)
+        {
+            spr.SetStartFrame(19);
+        }
+        else
+        {
+            spr.SetStartFrame(15);
+        }
+        // // mid
+        // int which = rand() % 10;
+        // switch (which)
+        // {
+        //     case 0: {
+        //         spr.SetStartFrame(4);
+        //     }break;
+        //     case 1: {
+        //         spr.SetStartFrame(5);
+        //     }break;
+        //     default: {
+        //         spr.SetStartFrame();
+        //     }break;
+        // }
     }
+
+    // if(row == -1 && col == -1)
+    // {
+    //     spr.SetStartFrame(15);
+    // }
+    // if(row == -1 && col == levelTiles.size())
+    // {
+    //     spr.SetStartFrame(15);
+    // }
+    // if(row == levelTiles[0].size() && col == -1)
+    // {
+    //     spr.SetStartFrame(15);
+    // }
+    // if(row == levelTiles[0].size() && col == levelTiles.size())
+    // {
+    //     spr.SetStartFrame(15);
+    // }
 }
 
 INTERNAL void AddColliderIfRequired(Entity tileEntity, i32 col, i32 row)
@@ -706,11 +797,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
             auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
             AddTileSizedCollider(_a);
             AddTileSizedCollider(_b);
-            if(-1 < i && i < NUMTILESWIDE)
-            {
-                ChangeSpritesBasedOnTopBottom(_a, i, -1);
-                ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
-            }
+            ChangeSpritesBasedOnTopBottom(_a, i, -1);
+            ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
         }
         for (int i = -1; i < ((NUMTILESTALL)+1); ++i)
         {
@@ -718,6 +806,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
             auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
             AddTileSizedCollider(_a);
             AddTileSizedCollider(_b);
+            ChangeSpritesBasedOnTopBottom(_a, -1, i);
+            ChangeSpritesBasedOnTopBottom(_b, NUMTILESWIDE, i);
         }
     }
     
