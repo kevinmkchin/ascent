@@ -108,20 +108,22 @@ void RenderSystem::DrawMainMenuBackground(float elapsed_ms) {
     elapsedTime += elapsed_ms / 1000.f;
 
     // TODO: Add a way to specify offset differences for background without manually doing it
-    DrawBackground(bgTexId[0], (elapsedTime / 800.0f) * 1.5f);
-    DrawBackground(bgTexId[1], (elapsedTime / 200.0f) * 1.5f);
-    DrawBackground(bgTexId[2], (elapsedTime / 150.0f) * 1.5f);
-    DrawBackground(bgTexId[3], (elapsedTime / 100.0f) * 1.5f);
-    DrawBackground(bgTexId[4], (elapsedTime / 50.0f) * 1.5f);
+    DrawBackground(bgTexId[0].texId, (elapsedTime / 800.0f) * 1.5f);
+    DrawBackground(bgTexId[1].texId, (elapsedTime / 200.0f) * 1.5f);
+    DrawBackground(bgTexId[2].texId, (elapsedTime / 150.0f) * 1.5f);
+    DrawBackground(bgTexId[3].texId, (elapsedTime / 100.0f) * 1.5f);
+    DrawBackground(bgTexId[4].texId, (elapsedTime / 50.0f) * 1.5f);
 }
 
 void RenderSystem::DrawAllBackgrounds(float elapsed_ms)
 {
     float offset = 0.f;
-    if (world->GetCurrentMode() == MODE_MAINMENU) {
+    if (world->GetCurrentMode() == MODE_MAINMENU) 
+    {
         DrawMainMenuBackground(elapsed_ms);
     }
-    else {
+    else 
+    {
         if (registry.players.size() > 0 && bgTexId.size() > 1) {
             Entity player = registry.players.entities[0];
             TransformComponent& playerTransform = registry.transforms.get(player);
@@ -133,8 +135,8 @@ void RenderSystem::DrawAllBackgrounds(float elapsed_ms)
         }
 
         for (int i = 0; i < bgTexId.size(); i++) {
-            DrawBackground(bgTexId[i], offset);
-            offset += offset;
+            DrawBackground(bgTexId[i].texId, offset);
+            offset += offset * bgTexId[i].speedFactor;
         }
     }
 }

@@ -10,6 +10,12 @@
 class WorldSystem;
 struct vtxt_font;
 
+struct ParallaxBackgroundTexturePair
+{
+    TEXTURE_ASSET_ID texId = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+    float speedFactor = 1.f;
+};
+
 struct SpriteTransformPair
 {
     u32 renderState;
@@ -81,7 +87,7 @@ public:
     vec2 cameraBoundMax;
 
     // Background texture
-    std::vector<TEXTURE_ASSET_ID> bgTexId = { TEXTURE_ASSET_ID::TEXTURE_COUNT };
+    std::vector<ParallaxBackgroundTexturePair> bgTexId;
 
     // UI
     TextureHandle   textLayer1FontAtlas;
