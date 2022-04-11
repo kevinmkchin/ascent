@@ -56,7 +56,7 @@ void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
 
     int lightSize = 0;
     float lightArray[50] = { };
-    if (registry.players.size() > 0 && ((world->GetCurrentStage() == CHAPTER_TUTORIAL) || (world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE))) {
+    if (registry.players.size() > 0 && ((world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE) || (world->GetCurrentStage() == CHAPTER_TWO_STAGE_ONE))) {
         Entity player = registry.players.entities[0];
         TransformComponent& playerTransform = registry.transforms.get(player);
         float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
@@ -214,7 +214,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
     int lightSize = 0;
     float lightArray[50] = { };
-    if ((world->GetCurrentStage() == CHAPTER_TUTORIAL) || (world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE)) {
+    if ((world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE) || (world->GetCurrentStage() == CHAPTER_TWO_STAGE_ONE)) {
         lightSize = registry.lightSources.size();
         for (int i = 0; i < registry.lightSources.size(); i++) {
             vec2 pos = registry.transforms.get(registry.lightSources.entities[i]).position;

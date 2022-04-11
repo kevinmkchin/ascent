@@ -54,7 +54,12 @@ if (IS_OS_MAC)
   link_directories(/usr/local/lib)
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES}  )
+if (IS_OS_WINDOWS)
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCE_FILES})
+elseif (IS_OS_LINUX OR IS_OS_MAC)
+    add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream

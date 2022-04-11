@@ -68,6 +68,60 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
     return entity;
 }
 
+INTERNAL Entity CreateDecoration(i32 column, i32 row, bool standing = true)
+{
+    Entity entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    transform.position = vec2(column * TILE_SIZE, row * TILE_SIZE);
+    transform.center = { 0.f,0.f };
+
+    u16 decorationToUseIndex = 0;
+    switch(__currentStage)
+    {
+        case CHAPTER_TUTORIAL:{
+            decorationToUseIndex = 0;
+        }break;
+        case CHAPTER_ONE_STAGE_ONE:{
+            decorationToUseIndex = 0;
+        }break;
+        case CHAPTER_TWO_STAGE_ONE:{
+            decorationToUseIndex = 8;
+        }break;
+        case CHAPTER_THREE_STAGE_ONE:{
+            decorationToUseIndex = 16;
+        }break;
+    }
+    if(standing) { decorationToUseIndex += 4; }
+    u32 roll = rand()%4;
+    decorationToUseIndex += roll;
+
+    registry.sprites.insert(
+        entity,
+        {
+            { TILE_SIZE, TILE_SIZE },
+            1,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::TILES_DECORATIONS,
+            true, false, true, 64, 96,
+            0,
+            0,
+            0.f,
+            {
+                {
+                    1,
+                    decorationToUseIndex,
+                    0.f
+                }
+            }
+        }
+    );
+
+    AddTileSizedCollider(entity);
+
+    return entity;
+}
+
 INTERNAL Entity CreateLadderTile(i32 column, i32 row)
 {
     Entity entity = Entity::CreateEntity(TAG_LADDER);
@@ -117,7 +171,7 @@ INTERNAL Entity CreateSpikeTile(i32 col, i32 row)
         entity,
         {
             { TILE_SIZE, TILE_SIZE },
-            0,
+            2,
             EFFECT_ASSET_ID::SPRITE,
             TEXTURE_ASSET_ID::ASCENT_LEVELTILES_SHEET,
             true, false, true, 256, 256,
@@ -441,7 +495,7 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
     }
 }
 
-INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
+INTERNAL void ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(Entity e, i32 col, i32 row)
 {
     auto& spr = registry.sprites.get(e);
     if (spr.GetStartFrame() != 0)
@@ -541,38 +595,39 @@ INTERNAL void ChangeSpritesBasedOnTopBottom(Entity e, i32 col, i32 row)
         {
             spr.SetStartFrame(15);
         }
-        // // mid
-        // int which = rand() % 10;
-        // switch (which)
-        // {
-        //     case 0: {
-        //         spr.SetStartFrame(4);
-        //     }break;
-        //     case 1: {
-        //         spr.SetStartFrame(5);
-        //     }break;
-        //     default: {
-        //         spr.SetStartFrame();
-        //     }break;
-        // }
     }
 
-    // if(row == -1 && col == -1)
-    // {
-    //     spr.SetStartFrame(15);
-    // }
-    // if(row == -1 && col == levelTiles.size())
-    // {
-    //     spr.SetStartFrame(15);
-    // }
-    // if(row == levelTiles[0].size() && col == -1)
-    // {
-    //     spr.SetStartFrame(15);
-    // }
-    // if(row == levelTiles[0].size() && col == levelTiles.size())
-    // {
-    //     spr.SetStartFrame(15);
-    // }
+    if(topClear || botClear)
+    {
+        u32 decorationChance;
+        switch(__currentStage)
+        {
+            case CHAPTER_TUTORIAL:{
+                decorationChance = 9;
+            }break;
+            case CHAPTER_ONE_STAGE_ONE:{
+                decorationChance = 5;
+            }break;
+            case CHAPTER_TWO_STAGE_ONE:{
+                decorationChance = 1;
+            }break;
+            case CHAPTER_THREE_STAGE_ONE:{
+                decorationChance = 6;
+            }break;
+        }
+        u32 roll = RandomInt(1, decorationChance);
+        if(roll == 1)
+        {
+            if(topClear)
+            {
+                CreateDecoration(col, row-1, true);
+            }
+            else if(botClear)
+            {
+                CreateDecoration(col, row+1, false);
+            }
+        }
+    }
 }
 
 INTERNAL void AddColliderIfRequired(Entity tileEntity, i32 col, i32 row)
@@ -604,7 +659,7 @@ INTERNAL void UpdateLevelGeometry(GAMELEVELENUM stageToGenerate)
                     Entity e = levelTiles[col][row];
                     if (e != 0)
                     {
-                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(e, col, row);
                         AddColliderIfRequired(e, col, row);
                     }
                 }
@@ -621,7 +676,7 @@ INTERNAL void UpdateLevelGeometry(GAMELEVELENUM stageToGenerate)
                     Entity e = levelTiles[col][row];
                     if (e != 0)
                     {
-                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(e, col, row);
                         AddColliderIfRequired(e, col, row);
                     }
                 }
@@ -638,7 +693,7 @@ INTERNAL void UpdateLevelGeometry(GAMELEVELENUM stageToGenerate)
                     Entity e = levelTiles[col][row];
                     if (e != 0)
                     {
-                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(e, col, row);
                         AddColliderIfRequired(e, col, row);
                     }
                 }
@@ -655,7 +710,7 @@ INTERNAL void UpdateLevelGeometry(GAMELEVELENUM stageToGenerate)
                     Entity e = levelTiles[col][row];
                     if (e != 0)
                     {
-                        ChangeSpritesBasedOnTopBottom(e, col, row);
+                        ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(e, col, row);
                         AddColliderIfRequired(e, col, row);
                     }
                 }
@@ -818,8 +873,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
             auto _b = CreateBasicLevelTile(i, NUMTILESTALL);
             AddTileSizedCollider(_a);
             AddTileSizedCollider(_b);
-            ChangeSpritesBasedOnTopBottom(_a, i, -1);
-            ChangeSpritesBasedOnTopBottom(_b, i, NUMTILESTALL);
+            ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(_a, i, -1);
+            ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(_b, i, NUMTILESTALL);
         }
         for (int i = -1; i < ((NUMTILESTALL)+1); ++i)
         {
@@ -827,8 +882,8 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
             auto _b = CreateBasicLevelTile(NUMTILESWIDE, i);
             AddTileSizedCollider(_a);
             AddTileSizedCollider(_b);
-            ChangeSpritesBasedOnTopBottom(_a, -1, i);
-            ChangeSpritesBasedOnTopBottom(_b, NUMTILESWIDE, i);
+            ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(_a, -1, i);
+            ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(_b, NUMTILESWIDE, i);
         }
     }
     
