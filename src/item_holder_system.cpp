@@ -68,7 +68,8 @@ INTERNAL Entity createArrow(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
-    registry.items.emplace(entity);
+    auto& item = registry.items.emplace(entity);
+    item.pickable = false;
 
     transform.position = position;
     transform.rotation = 0.f;
