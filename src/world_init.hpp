@@ -12,6 +12,8 @@ Entity CreateBatEnemy(vec2 position);
 
 Entity CreateKnightEnemy(vec2 position);
 
+Entity CreateBoss(vec2 position);
+
 Entity CreateStationaryEnemy(vec2 position);
 
 Entity CreateGoblinEnemy(vec2 position);
