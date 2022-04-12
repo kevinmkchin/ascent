@@ -543,7 +543,7 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                     CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
 
-                case '3': {
+                case 'X': {
                     // boss
                     currentLevelData.bossMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });                }
