@@ -388,6 +388,7 @@ void WorldSystem::SpawnLevelEntities() {
 
     createSword(currentLevelData.playerStart);
     createBow(currentLevelData.playerStart + vec2({10.f, 0}));
+    createWalkingBomb(currentLevelData.playerStart + vec2({20.f, 0}));
 
 
     // Create enemies

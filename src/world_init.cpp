@@ -824,6 +824,69 @@ Entity createBow(vec2 position)
     return entity;
 }
 
+Entity createWalkingBomb(vec2 position)
+{
+    auto entity = Entity::CreateEntity(TAG_WALKINGBOMB);
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    registry.items.emplace(entity);
+
+    vec2 dimensions = { 64, 64 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = {32.5, 35.5};
+
+    collider.collision_pos = {9.5, 13.5};
+    collider.collision_neg = {9.5, 13.5};
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    15,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::WALKING_BOMB,
+                    true,
+                    false,
+                    true,
+                    896,
+                    64,
+                    0,
+                    0,
+                    0.f,
+                    {
+                            //idle
+                            {
+                                    1,
+                                    0,
+                                    0,
+                            },
+                            //walking
+                            {
+                                6,
+                                2,
+                                300.f,
+                            },
+                            //explosion
+                            {
+                                3,
+                                10,
+                                300.f,
+                                false,
+                                false
+                            }
+                    },
+            }
+    );
+
+    return entity;
+}
+
 Entity createEnemyLobbingProjectile(vec2 position, vec2 velocity, vec2 acceleration, Entity enemy) {
     auto entity = Entity::CreateEntity();
     auto& transform = registry.transforms.emplace(entity);

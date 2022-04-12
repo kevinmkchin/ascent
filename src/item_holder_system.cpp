@@ -23,7 +23,7 @@ void ItemHolderSystem::Init(WorldSystem* world_sys_arg)
 INTERNAL void makeItemDisappear(Entity item)
 {
     //TODO: Make another way to do this
-    registry.transforms.get(item).position = {0, 0};
+    registry.transforms.get(item).position = {-900, -900};
 }
 
 INTERNAL void nextCurrentItem(HolderComponent& holderComponent)
