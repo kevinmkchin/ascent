@@ -1206,6 +1206,8 @@ Entity CreateTorch(vec2 position)
             },
         }
     );
+
+    return entity;
 }
 
 Entity CreateShopKeeperNPC(vec2 position)
