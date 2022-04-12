@@ -416,7 +416,7 @@ void UISystem::UpdateLevelUpUI(float dt)
                     }
                     else
                     {
-                        vtxt_append_line("Press Z to select mutation...", &font_c64, 32);
+                        vtxt_append_line("Press SPACE to select mutation...", &font_c64, 32);
                     }
 
                     if(Input::GameLeftHasBeenPressed())
@@ -438,7 +438,7 @@ void UISystem::UpdateLevelUpUI(float dt)
                     renderer->mutationSelectionIndex = (renderer->mutationSelectionIndex + 3) % 3;
                     renderer->showMutationSelect = true;
 
-                    if(Input::GameAttackHasBeenPressed())
+                    if(Input::GameJumpHasBeenPressed())
                     {
                         Mutation mutationToAdd = mutationOptions[renderer->mutationSelectionIndex];
                         ActiveMutationsComponent& playerActiveMutations = registry.mutations.get(playerEntity);
