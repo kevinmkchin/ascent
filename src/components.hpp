@@ -291,7 +291,8 @@ struct PatrollingBehavior : Behavior {
     bool standStill; 
     float patrolSpeed = 0;       // speed at which enemy patrols their spawnpoint
     float currentPatrolTime = 0; // current time patrolling 
-    float maxPatrolTime = 0;     // max time you patrol in that direction
+    float maxPatrolTime = 0;     // max time you patrol in that direction'
+    float timeSinceForcedRotation = 9999;
 };
 
 struct FlyingBehavior : Behavior {};

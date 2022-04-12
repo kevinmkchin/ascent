@@ -73,7 +73,7 @@ void AISystem::Step(float deltaTime)
 	}
 
 	// Pathing
-	if (elapsedAICycleTime >= 0.0f) {
+	if (elapsedAICycleTime >= 20.f) {
 		for (int i = 0; i < registry.enemy.size(); ++i)
 		{
 			Enemy& enemyComponent = registry.enemy.components[i];
@@ -315,6 +315,7 @@ void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 			motionComponent.velocity.x = 0;
 		}
 		else {
+			patrollingBehavior.timeSinceForcedRotation += elapsedTime;
 			if (motionComponent.velocity.x == 0) {
 				motionComponent.velocity.x = patrollingBehavior.patrolSpeed;
 			}
@@ -359,14 +360,22 @@ void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 		}
 		if (motionComponent.velocity.x > 0) {
 			if (drTileEmpty) {
+				if (patrollingBehavior.timeSinceForcedRotation < 25.f) {
+					patrollingBehavior.standStill = true;
+				}
 				motionComponent.velocity.x *= -1;
 				patrollingBehavior.currentPatrolTime = 0;
+				patrollingBehavior.timeSinceForcedRotation = 0;
 			}
 		}
 		else {
 			if (dlTileEmpty) {
+				if (patrollingBehavior.timeSinceForcedRotation < 25.f) {
+					patrollingBehavior.standStill = true;
+				}
 				motionComponent.velocity.x *= -1;
 				patrollingBehavior.currentPatrolTime = 0;
+				patrollingBehavior.timeSinceForcedRotation = 0;
 			}
 		}
 	}
