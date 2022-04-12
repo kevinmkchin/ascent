@@ -12,4 +12,5 @@
 - Final Boss
 - lighting effects that only make surrounding area of player visible
 - Updated control scheme 
-
+- Bomb item
+- Swappable held items/weapons
