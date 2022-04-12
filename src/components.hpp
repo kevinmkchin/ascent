@@ -316,6 +316,8 @@ struct Item
     // When item is on the floor, we want it to be colliding with the floor
     bool collidableWithEnvironment = true;
     bool grounded = true;
+    bool friction = true;
+    bool pickable = true;
 };
 
 struct ShopItem
@@ -378,6 +380,7 @@ struct Animation // NOT A COMPONENT
     float animation_duration = 0.f;
     bool replay = true;
     bool played = false;
+    bool go_back_to_first = true;
 };
 
 struct SpriteComponent

@@ -25,7 +25,12 @@ void SpriteSystem::Step(float deltaTime) {
                 sprite.current_frame++;
             }
             if (sprite.current_frame >= current_anim.num_frames) {
-                sprite.current_frame = 0;
+                if (current_anim.go_back_to_first)
+                {
+                    sprite.current_frame = 0;
+                } else {
+                    sprite.current_frame = current_anim.num_frames - 1;
+                }
                 current_anim.played = true;
             }
         }

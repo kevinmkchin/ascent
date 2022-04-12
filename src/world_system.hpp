@@ -126,6 +126,7 @@ public:
 	Mix_Chunk* points_pickup_sound;
     Mix_Chunk* bow_and_arrow_sound;
 	Mix_Chunk* health_pickup_sound;
+    Mix_Chunk* walking_bomb_sound;
 
 	// HACK should prob remove later
 	UISystem* uiSystem;
