@@ -507,6 +507,11 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE });
                 }break;
 
+                case 'Q': {
+                    CreateTorch({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + TILE_SIZE/2.f, 
+                                  roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + TILE_SIZE/2.f});
+                }break;
+
                 case 'R': {
                     CreateShopKeeperNPC({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + TILE_SIZE/2.f, 
                                           roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + TILE_SIZE/2.f});
