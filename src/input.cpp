@@ -67,22 +67,22 @@ bool Input::GameRightIsPressed()
 
 bool Input::GameJumpHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_Z) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_SPACE) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_A);
 }
 
 bool Input::GameJumpHasBeenReleased()
 {
-    return Input::HasKeyBeenReleased(SDL_SCANCODE_Z) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
+    return Input::HasKeyBeenReleased(SDL_SCANCODE_SPACE) || Input::GetGamepad(0).HasBeenReleased(GAMEPAD_A);
 }
 
 bool Input::GameJumpIsPressed()
 {
-    return Input::IsKeyPressed(SDL_SCANCODE_Z) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
+    return Input::IsKeyPressed(SDL_SCANCODE_SPACE) || Input::GetGamepad(0).IsPressed(GAMEPAD_A);
 }
 
 bool Input::GameAttackHasBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_X) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_X);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_Z) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_X);
 }
 
 bool Input::GamePickUpHasBeenPressed()
@@ -102,7 +102,7 @@ bool Input::GameCycleItemLeftBeenPressed()
 
 bool Input::GameCycleItemRightBeenPressed()
 {
-    return Input::HasKeyBeenPressed(SDL_SCANCODE_SPACE) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_RB);
+    return Input::HasKeyBeenPressed(SDL_SCANCODE_X) || Input::GetGamepad(0).HasBeenPressed(GAMEPAD_RB);
 }
 
 bool Input::GameInteractButtonHasBeenPressed()
