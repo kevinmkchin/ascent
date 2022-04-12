@@ -9,5 +9,7 @@
 - Suzuran Takikawa 79766572
 
 ### Features implemented in Milestone 4:
-
+- Final Boss
+- lighting effects that only make surrounding area of player visible
+- Updated control scheme 
 
