@@ -416,7 +416,7 @@ Entity CreateGoblinEnemy(vec2 position)
     collider.collision_pos = collisionDimension / 2.f;
     collider.collision_neg = collisionDimension / 2.f;
 
-    float maxMoveSpeed = 26.f;
+    float maxMoveSpeed = 35.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
@@ -487,9 +487,12 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
     auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
     auto& rangedBehavior = registry.rangedBehaviors.emplace(entity);
-    hb.health = 50.f;
-    registry.enemy.emplace(entity);
+    auto& enemy = registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
+
+    hb.health = 50.f;
+
+    enemy.projectile_speed = 80;
 
     vec2 dimensions = { 16, 16 };
     transform.position = position;
@@ -500,7 +503,7 @@ Entity CreateGoblinBomberEnemy(vec2 position)
     collider.collision_neg = dimensions / 2.f;
 
     // TODO: Change Goblin Bomber behavior
-    float maxMoveSpeed = 20.f;
+    float maxMoveSpeed = 25.f;
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 

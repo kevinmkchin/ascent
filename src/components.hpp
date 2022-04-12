@@ -234,7 +234,7 @@ const float PLAYER_EXP_THRESHOLDS_ARRAY[10] = { 0.f, 100.f, 300.f, 700.f, 1200.f
 
 struct Enemy
 {
-    float projectile_speed = 120.f;
+    float projectile_speed = 100.f;
     float playerHurtCooldown = 0.f;
     //std::vector<Behavior> behaviors;
 };
@@ -247,7 +247,7 @@ struct Boss
     float actionTimer = 0;
     float actionCooldown = 950;
     bool hasRaged = false;
-    int rageTick = 15;
+    int rageTick = 20;
 };
 
 struct Behavior {
