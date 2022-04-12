@@ -10,6 +10,7 @@
 
 ### Features implemented in Milestone 4:
 - Final Boss
+- Additional enemy logic
 - Lighting effects, distance-based exponential decay lighting with light sources
 - Updated control scheme 
 - More levels and various environments
