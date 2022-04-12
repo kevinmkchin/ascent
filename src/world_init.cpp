@@ -721,6 +721,7 @@ Entity createSword(vec2 position)
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
+    motion.acceleration.y = 500.f;
     auto& collider = registry.colliders.emplace(entity);
     registry.weapons.emplace(entity);
     registry.items.emplace(entity);
@@ -772,6 +773,7 @@ Entity createBow(vec2 position)
 
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
+    motion.acceleration.y = 500.f;
     auto& collider = registry.colliders.emplace(entity);
     registry.items.emplace(entity);
 
@@ -817,6 +819,75 @@ Entity createBow(vec2 position)
                             false,
                             true
                         }
+                    },
+            }
+    );
+
+    return entity;
+}
+
+Entity createWalkingBomb(vec2 position)
+{
+    auto entity = Entity::CreateEntity(TAG_WALKINGBOMB);
+
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    motion.acceleration.y = 500.f;
+    auto& collider = registry.colliders.emplace(entity);
+
+    auto& item = registry.items.emplace(entity);
+    item.friction = false;
+
+    vec2 dimensions = { 64 / 2, 64 / 2 };
+    transform.position = position;
+    transform.rotation = 0.f;
+    transform.center = {32.5 / 2, 35.5 / 2};
+
+    collider.collision_pos = {9.5 / 2, 13.5 / 2};
+    collider.collision_neg = {9.5 / 2, 13.5 / 2};
+
+    float maxFallSpeed = 200.f;
+    motion.terminalVelocity.y = maxFallSpeed;
+
+    auto& weapon = registry.weapons.emplace(entity);
+
+    registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    15,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::WALKING_BOMB,
+                    true,
+                    false,
+                    true,
+                    896 / 2,
+                    64 / 2,
+                    0,
+                    0,
+                    0.f,
+                    {
+                            //idle
+                            {
+                                    1,
+                                    0,
+                                    0,
+                            },
+                            //walking
+                            {
+                                6,
+                                2,
+                                800.f,
+                            },
+                            //explosion
+                            {
+                                4,
+                                10,
+                                800.f,
+                                false,
+                                false,
+                                false
+                            }
                     },
             }
     );
