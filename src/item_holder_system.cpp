@@ -130,6 +130,10 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent, Entity holder)
                 SpriteComponent& sprite = registry.sprites.get(held_weapon);
                 sprite.selected_animation = 0;
                 sprite.current_frame = 0;
+
+                if (registry.activePlayerProjectiles.has(held_weapon)) {
+                    registry.activePlayerProjectiles.remove(held_weapon);
+                }
             }
 
             Item& item = registry.items.get(held_weapon);
