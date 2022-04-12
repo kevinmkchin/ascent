@@ -764,7 +764,7 @@ void WorldSystem::handle_collisions() {
                         }
                     }
 
-                    if (coin_or_potion <= 2)
+                    if (coin_or_potion <= 1)
                     {
                         createWalkingBomb(expPosition);
                     }
