@@ -245,8 +245,7 @@ void WorldSystem::init(SDL_Window* window_arg, RenderSystem *renderer_arg, Playe
 
     SetCurrentMode(MODE_MAINMENU);
 
-    // Playing background music indefinitely
-    // TODO(Kevin): uncomment  // Mix_PlayMusic(background_music, -1);
+    Mix_PlayMusic(music_mainmenu, -1);
     fprintf(stderr, "Loaded music\n");
 }
 
@@ -279,6 +278,9 @@ void WorldSystem::HelpMode() {
 }
 
 void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
+
+    Mix_HaltMusic();
+
 // SAVE PLAYER DATA
     auto playerPlayerComponent = Player();
     auto playerHealthComponent = HealthBar();
@@ -321,6 +323,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 
     switch (stage) {
         case CHAPTER_TUTORIAL: {
+            Mix_PlayMusic(music_tutorial, -1);
             renderer->bgTexId = {
                 { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER1, 0.3f },
                 { TEXTURE_ASSET_ID::BG_VILLAGE_LAYER2, 0.3f },
@@ -335,6 +338,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
             };
         }break;
         case CHAPTER_ONE_STAGE_ONE: {
+            Mix_PlayMusic(music_cave, -1);
             renderer->bgTexId = {
                 { TEXTURE_ASSET_ID::BG_LAYER1, 0.8f },
                 { TEXTURE_ASSET_ID::BG_LAYER2, 0.8f },
@@ -344,6 +348,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
             };
         }break;
         case CHAPTER_TWO_STAGE_ONE: {
+            Mix_PlayMusic(music_forest, -1);
             renderer->bgTexId = {
                 { TEXTURE_ASSET_ID::BG_FOREST_LAYER1, 0.8f },
                 { TEXTURE_ASSET_ID::BG_FOREST_LAYER2, 0.8f },
@@ -352,6 +357,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
             };
         }break;
         case CHAPTER_THREE_STAGE_ONE: {
+            Mix_PlayMusic(music_mountain, -1);
             renderer->bgTexId = {
                 { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER1, 0.5f },
                 { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER2, 0.5f },
@@ -362,6 +368,9 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
                 { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER7, 0.5f },
                 { TEXTURE_ASSET_ID::BG_MOUNTAIN_LAYER8, 0.3f },
             };
+        }break;
+        case CHAPTER_BOSS: {
+            Mix_PlayMusic(music_bossfight, -1);
         }break;
     }
 
@@ -457,9 +466,13 @@ void WorldSystem::SpawnLevelEntities() {
 }
 
 void WorldSystem::loadAllContent() {
-    background_music = Mix_LoadMUS(audio_path("hadesmusiclmao.wav").c_str());
-    chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
-    chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
+    music_mainmenu = Mix_LoadMUS(audio_path("music_mainmenu.wav").c_str());
+    music_tutorial = Mix_LoadMUS(audio_path("music_tutorial.wav").c_str());
+    music_cave = Mix_LoadMUS(audio_path("music_cave.wav").c_str());
+    music_forest = Mix_LoadMUS(audio_path("music_forest.wav").c_str());
+    music_mountain = Mix_LoadMUS(audio_path("music_mountain.wav").c_str());
+    music_bossfight = Mix_LoadMUS(audio_path("music_bossfight.wav").c_str());
+
     sword_sound = Mix_LoadWAV(audio_path("sword_sound.wav").c_str());
     monster_hurt_sound = Mix_LoadWAV(audio_path("monster_hurt.wav").c_str());
     monster_death_sound = Mix_LoadWAV(audio_path("monster_death.wav").c_str());
@@ -475,8 +488,12 @@ void WorldSystem::loadAllContent() {
     bow_and_arrow_sound = Mix_LoadWAV(audio_path("bow_and_arrow.wav").c_str());
     walking_bomb_sound = Mix_LoadWAV(audio_path("walking_bomb.wav").c_str());
 
-    if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
-        || sword_sound == nullptr
+    if (music_mainmenu == nullptr 
+        || music_tutorial == nullptr
+        || music_cave == nullptr
+        || music_forest == nullptr
+        || music_mountain == nullptr
+        || music_bossfight == nullptr
         || monster_hurt_sound == nullptr
         || monster_death_sound == nullptr
         || player_hurt_sound == nullptr
@@ -498,12 +515,18 @@ void WorldSystem::loadAllContent() {
 
 void WorldSystem::unloadAllContent() {
     // Destroy music components
-    if (background_music != nullptr)
-        Mix_FreeMusic(background_music);
-    if (chicken_dead_sound != nullptr)
-        Mix_FreeChunk(chicken_dead_sound);
-    if (chicken_eat_sound != nullptr)
-        Mix_FreeChunk(chicken_eat_sound);
+    if (music_mainmenu != nullptr)
+        Mix_FreeMusic(music_mainmenu);
+    if (music_tutorial != nullptr)
+        Mix_FreeMusic(music_tutorial);
+    if (music_cave != nullptr)
+        Mix_FreeMusic(music_cave);
+    if (music_forest != nullptr)
+        Mix_FreeMusic(music_forest);
+    if (music_mountain != nullptr)
+        Mix_FreeMusic(music_mountain);
+    if (music_bossfight != nullptr)
+        Mix_FreeMusic(music_bossfight);
     if (sword_sound != nullptr)
         Mix_FreeChunk(sword_sound);
     if (monster_hurt_sound != nullptr)

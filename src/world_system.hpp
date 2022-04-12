@@ -111,9 +111,13 @@ public:
     std::vector<Mutation> allPossibleMutations;
 
 	// music references
-	Mix_Music* background_music;
-	Mix_Chunk* chicken_dead_sound;
-	Mix_Chunk* chicken_eat_sound;
+	Mix_Music* music_mainmenu;
+	Mix_Music* music_tutorial;
+	Mix_Music* music_cave;
+	Mix_Music* music_forest;
+	Mix_Music* music_mountain;
+	Mix_Music* music_bossfight;
+
 	Mix_Chunk* sword_sound;
 	Mix_Chunk* monster_hurt_sound;
 	Mix_Chunk* monster_death_sound;
