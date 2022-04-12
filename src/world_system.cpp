@@ -377,7 +377,21 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 void WorldSystem::SpawnLevelEntities() {
     // Create player
     player = createPlayer(currentLevelData.playerStart);
-    CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your way to the top of the mountain!");
+
+    switch (currentGameStage) {
+        case CHAPTER_TUTORIAL: {
+        }break;
+        case CHAPTER_ONE_STAGE_ONE: {
+            CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
+        }break;
+        case CHAPTER_TWO_STAGE_ONE: {
+            CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
+        }break;
+        case CHAPTER_THREE_STAGE_ONE: {
+            CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
+        }break;
+    }
+    
 
     if (currentDifficulty == DIFFICULTY_EASY) {
         registry.healthBar.get(player).maxHealth += 25;
@@ -388,6 +402,7 @@ void WorldSystem::SpawnLevelEntities() {
 
     createSword(currentLevelData.playerStart);
     createBow(currentLevelData.playerStart + vec2({10.f, 0}));
+    createWalkingBomb(currentLevelData.playerStart + vec2({20.f, 0}));
 
 
     // Create enemies
@@ -458,6 +473,7 @@ void WorldSystem::loadAllContent() {
     points_pickup_sound = Mix_LoadWAV(audio_path("points_pickup.wav").c_str());
     health_pickup_sound = Mix_LoadWAV(audio_path("health_pickup.wav").c_str());
     bow_and_arrow_sound = Mix_LoadWAV(audio_path("bow_and_arrow.wav").c_str());
+    walking_bomb_sound = Mix_LoadWAV(audio_path("walking_bomb.wav").c_str());
 
     if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr
         || sword_sound == nullptr
@@ -472,7 +488,8 @@ void WorldSystem::loadAllContent() {
         || coins_pickup_sound == nullptr
         || points_pickup_sound == nullptr
         || health_pickup_sound == nullptr
-        || bow_and_arrow_sound == nullptr) {
+        || bow_and_arrow_sound == nullptr
+        || walking_bomb_sound == nullptr) {
         fprintf(stderr, "Failed to load sounds. Make sure the audio directory is present.");
     }
 
@@ -513,6 +530,8 @@ void WorldSystem::unloadAllContent() {
         Mix_FreeChunk(health_pickup_sound);
     if (bow_and_arrow_sound != nullptr)
         Mix_FreeChunk(bow_and_arrow_sound);
+    if (walking_bomb_sound != nullptr)
+        Mix_FreeChunk(walking_bomb_sound);
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -724,6 +743,20 @@ void WorldSystem::handle_collisions() {
                 if (is_thrown_weapon)
                 {
                     registry.activePlayerProjectiles.remove(entity_other);
+
+                    if (entity_other.GetTag() == TAG_WALKINGBOMB)
+                    {
+                        SpriteComponent& sprite = registry.sprites.get(entity_other);
+                        enemyHealth.TakeDamage(100, 0);
+                        sprite.selected_animation = 2;
+                        sprite.current_frame = 0;
+                        sprite.animations[2].played = false;
+                        registry.motions.get(entity_other).velocity.x = 0;
+                        registry.items.get(entity_other).pickable = false;
+                        if (Mix_PlayChannel(-1, walking_bomb_sound, 0) == -1) {
+                            printf("Mix_PlayChannel: %s\n", Mix_GetError());
+                        }
+                    }
                 }
 
                 if (enemyHealth.health <= 0.f && !registry.deathTimers.has(entity))
@@ -748,6 +781,11 @@ void WorldSystem::handle_collisions() {
                         {
                             createCoins(expPosition);
                         }
+                    }
+
+                    if (coin_or_potion <= 1)
+                    {
+                        createWalkingBomb(expPosition);
                     }
 
                     int random_exp_count = RandomInt(3, 7);
@@ -886,7 +924,7 @@ void WorldSystem::handle_collisions() {
         if (registry.holders.has(entity)) {
             HolderComponent &holder = registry.holders.get(entity);
 
-            if (entity_other.GetTagAndID() != 0 && entity_other != holder.held_weapon && registry.items.has(entity_other) && !registry.playerProjectiles.has(entity_other))
+            if (entity_other.GetTagAndID() != 0 && entity_other != holder.held_weapon && registry.items.has(entity_other) && registry.items.get(entity_other).pickable && !registry.playerProjectiles.has(entity_other))
             {
                 holder.near_weapon = entity_other;
             }
@@ -894,11 +932,13 @@ void WorldSystem::handle_collisions() {
 
         if(registry.items.has(entity))
         {
-            if(registry.items.get(entity).collidableWithEnvironment)
+            Item& item = registry.items.get(entity);
+
+            if(item.collidableWithEnvironment)
             {
                 if(!registry.playerProjectiles.has(entity) || registry.playerProjectiles.get(entity).elapsed_time > 0.01f)
                 {
-                    CheckCollisionWithBlockable(entity, entity_other, true, true);
+                    CheckCollisionWithBlockable(entity, entity_other, item.friction, true);
                 }
 
                 if(entity_other.GetTag() == TAG_PLAYERBLOCKABLE)
@@ -922,7 +962,7 @@ void WorldSystem::handle_collisions() {
                             }
                         }
                     }
-                    else
+                    else if (item.friction)
                     {
                         if(itemMotion.velocity.x > 0) 
                         {
@@ -978,10 +1018,10 @@ void WorldSystem::CheckCollisionWithBlockable(Entity entity_resolver, Entity ent
                     if (bounce_x) {
                         resolverMotion.velocity.x = 0.25f * -resolverMotion.velocity.x;
                     } 
-                    else
-                    {
-                        resolverMotion.velocity.x = 0.f;
-                    }
+//                    else
+//                    {
+//                        resolverMotion.velocity.x = 0.f;
+//                    }
 
                     if(is_item)
                     {

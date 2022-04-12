@@ -462,6 +462,48 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) };
                 }break;
 
+                case '3': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "Did you pick up both weapons with C?");
+                }break;
+
+                case '4': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "Spike hurt... a lot");
+                }break;
+
+                case '5': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "You were supposed to platform over here...");
+                }break;
+
+                case '6': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "Your first encouter with a monster!");
+                }break;
+
+                case '7': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "Attack down in the air to jump higher!");
+                }break;
+
+                case '8': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "Press X to swap weapons!");
+                }break;
+
+                case '9': {
+                    CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                    roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
+                                    "Your journey now begins... ascend to the top!");
+                }break;
+
                 case 'M': {
                     currentLevelData.groundMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });
@@ -484,6 +526,11 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                     // shop items
                     currentLevelData.shopItemSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE,
                                                      roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE });
+                }break;
+
+                case 'Q': {
+                    CreateTorch({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + TILE_SIZE/2.f, 
+                                  roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + TILE_SIZE/2.f});
                 }break;
 
                 case 'R': {

@@ -36,6 +36,8 @@ Entity createSword(vec2 position);
 
 Entity createBow(vec2 position);
 
+Entity createWalkingBomb(vec2 position);
+
 Entity CreateShopItem(vec2 position, u8 shopItemIndex);
 
 Entity createCoins(vec2 position);
@@ -43,6 +45,8 @@ Entity createCoins(vec2 position);
 Entity CreateProximityWorldText(vec2 pos, float triggerRadius, u32 size, const char* text);
 
 Entity CreateHelpSign(vec2 pos, float triggerRadius, vec2 textOffsetFromPos, u32 textSize, const char* text);
+
+Entity CreateTorch(vec2 position);
 
 Entity CreateShopKeeperNPC(vec2 position);
 
