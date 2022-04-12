@@ -73,7 +73,7 @@ void AISystem::Step(float deltaTime)
 	}
 
 	// Pathing
-	if (elapsedAICycleTime >= 0.0f) {
+	if (elapsedAICycleTime >= 20.f) {
 		for (int i = 0; i < registry.enemy.size(); ++i)
 		{
 			Enemy& enemyComponent = registry.enemy.components[i];
@@ -315,6 +315,7 @@ void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 			motionComponent.velocity.x = 0;
 		}
 		else {
+			patrollingBehavior.timeSinceForcedRotation += elapsedTime;
 			if (motionComponent.velocity.x == 0) {
 				motionComponent.velocity.x = patrollingBehavior.patrolSpeed;
 			}
@@ -359,14 +360,22 @@ void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 		}
 		if (motionComponent.velocity.x > 0) {
 			if (drTileEmpty) {
+				if (patrollingBehavior.timeSinceForcedRotation < 25.f) {
+					patrollingBehavior.standStill = true;
+				}
 				motionComponent.velocity.x *= -1;
 				patrollingBehavior.currentPatrolTime = 0;
+				patrollingBehavior.timeSinceForcedRotation = 0;
 			}
 		}
 		else {
 			if (dlTileEmpty) {
+				if (patrollingBehavior.timeSinceForcedRotation < 25.f) {
+					patrollingBehavior.standStill = true;
+				}
 				motionComponent.velocity.x *= -1;
 				patrollingBehavior.currentPatrolTime = 0;
+				patrollingBehavior.timeSinceForcedRotation = 0;
 			}
 		}
 	}
@@ -896,9 +905,11 @@ void AISystem::BossStep(float elapsedTime) {
 	TransformComponent& playerTransform = registry.transforms.get(registry.players.entities[0]);
 	vec2 distance = bossTransform.position - playerTransform.position;
 	if ((distance.x < bossVisual.sightRadius && distance.y < bossVisual.sightRadius) || bossVisual.hasAggro) {
-		if (registry.healthBar.get(bossEntity).health > registry.healthBar.get(bossEntity).maxHealth / 5 && bossComponent.hasRaged == false) {
+		if (registry.healthBar.get(bossEntity).health < registry.healthBar.get(bossEntity).maxHealth / 5 && bossComponent.hasRaged == false) {
 			// add sound cue!
 			bossComponent.actionCooldown = 750;
+			bossComponent.hasRaged = true;
+
 		}
 		else if (bossComponent.rageTick > 0 && bossComponent.hasRaged == true) {
 			bossComponent.rageTick--;
@@ -967,7 +978,7 @@ void AISystem::BossStep(float elapsedTime) {
 					Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_BOSSMELEEATTACK);
 					auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
 					attack.attackPower = bossComponent.meleeAttackPower;
-					attack.existenceTime = 1;
+					attack.existenceTime = 100;
 					auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
 					auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
 
