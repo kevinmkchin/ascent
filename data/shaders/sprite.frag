@@ -28,12 +28,12 @@ void main()
     if (lightSize == 0) {
         lightFactor = 1.0;
     }
-    else if (closestDistance < 150.0) {
+    else if (closestDistance < 180.0) {
         float exp = closestDistance;
-        lightFactor = max(1.0 * pow(0.98, exp), 0.3);
+        lightFactor = max(1.0 * pow(0.98, exp), 0.05);
     }
     else {
-        lightFactor = 0.3;
+        lightFactor = 0.05;
     }
 
 	color = vec4(lightFactor * fcolor, 1.0) * texture(sampler0, texcoord);
