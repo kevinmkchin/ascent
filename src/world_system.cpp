@@ -406,6 +406,11 @@ void WorldSystem::SpawnLevelEntities() {
 
 
     // Create enemies
+    if (currentGameStage == CHAPTER_BOSS) {
+        for (vec2 bossEnemySpawn : currentLevelData.bossMonsterSpawns) {
+            CreateBoss(bossEnemySpawn);
+        }
+    }
     for (vec2 groundEnemySpawn : currentLevelData.groundMonsterSpawns) {
 
         int spawnType = rand() % 2;
@@ -818,11 +823,11 @@ void WorldSystem::handle_collisions() {
                 }
             }
 
-            if (entity_other.GetTag() == TAG_ENEMYMELEEATTACK) {
-                playerHealth.health -= registry.enemyMeleeAttacks.get(entity_other).attackPower;
+            if (entity_other.GetTag() == TAG_BOSSMELEEATTACK) {
+                playerHealth.health -= registry.boss.components[0].meleeAttackPower;
                 registry.remove_all_components_of(entity_other);
+                continue;
             }
-
 
             if (registry.enemy.has(entity_other)) {
                 Enemy &enemy = registry.enemy.get(entity_other);

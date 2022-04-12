@@ -44,6 +44,7 @@ public:
 	ComponentContainer<LightSource> lightSources;
 	ComponentContainer<HealthPotion> healthPotion;
 	ComponentContainer<EnemyMeleeAttack> enemyMeleeAttacks;
+	ComponentContainer<Boss> boss;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -82,6 +83,7 @@ public:
 		registry_list.push_back(&lightSources);
 		registry_list.push_back(&healthPotion);
 		registry_list.push_back(&enemyMeleeAttacks);
+		registry_list.push_back(&boss);
 		
 	}
 

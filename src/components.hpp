@@ -239,6 +239,17 @@ struct Enemy
     //std::vector<Behavior> behaviors;
 };
 
+struct Boss
+{
+    i32 meleeAttackPower = 10;
+    i32 rangedAttackPower = 7;
+    bool summonState = false;
+    float actionTimer = 0;
+    float actionCooldown = 950;
+    bool hasRaged = false;
+    int rageTick = 15;
+};
+
 struct Behavior {
 
 };
@@ -543,5 +554,6 @@ enum GAMETAGS : u8
     TAG_SWORD,
     TAG_BOW,
     TAG_ENEMYMELEEATTACK,
+    TAG_BOSSMELEEATTACK,
     TAG_WALKINGBOMB
 };

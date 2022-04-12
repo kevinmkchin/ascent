@@ -42,6 +42,9 @@ INTERNAL Entity CreateBasicLevelTile(i32 column, i32 row, u16 spriteFrame = 0)
         case CHAPTER_THREE_STAGE_ONE:{
             tileSetToUse = TEXTURE_ASSET_ID::TILES_SNOWY;
         }break;
+        case CHAPTER_BOSS: {
+            tileSetToUse = TEXTURE_ASSET_ID::TILES_SNOWY;
+        }break;
     }
 
     registry.sprites.insert(
@@ -89,6 +92,9 @@ INTERNAL Entity CreateDecoration(i32 column, i32 row, bool standing = true)
             decorationToUseIndex = 8;
         }break;
         case CHAPTER_THREE_STAGE_ONE:{
+            decorationToUseIndex = 16;
+        }break;
+        case CHAPTER_BOSS: {
             decorationToUseIndex = 16;
         }break;
     }
@@ -288,6 +294,7 @@ INTERNAL std::unordered_map<std::string, std::vector<ns::RoomRawData>> chapterOn
 INTERNAL std::unordered_map<std::string, std::vector<ns::RoomRawData>> chapterTwoRooms;
 INTERNAL std::unordered_map<std::string, std::vector<ns::RoomRawData>> chapterThreeRooms;
 INTERNAL ns::RoomRawData tutorialRoomData;
+INTERNAL ns::RoomRawData bossRoomData;
 
 INTERNAL void LoadAllLevelData()
 {
@@ -369,6 +376,19 @@ INTERNAL void LoadAllLevelData()
     JSON room = *roomDataJsonArray.begin();
     auto roomRawData = room.get<ns::RoomRawData>();
     tutorialRoomData = roomRawData;
+
+    ifs = std::ifstream(level_path("boss.json"));
+    if (!ifs.is_open()) {
+        std::cerr << " Failed to open level data..." << std::endl;
+        assert(0);
+        return;
+    }
+    ifs >> roomData;
+    ifs.close();
+    roomDataJsonArray = roomData["rooms"];
+    room = *roomDataJsonArray.begin();
+    roomRawData = room.get<ns::RoomRawData>();
+    bossRoomData = roomRawData;
 }
 
 struct CurrentLevelData
@@ -380,6 +400,7 @@ struct CurrentLevelData
     std::vector<vec2> groundMonsterSpawns;
     std::vector<vec2> flyingMonsterSpawns;
     std::vector<vec2> stationaryMonsterSpawns;
+    std::vector<vec2> bossMonsterSpawns;
     std::vector<vec2> treasureSpawns;
     std::vector<vec2> shopItemSpawns;
 };
@@ -521,6 +542,11 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                     // end point
                     CreateEndPointTile(roomXIndex * r.width + j, roomYIndex * r.height + i);
                 }break;
+
+                case '3': {
+                    // boss
+                    currentLevelData.bossMonsterSpawns.push_back({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
+                                                     roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) });                }
 
                 case 'L': {
                     // ladder
@@ -666,6 +692,9 @@ INTERNAL void ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(Entity e,
             case CHAPTER_THREE_STAGE_ONE:{
                 decorationChance = 6;
             }break;
+            case CHAPTER_BOSS: {
+                decorationChance = 7;
+            }break;
         }
         u32 roll = RandomInt(1, decorationChance);
         if(roll == 1)
@@ -707,6 +736,22 @@ INTERNAL void UpdateLevelGeometry(GAMELEVELENUM stageToGenerate)
             for (int col = 0; col < tutorialRoomData.width; ++col)
             {
                 for (int row = 0; row < tutorialRoomData.height; ++row)
+                {
+                    Entity e = levelTiles[col][row];
+                    if (e != 0)
+                    {
+                        ChangeSpritesBasedOnSurroundingTilesAndCreateDecorations(e, col, row);
+                        AddColliderIfRequired(e, col, row);
+                    }
+                }
+            }
+            break;
+        }
+        case CHAPTER_BOSS:
+        {
+            for (int col = 0; col < bossRoomData.width; ++col)
+            {
+                for (int row = 0; row < bossRoomData.height; ++row)
                 {
                     Entity e = levelTiles[col][row];
                     if (e != 0)
@@ -891,6 +936,14 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
             }
         }break;
 
+        case CHAPTER_BOSS: {
+            levelTiles.resize(bossRoomData.width);
+            for (auto& ltv : levelTiles)
+            {
+                ltv.resize(bossRoomData.height);
+            }
+        }break;
+
         case CHAPTER_ONE_STAGE_ONE:
         case CHAPTER_TWO_STAGE_ONE:
         case CHAPTER_THREE_STAGE_ONE:
@@ -903,14 +956,19 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
         }break;
     }
 
-    if(stageToGenerate != CHAPTER_TUTORIAL)
+    if(stageToGenerate != CHAPTER_TUTORIAL && stageToGenerate != CHAPTER_BOSS)
     {
         GenerateRooms(currentChapterRooms);
     }
     else
     {
         // tutorial
-        ParseRoomData(tutorialRoomData, 0, 0);
+        if (stageToGenerate == CHAPTER_TUTORIAL) {
+            ParseRoomData(tutorialRoomData, 0, 0);
+        }
+        else {
+            ParseRoomData(bossRoomData, 0, 0);
+        }
     }
 
     // Process and prepare the level
@@ -946,7 +1004,7 @@ INTERNAL void GenerateNewLevel(GAMELEVELENUM stageToGenerate)
     int miny = (-1 * TILE_SIZE);
     int maxx = (int)levelTiles.size()+1;
     int maxy = (int)levelTiles[0].size()+1;
-    if(stageToGenerate == CHAPTER_TUTORIAL)
+    if(stageToGenerate == CHAPTER_TUTORIAL || stageToGenerate == CHAPTER_BOSS)
     {
         minx = 0;
         miny = 0;
