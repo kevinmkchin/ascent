@@ -246,6 +246,13 @@ void UISystem::UpdateTextUI(float dt)
                     vtxt_move_cursor(100,930);
                     vtxt_append_line("Mountaintop of Warriors", &font_medusa_gothic, 80);
                 }break;
+                case CHAPTER_BOSS:
+                {
+                    vtxt_move_cursor(100,800);
+                    vtxt_append_line("Evil Sorcerer Izual", &font_medusa_gothic, 110);
+                    vtxt_move_cursor(100,930);
+                    vtxt_append_line("Final Fight", &font_medusa_gothic, 80);
+                }break;
             }
         }
 
