@@ -377,7 +377,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
 void WorldSystem::SpawnLevelEntities() {
     // Create player
     player = createPlayer(currentLevelData.playerStart);
-    CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your way to the top of the mountain!");
+    CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
 
     if (currentDifficulty == DIFFICULTY_EASY) {
         registry.healthBar.get(player).maxHealth += 25;
