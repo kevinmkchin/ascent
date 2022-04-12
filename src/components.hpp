@@ -59,6 +59,7 @@ enum class TEXTURE_ASSET_ID : u16
     WORM,
     EXP,
     COIN,
+    TORCH,
     SWORDSWING_LEFT,
     SWORDSWING_RIGHT,
     SWORDSWING_UP,
@@ -97,6 +98,7 @@ enum class TEXTURE_ASSET_ID : u16
     TILES_FOREST,
     TILES_SNOWY,
     TILES_DECORATIONS,
+    WALKING_BOMB,
 
     TEXTURE_COUNT
 };
@@ -129,6 +131,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("worm.png"),
         textures_path("exp.png"),
         textures_path("coin.png"),
+        textures_path("torch.png"),
         textures_path("swing_left.png"),
         textures_path("swing_right.png"),
         textures_path("swing_up.png"),
@@ -167,6 +170,7 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("tiles_forest.png"),
         textures_path("tiles_snowy.png"),
         textures_path("tiles_decorations.png"),
+        textures_path("walking_bomb_small.png"),
 };
 
 enum class EFFECT_ASSET_ID : u8
@@ -325,6 +329,8 @@ struct Item
     // When item is on the floor, we want it to be colliding with the floor
     bool collidableWithEnvironment = true;
     bool grounded = true;
+    bool friction = true;
+    bool pickable = true;
 };
 
 struct ShopItem
@@ -370,8 +376,8 @@ struct CollisionComponent
 {
     vec2 collider_position = { 0.f, 0.f };
     // Collision
-    shortvec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
-    shortvec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
+    vec2 collision_pos = { 0, 0 }; // Collision box x,y size in the positive direction from the center
+    vec2 collision_neg = { 0, 0 }; // Collision box x,y size in the negative direction from the center
 };
 
 struct VisionComponent
@@ -387,6 +393,7 @@ struct Animation // NOT A COMPONENT
     float animation_duration = 0.f;
     bool replay = true;
     bool played = false;
+    bool go_back_to_first = true;
 };
 
 struct SpriteComponent
@@ -548,4 +555,5 @@ enum GAMETAGS : u8
     TAG_BOW,
     TAG_ENEMYMELEEATTACK,
     TAG_BOSSMELEEATTACK,
+    TAG_WALKINGBOMB
 };

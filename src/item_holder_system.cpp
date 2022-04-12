@@ -9,6 +9,7 @@ INTERNAL float itemUpwardsYVelocity = -250.f;
 INTERNAL float itemDownwardsYVelocity = 250.f;
 INTERNAL float itemThrowSideVelocity = 150.f;
 INTERNAL float itemShootSideVelocity = 250.f;
+INTERNAL float bombWalkVelocity = 50.f;
 
 INTERNAL float bowCooldown = 0.5;
 
@@ -23,7 +24,7 @@ void ItemHolderSystem::Init(WorldSystem* world_sys_arg)
 INTERNAL void makeItemDisappear(Entity item)
 {
     //TODO: Make another way to do this
-    registry.transforms.get(item).position = {0, 0};
+    registry.transforms.get(item).position = {-900, -900};
 }
 
 INTERNAL void nextCurrentItem(HolderComponent& holderComponent)
@@ -67,7 +68,8 @@ INTERNAL Entity createArrow(vec2 position)
     auto& transform = registry.transforms.emplace(entity);
     auto& motion = registry.motions.emplace(entity);
     auto& collider = registry.colliders.emplace(entity);
-    registry.items.emplace(entity);
+    auto& item = registry.items.emplace(entity);
+    item.pickable = false;
 
     transform.position = position;
     transform.rotation = 0.f;
@@ -115,11 +117,24 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent, Entity holder)
 {
     if(holderComponent.want_to_pick_up && holderComponent.near_weapon.GetTagAndID() != 0 && (registry.items.has(holderComponent.near_weapon) || registry.weapons.has(holderComponent.near_weapon)))
     {
-        if (registry.colliders.has(holder) && registry.colliders.has(holderComponent.near_weapon) && CheckCollision(registry.colliders.get(holder), registry.colliders.get(holderComponent.near_weapon)).collides)
+        if (registry.items.get(holderComponent.near_weapon).pickable
+        && registry.colliders.has(holder) && registry.colliders.has(holderComponent.near_weapon)
+        && CheckCollision(registry.colliders.get(holder), registry.colliders.get(holderComponent.near_weapon)).collides)
         {
             addToInventory(holderComponent, holderComponent.near_weapon);
 
             Entity held_weapon = holderComponent.near_weapon;
+
+            if (held_weapon.GetTag() == TAG_WALKINGBOMB)
+            {
+                SpriteComponent& sprite = registry.sprites.get(held_weapon);
+                sprite.selected_animation = 0;
+                sprite.current_frame = 0;
+
+                if (registry.activePlayerProjectiles.has(held_weapon)) {
+                    registry.activePlayerProjectiles.remove(held_weapon);
+                }
+            }
 
             Item& item = registry.items.get(held_weapon);
             item.collidableWithEnvironment = false;
@@ -133,7 +148,7 @@ INTERNAL void ResolvePickUp(HolderComponent& holderComponent, Entity holder)
     holderComponent.near_weapon = Entity();
 }
 
-INTERNAL void ResolveDrop(HolderComponent& holderComponent)
+INTERNAL void ResolveDrop(HolderComponent& holderComponent, MotionComponent& holderMotion)
 {
     if(holderComponent.want_to_drop && holderComponent.held_weapon.GetTagAndID() != 0)
     {
@@ -143,13 +158,28 @@ INTERNAL void ResolveDrop(HolderComponent& holderComponent)
         item.collidableWithEnvironment = true;
         item.grounded = false;
 
-        if (registry.weapons.has(held_weapon) && !registry.activePlayerProjectiles.has(held_weapon))
-        {
-            registry.activePlayerProjectiles.emplace(held_weapon);
-        }
-
         MotionComponent& motion = registry.motions.get(held_weapon);
         motion.acceleration.y = itemGravity;
+
+        if (held_weapon.GetTag() == TAG_WALKINGBOMB)
+        {
+            SpriteComponent& sprite = registry.sprites.get(held_weapon);
+            sprite.selected_animation = 1;
+            sprite.current_frame = 0;
+
+            MotionComponent& bombMotion = registry.motions.get(held_weapon);
+
+            if (holderMotion.facingRight) {
+                bombMotion.velocity.x = bombWalkVelocity;
+            } else {
+                bombMotion.velocity.x = -bombWalkVelocity;
+            }
+
+            if (registry.weapons.has(held_weapon) && !registry.weapons.get(held_weapon).ranged && !registry.activePlayerProjectiles.has(held_weapon))
+            {
+                registry.activePlayerProjectiles.emplace(held_weapon);
+            }
+        }
 
         holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
         previousCurrentItem(holderComponent);
@@ -174,22 +204,38 @@ INTERNAL void ResolveThrow(HolderComponent& holderComponent, MotionComponent& ho
             registry.activePlayerProjectiles.emplace(held_weapon);
         }
 
-        if(holderMotion.facingRight)
+        if (held_weapon.GetTag() == TAG_WALKINGBOMB)
         {
-            motion.velocity = {itemThrowSideVelocity, itemNormalYVelocity};
+            SpriteComponent& sprite = registry.sprites.get(held_weapon);
+            sprite.selected_animation = 1;
+            sprite.current_frame = 0;
+
+            MotionComponent& bombMotion = registry.motions.get(held_weapon);
+
+            if (holderMotion.facingRight) {
+                bombMotion.velocity.x = bombWalkVelocity;
+            } else {
+                bombMotion.velocity.x = -bombWalkVelocity;
+            }
         }
-        else
-        {
-            motion.velocity = {-itemThrowSideVelocity, itemNormalYVelocity};
-        }
-        if (holderComponent.want_to_shoot_up)
-        {
-            motion.velocity.x *= 0.7;
-            motion.velocity.y = itemUpwardsYVelocity;
-        } else if (holderComponent.want_to_shoot_down)
-        {
-            motion.velocity.x *= 0.7;
-            motion.velocity.y = itemDownwardsYVelocity;
+        else {
+            if(holderMotion.facingRight)
+            {
+                motion.velocity = {itemThrowSideVelocity, itemNormalYVelocity};
+            }
+            else
+            {
+                motion.velocity = {-itemThrowSideVelocity, itemNormalYVelocity};
+            }
+            if (holderComponent.want_to_shoot_up)
+            {
+                motion.velocity.x *= 0.7;
+                motion.velocity.y = itemUpwardsYVelocity;
+            } else if (holderComponent.want_to_shoot_down)
+            {
+                motion.velocity.x *= 0.7;
+                motion.velocity.y = itemDownwardsYVelocity;
+            }
         }
 
         holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
@@ -205,6 +251,38 @@ void ItemHolderSystem::ResolveShoot(HolderComponent& holderComponent, MotionComp
     }
 
     Entity held_weapon = holderComponent.held_weapon;
+
+    if (held_weapon.GetTag() == TAG_WALKINGBOMB)
+    {
+        Item& item = registry.items.get(held_weapon);
+        item.collidableWithEnvironment = true;
+        item.grounded = false;
+
+        MotionComponent& motion = registry.motions.get(held_weapon);
+        motion.acceleration.y = itemGravity;
+
+        holderComponent.carried_items.erase(holderComponent.carried_items.begin() + holderComponent.current_item);
+        previousCurrentItem(holderComponent);
+
+        SpriteComponent& sprite = registry.sprites.get(held_weapon);
+        sprite.selected_animation = 1;
+        sprite.current_frame = 0;
+
+        MotionComponent& bombMotion = registry.motions.get(held_weapon);
+
+        if (holderMotion.facingRight) {
+            bombMotion.velocity.x = bombWalkVelocity;
+        } else {
+            bombMotion.velocity.x = -bombWalkVelocity;
+        }
+
+        if (registry.weapons.has(held_weapon) && !registry.weapons.get(held_weapon).ranged && !registry.activePlayerProjectiles.has(held_weapon))
+        {
+            registry.activePlayerProjectiles.emplace(held_weapon);
+        }
+
+        return;
+    }
 
     if(registry.weapons.has(held_weapon) && holderComponent.held_weapon.GetTagAndID() != 0)
     {
@@ -349,7 +427,7 @@ void ItemHolderSystem::Step(float deltaTime)
         }
 
         ResolvePickUp(holderComponent, holder);
-        ResolveDrop(holderComponent);
+        ResolveDrop(holderComponent, holderMotion);
         ResolveThrow(holderComponent, holderMotion);
         ResolveShoot(holderComponent, holderMotion, holderTransform);
         ResolveCycle(holderComponent);

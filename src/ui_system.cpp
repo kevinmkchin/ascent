@@ -409,7 +409,7 @@ void UISystem::UpdateLevelUpUI(float dt)
                     }
                     else
                     {
-                        vtxt_append_line("Press J to select mutation...", &font_c64, 32);
+                        vtxt_append_line("Press Z to select mutation...", &font_c64, 32);
                     }
 
                     if(Input::GameLeftHasBeenPressed())
@@ -431,7 +431,7 @@ void UISystem::UpdateLevelUpUI(float dt)
                     renderer->mutationSelectionIndex = (renderer->mutationSelectionIndex + 3) % 3;
                     renderer->showMutationSelect = true;
 
-                    if(Input::GameJumpHasBeenPressed())
+                    if(Input::GameAttackHasBeenPressed())
                     {
                         Mutation mutationToAdd = mutationOptions[renderer->mutationSelectionIndex];
                         ActiveMutationsComponent& playerActiveMutations = registry.mutations.get(playerEntity);
@@ -514,7 +514,7 @@ void UISystem::UpdateShopUI(float dt) {
             }
             else
             {
-                vtxt_append_line("Press J to buy for 50 gold.", &font_c64, 32);
+                vtxt_append_line("Press Z to buy for 50 gold.", &font_c64, 32);
             }
 
             vtxt_move_cursor(930, 900);
@@ -527,10 +527,10 @@ void UISystem::UpdateShopUI(float dt) {
             }
             else
             {
-                vtxt_append_line("Press K to exit...", &font_c64, 32);
+                vtxt_append_line("Press X to exit...", &font_c64, 32);
             }
 
-            if (Input::GameJumpHasBeenPressed())
+            if (Input::GameAttackHasBeenPressed())
             {
                 GoldBar& playerGold = registry.goldBar.get(playerEntity);
                 
@@ -551,7 +551,7 @@ void UISystem::UpdateShopUI(float dt) {
                 *GlobalPauseForSeconds = 0.0f;
             }
 
-            if (Input::GameAttackHasBeenPressed())
+            if (Input::GameCycleItemRightBeenPressed() || Input::GamePickUpHasBeenPressed())
             {
                 registry.activeShopItems.clear();
                 *GlobalPauseForSeconds = 0.0f;
