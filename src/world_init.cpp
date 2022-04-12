@@ -1170,6 +1170,44 @@ Entity CreateHelpSign(vec2 pos, float triggerRadius, vec2 textOffsetFromPos, u32
     return entity;
 }
 
+Entity CreateTorch(vec2 position)
+{
+    auto entity = Entity::CreateEntity();
+
+    auto& transform = registry.transforms.emplace(entity);
+    vec2 dimensions = { 8, 24 };
+    transform.position = position;
+    transform.center = dimensions/2.f;
+
+    registry.lightSources.emplace(entity);
+
+    registry.sprites.insert(
+        entity,
+        {
+            dimensions,
+            0,
+            EFFECT_ASSET_ID::SPRITE,
+            TEXTURE_ASSET_ID::TORCH,
+            true,
+            false,
+            true,
+            96,
+            24,
+            0,
+            0,
+            0.f,
+            {
+                // idle
+                {
+                    12,
+                    0,
+                    100.f * 12.f
+                }
+            },
+        }
+    );
+}
+
 Entity CreateShopKeeperNPC(vec2 position)
 {
     auto entity = Entity::CreateEntity();
