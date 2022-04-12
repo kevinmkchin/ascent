@@ -42,6 +42,12 @@ INTERNAL void previousCurrentItem(HolderComponent& holderComponent)
     }
 }
 
+INTERNAL void lastCurrentItem(HolderComponent& holderComponent)
+{
+
+    holderComponent.current_item = holderComponent.carried_items.size() - 1;
+}
+
 INTERNAL void addToInventory(HolderComponent& holderComponent, Entity itemToPickUp)
 {
     for (Entity item : holderComponent.carried_items)
@@ -58,7 +64,7 @@ INTERNAL void addToInventory(HolderComponent& holderComponent, Entity itemToPick
     }
 
     holderComponent.carried_items.push_back(itemToPickUp);
-    nextCurrentItem(holderComponent);
+    lastCurrentItem(holderComponent);
 }
 
 INTERNAL Entity createArrow(vec2 position)
