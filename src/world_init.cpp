@@ -331,6 +331,7 @@ Entity CreateBoss(vec2 position) {
     transform.position = position;
     transform.rotation = 0.f;
     transform.center = dimensions / 2.f;
+    transform.scale = { 2.0, 2.0 };
 
     collider.collision_pos = collisionDimension / 2.f;
     collider.collision_neg = collisionDimension / 2.f;
