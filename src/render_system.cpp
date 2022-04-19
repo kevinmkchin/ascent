@@ -291,7 +291,7 @@ void RenderSystem::BatchDrawAllSprites(std::vector<SpriteTransformPair>& sortedS
 
         vec2 scaledPosition = sortedSprite.transform.position * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
         vec2 topLeftCorner = scaledPosition - sortedSprite.transform.center * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
-        vec2 scaledDimensions = ((vec2) sortedSpriteSprite.dimensions) * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
+        vec2 scaledDimensions = sortedSprite.transform.scale * ((vec2) sortedSpriteSprite.dimensions) * (float) FRAMEBUFFER_PIXELS_PER_GAME_PIXEL;
 
         vertices[verticesCount + 0] = topLeftCorner.x;
         vertices[verticesCount + 1] = topLeftCorner.y - 0.1f;
