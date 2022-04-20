@@ -1011,7 +1011,7 @@ Entity createEnemyLobbingProjectile(vec2 position, vec2 velocity, vec2 accelerat
         entity,
         {
                 dimensions,
-                10,
+                15,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::LOB_PROJECTILE
         }
@@ -1046,7 +1046,7 @@ Entity createEnemyProjectile(vec2 position, vec2 velocity, Entity enemy) {
         entity,
         {
                 dimensions,
-                10,
+                15,
                 EFFECT_ASSET_ID::SPRITE,
                 TEXTURE_ASSET_ID::FIRE
         }
