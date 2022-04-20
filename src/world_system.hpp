@@ -107,6 +107,7 @@ public:
     float* GlobalPauseForSeconds = nullptr;
     bool darkenGameFrame = false;
     bool gamePaused = false;
+	bool keyReleased = false;
 
     std::vector<Mutation> allPossibleMutations;
 
