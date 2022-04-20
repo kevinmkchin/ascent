@@ -56,7 +56,8 @@ void RenderSystem::DrawBackground(TEXTURE_ASSET_ID texId, float offset)
 
     int lightSize = 0;
     float lightArray[50] = { };
-    if (registry.players.size() > 0 && ((world->GetCurrentStage() == CHAPTER_ONE_STAGE_ONE) || (world->GetCurrentStage() == CHAPTER_TWO_STAGE_ONE))) {
+    GAMELEVELENUM stage = world->GetCurrentStage();
+    if (registry.players.size() > 0 && ((stage == CHAPTER_ONE_STAGE_ONE) || (stage == CHAPTER_TWO_STAGE_ONE)) && !world->gamePaused) {
         Entity player = registry.players.entities[0];
         TransformComponent& playerTransform = registry.transforms.get(player);
         float playerPositionX = clamp(playerTransform.position.x, cameraBoundMin.x, cameraBoundMax.x);
