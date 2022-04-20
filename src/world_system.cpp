@@ -271,7 +271,12 @@ void WorldSystem::HelpMode() {
 
     SetCurrentMode(MODE_HELP);
 
-    if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+    if (Input::HasKeyBeenReleased(SDL_SCANCODE_RETURN)) {
+        keyReleased = true;
+    }
+
+    if (keyReleased && Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+        keyReleased = false;
         SetCurrentMode(MODE_INGAME);
     }
 
@@ -599,7 +604,7 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
 void WorldSystem::UpdateMode() {
     if (GetCurrentMode() == MODE_MAINMENU ) {
         if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
-            StartNewRun();
+            HelpMode();
         }
 
         else if (Input::HasKeyBeenPressed(SDL_SCANCODE_H)) {
