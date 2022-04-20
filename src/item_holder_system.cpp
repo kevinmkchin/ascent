@@ -13,8 +13,7 @@ INTERNAL float bombWalkVelocity = 50.f;
 
 INTERNAL float bowCooldown = 0.5;
 
-ItemHolderSystem::ItemHolderSystem()
-= default;
+ItemHolderSystem::ItemHolderSystem() = default;
 
 void ItemHolderSystem::Init(WorldSystem* world_sys_arg)
 {
@@ -389,11 +388,19 @@ INTERNAL void ResolveItemMovement(HolderComponent& holderComponent, MotionCompon
     {
         weaponTransform.position.x = holderTransform.position.x + holderTransform.center.x;
         registry.sprites.get(weapon).reverse = false;
+        if (weapon.GetTag() == TAG_SWORD) {
+            weaponTransform.position.x += holderTransform.center.x * 0.4f;
+            weaponTransform.position.y -= holderTransform.center.y * 0.2f;
+        }
     }
     else
     {
         weaponTransform.position.x = holderTransform.position.x - holderTransform.center.x;
         registry.sprites.get(weapon).reverse = true;
+        if (weapon.GetTag() == TAG_SWORD) {
+            weaponTransform.position.x -= holderTransform.center.x * 0.4f;
+            weaponTransform.position.y -= holderTransform.center.y * 0.2f;
+        }
     }
 }
 
