@@ -308,7 +308,18 @@ Entity CreateStationaryEnemy(vec2 position)
 
 Entity CreateBoss(vec2 position) {
     
+    return CreateBossRanged(position, true);
+}
+
+Entity CreateBossMelee() {
+    // steal old boss identity and then delete him!
     auto entity = Entity::CreateEntity();
+
+    auto& currentBossEntity = registry.boss.entities[0];
+    auto bossOld = registry.boss.get(currentBossEntity);
+    auto transformOld = registry.transforms.get(currentBossEntity);
+    auto motionOld = registry.motions.get(currentBossEntity);
+    auto hbOld = registry.healthBar.get(currentBossEntity);
 
     auto& boss = registry.boss.emplace(entity);
     auto& transform = registry.transforms.emplace(entity);
@@ -320,18 +331,17 @@ Entity CreateBoss(vec2 position) {
     auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
     auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
     auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
-
-    boss.summonState = false;
-    hb.health = 500.f;
     registry.enemy.emplace(entity);
     registry.holders.emplace(entity);
 
-    vec2 dimensions = { 16, 16 };
-    vec2 collisionDimension = { 12, 16 };
-    transform.position = position;
-    transform.rotation = 0.f;
-    transform.center = dimensions / 2.f;
-    transform.scale = { 2.0, 2.0 };
+    vec2 dimensions = { 108, 59 };
+    vec2 collisionDimension = { 108, 59 };
+
+    transform = transformOld;
+    motion = motionOld;
+    hb = hbOld;
+    boss = bossOld;
+    transform.center.y -= 17;
 
     collider.collision_pos = collisionDimension / 2.f;
     collider.collision_neg = collisionDimension / 2.f;
@@ -340,24 +350,27 @@ Entity CreateBoss(vec2 position) {
     pathingBehavior.goalFromPlayer = { 0, 0 };
     pathingBehavior.pathSpeed = maxMoveSpeed;
 
-    patrollingBehavior.standStill = true;
 
+    patrollingBehavior.standStill = true;
     walkingBehavior.stupid = true;
 
     visualComponent.sightRadius = 96.f;
 
+    registry.remove_all_components_of(currentBossEntity);
+
+    // TODO add attack anims
     registry.sprites.insert(
         entity,
         {
                 dimensions,
-                16,
+                4,
                 EFFECT_ASSET_ID::SPRITE,
-                TEXTURE_ASSET_ID::GOBLIN_BOMBER,
+                TEXTURE_ASSET_ID::BOSS_MELEE,
                 true,
                 false,
-                true,
-                96,
-                80,
+                false,
+                540,
+                708,
                 0,
                 0,
                 0.f,
@@ -365,30 +378,302 @@ Entity CreateBoss(vec2 position) {
 
             // idle
             {
-                4,
-                18,
-                100.f * 4.f
+                    8,
+                    0,
+                    75.f * 8.f
             },
 
         // run
         {
-            6,
-            0,
-            100.f * 6.f
+                8,
+                8,
+                75.f * 8.f
+        },
+
+        // death (DOESNT GET USED SO IDC)
+        {
+                12,
+                39,
+                75.f * 12.f
+        },
+
+},
+        }
+    );
+    return entity;
+}
+
+Entity CreateBossRage() {
+
+
+    // steal old boss identity and then delete him!
+    auto entity = Entity::CreateEntity();
+
+    auto& currentBossEntity = registry.boss.entities[0];
+    auto bossOld = registry.boss.get(currentBossEntity);
+    auto transformOld = registry.transforms.get(currentBossEntity);
+    auto motionOld = registry.motions.get(currentBossEntity);
+    auto hbOld = registry.healthBar.get(currentBossEntity);
+
+    auto& boss = registry.boss.emplace(entity);
+    auto& transform = registry.transforms.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& collider = registry.colliders.emplace(entity);
+    auto& hb = registry.healthBar.emplace(entity);
+    auto& visualComponent = registry.visionComponents.emplace(entity);
+    auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+    auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+    auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+    auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+    registry.enemy.emplace(entity);
+    registry.holders.emplace(entity);
+
+    vec2 dimensions = { 45, 42 };
+    vec2 collisionDimension = { 45, 42 };
+
+    transform = transformOld;
+    motion = motionOld;
+    hb = hbOld;
+    boss = bossOld;
+
+    collider.collision_pos = collisionDimension / 2.f;
+    collider.collision_neg = collisionDimension / 2.f;
+
+    float maxMoveSpeed = 40.f;
+    pathingBehavior.goalFromPlayer = { 0, 0 };
+    pathingBehavior.pathSpeed = maxMoveSpeed;
+
+
+    patrollingBehavior.standStill = true;
+    walkingBehavior.stupid = true;
+
+    visualComponent.sightRadius = 96.f;
+
+    registry.remove_all_components_of(currentBossEntity);
+
+    // TODO add attack anims
+    registry.sprites.insert(
+        entity,
+        {
+                dimensions,
+                4,
+                EFFECT_ASSET_ID::SPRITE,
+                TEXTURE_ASSET_ID::BOSS_RAGE,
+                true,
+                false,
+                false,
+                455,
+                588,
+                0,
+                0,
+                0.f,
+                {
+
+            // idle
+            {
+                    12,
+                    0,
+                    75.f * 12.f
+            },
+
+        // run
+        {
+                16,
+                12,
+                75.f * 16.f
         },
 
         // death
         {
-            6,
-            6,
-            100.f * 6.f
+                12,
+                38,
+                75.f * 12.f
         },
 
-    },
+},
         }
     );
-
     return entity;
+}
+
+Entity CreateBossRanged(vec2 position, bool start) {
+    if (start == true) {
+        auto entity = Entity::CreateEntity();
+
+        auto& boss = registry.boss.emplace(entity);
+        auto& transform = registry.transforms.emplace(entity);
+        auto& motion = registry.motions.emplace(entity);
+        auto& collider = registry.colliders.emplace(entity);
+        auto& hb = registry.healthBar.emplace(entity);
+        auto& visualComponent = registry.visionComponents.emplace(entity);
+        auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+        auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+        auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+        auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+
+        hb.health = 600.f;
+        registry.enemy.emplace(entity);
+        registry.holders.emplace(entity);
+        vec2 dimensions = { 45, 42 };
+        vec2 collisionDimension = { 30, 40 };
+        transform.position = position;
+        transform.rotation = 0.f;
+        transform.center = { 28, 26 };
+        transform.scale = { 1.0, 1.0 };
+
+        collider.collision_pos = collisionDimension / 2.f;
+        collider.collision_neg = collisionDimension / 2.f;
+
+        float maxMoveSpeed = 0.f;
+        pathingBehavior.goalFromPlayer = { 0, 0 }; // TODO update?
+        pathingBehavior.pathSpeed = maxMoveSpeed;  // as above
+
+        patrollingBehavior.standStill = true;
+        walkingBehavior.stupid = true;            // as above
+
+        visualComponent.sightRadius = 96.f;
+
+        // TODO add attack anims
+        registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    4,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::BOSS_RANGED,
+                    true,
+                    false,
+                    false ,
+                    225,
+                    504,
+                    0,
+                    0,
+                    0.f,
+                    {
+
+                // idle
+                {
+                        6,
+                        0,
+                        75.f * 6.f
+                },
+
+            // run
+            {
+                    8,
+                    6,
+                    75.f * 8.f
+            },
+
+            // death (DOESNT GET USED SO IDC)
+            {
+                    5,
+                    43,
+                    75.f * 5.f
+            },
+
+            {
+                    10,
+                    14,
+                    50.f * 10
+            },
+
+    },
+            }
+        );
+
+        return entity;
+    }
+    else {
+        // steal old boss identity and then delete him!
+        auto entity = Entity::CreateEntity();
+
+        auto& currentBossEntity = registry.boss.entities[0];
+        auto bossOld = registry.boss.get(currentBossEntity);
+        auto transformOld = registry.transforms.get(currentBossEntity);
+        auto motionOld = registry.motions.get(currentBossEntity);
+        auto hbOld = registry.healthBar.get(currentBossEntity);
+
+        auto& boss = registry.boss.emplace(entity);
+        auto& transform = registry.transforms.emplace(entity);
+        auto& motion = registry.motions.emplace(entity);
+        auto& collider = registry.colliders.emplace(entity);
+        auto& hb = registry.healthBar.emplace(entity);
+        auto& visualComponent = registry.visionComponents.emplace(entity);
+        auto& pathingBehavior = registry.pathingBehaviors.emplace(entity);
+        auto& patrollingBehavior = registry.patrollingBehaviors.emplace(entity);
+        auto& walkingBehavior = registry.walkingBehaviors.emplace(entity);
+        auto& meleeBehavior = registry.meleeBehaviors.emplace(entity);
+        registry.enemy.emplace(entity);
+        registry.holders.emplace(entity);
+
+        vec2 dimensions = { 45, 42 };
+        vec2 collisionDimension = { 45, 42 };
+
+        transform = transformOld;
+        motion    = motionOld;
+        hb        = hbOld;
+        boss      = bossOld;
+
+        collider.collision_pos = collisionDimension / 2.f;
+        collider.collision_neg = collisionDimension / 2.f;
+
+        float maxMoveSpeed = 25.f;
+        pathingBehavior.goalFromPlayer = { 0, 0 };
+        pathingBehavior.pathSpeed = maxMoveSpeed;
+
+
+        patrollingBehavior.standStill = true;
+        walkingBehavior.stupid = true;
+
+        visualComponent.sightRadius = 96.f;
+
+        registry.remove_all_components_of(currentBossEntity);
+
+        // TODO add attack anims
+        registry.sprites.insert(
+            entity,
+            {
+                    dimensions,
+                    4,
+                    EFFECT_ASSET_ID::SPRITE,
+                    TEXTURE_ASSET_ID::BOSS_RANGED,
+                    true,
+                    false,
+                    false,
+                    225,
+                    504,
+                    0,
+                    0,
+                    0.f,
+                    {
+
+                // idle
+                {
+                        6,
+                        0,
+                        75.f * 6.f
+                },
+
+            // run
+            {
+                    8,
+                    6,
+                    75.f * 8.f
+            },
+
+            // death (DOESNT GET USED SO IDC)
+            {
+                    4,
+                    4,
+                    100.f * 4.f
+            },
+
+    },
+            }
+        );
+        return entity;
+    }
 }
 
 Entity CreateGoblinEnemy(vec2 position)

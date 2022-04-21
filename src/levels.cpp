@@ -412,6 +412,7 @@ INTERNAL void ClearCurrentLevelData()
 {
     currentLevelData.playerStart = vec2(0.f, 0.f);
     currentLevelData.groundMonsterSpawns.clear();
+    currentLevelData.bossMonsterSpawns.clear();
     currentLevelData.flyingMonsterSpawns.clear();
     currentLevelData.treasureSpawns.clear();
     currentLevelData.shopItemSpawns.clear();

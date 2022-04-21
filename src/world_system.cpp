@@ -784,7 +784,22 @@ void WorldSystem::handle_collisions() {
 
                 if (enemyHealth.health <= 0.f && !registry.deathTimers.has(entity))
                 {
-                    registry.deathTimers.emplace(entity);
+                    if (registry.boss.has(entity)) {
+                        auto& boss = registry.boss.get(entity);
+                        auto& timer = registry.deathTimers.emplace(entity);
+                        if (boss.meleeState) {
+                            timer.elapsed_ms = 75.f * 11.f;
+                        }
+                        else if (boss.rangedState) {
+                            timer.elapsed_ms = 75.f * 11.f;
+                        }
+                        else if (boss.rageState) {
+                            timer.elapsed_ms = 75.f * 11.f;// TODO
+                        }
+                    }
+                    else {
+                        registry.deathTimers.emplace(entity);
+                    }
                     registry.colliders.remove(entity);
                     registry.collisionEvents.remove(entity);
                     MotionComponent &motion = registry.motions.get(entity);
@@ -847,7 +862,8 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_BOSSMELEEATTACK) {
-                playerHealth.health -= registry.boss.components[0].meleeAttackPower;
+                playerHealth.TakeDamage(registry.boss.components[0].meleeAttackPower);
+                // TODO add iframes (how?)
                 registry.remove_all_components_of(entity_other);
                 continue;
             }
@@ -921,7 +937,9 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameInteractButtonHasBeenPressed()) {
-                bGoToNextStage = true;
+                if (currentGameStage != CHAPTER_BOSS || registry.boss.entities.size() == 0) {
+                    bGoToNextStage = true;
+                }
                 continue;
             }
 
