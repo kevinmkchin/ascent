@@ -763,7 +763,7 @@ void WorldSystem::handle_collisions() {
                         playerMotion.velocity.x = std::max(std::min(playerMotion.velocity.x, 400.f), -400.f);
                     } else if (playerSystem->lastAttackDirection == 0 || playerSystem->lastAttackDirection == 1) {
                         auto &playerMotion = registry.motions.get(player);
-                        float bumpXVel = std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f);
+                        float bumpXVel = std::min(std::max(std::abs(playerMotion.velocity.x) * 1.5f, 150.f), 300.f);
                         playerMotion.velocity.x = playerSystem->lastAttackDirection == 0 ? bumpXVel : -bumpXVel;
                     }
                 }
