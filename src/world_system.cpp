@@ -312,6 +312,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
         printf("Ending run.\n");
         currentGameStage = GAME_NOT_STARTED;
         SetCurrentMode(MODE_CREDITS);
+        Mix_PlayMusic(music_mainmenu, -1);
         return;
     }
 
