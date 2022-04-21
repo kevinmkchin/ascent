@@ -102,7 +102,53 @@ void AISystem::HandleSpriteSheetFrame(float deltaTime)
 	for (int i = 0; i < registry.sprites.size(); i++) {
 		SpriteComponent& sprite = registry.sprites.components[i];
 		Entity& entity = registry.sprites.entities[i];
+		if (registry.boss.has(entity) && sprite.sprite_sheet) {
+			MotionComponent& motion = registry.motions.get(entity);
+			Boss& boss = registry.boss.get(entity);
 
+			float x_velocity = motion.velocity.x;
+			bool faceRight = motion.facingRight;
+			bool reversed = sprite.reverse;
+			int prev_state = sprite.selected_animation;
+
+			if (faceRight != boss.facingRight) {
+				boss.facingRight = faceRight;
+				TransformComponent& transform = registry.transforms.get(entity);
+				if (boss.meleeState) {
+					transform.center.x = 108 - transform.center.x;
+				}
+				else if (boss.rangedState) {
+					transform.center.x = 45 - transform.center.x;
+				}
+				else if (boss.rageState) {
+					// TODO this, naively the same as ranged state
+				}
+			}
+
+			if (registry.deathTimers.has(entity)) {
+				// death
+				sprite.selected_animation = 2;
+			}
+			else if (boss.isBuffering) {
+				// attack!
+				sprite.selected_animation = 3;
+			}
+			else if (x_velocity != 0.f) {
+				// run
+				sprite.selected_animation = 1;
+			}
+			else {
+				// idle
+				sprite.selected_animation = 0;
+			}
+
+			bool aligned = sprite.faceRight ? (faceRight != reversed) : (faceRight == reversed);
+			sprite.current_frame = (aligned && prev_state == sprite.selected_animation)
+				? sprite.current_frame : 0;
+
+			sprite.reverse = sprite.faceRight ? !faceRight : faceRight;
+			continue;
+		}
 		if (registry.enemy.has(entity) && sprite.sprite_sheet) {
 			MotionComponent& motion = registry.motions.get(entity);
 
@@ -891,6 +937,143 @@ void AISystem::EnemyJumping(Entity enemy_entity, float deltaTime) {
 }
 
 void AISystem::BossStep(float elapsedTime) {
+	if (registry.boss.entities.size() == 0) {
+		return;
+	}
+	Entity& bossEntity = registry.boss.entities[0];
+	if (registry.deathTimers.has(bossEntity)) {
+		return;
+	}
+	Boss& bossComponent = registry.boss.components[0];
+	VisionComponent& bossVisual = registry.visionComponents.get(bossEntity);
+	TransformComponent& bossTransform = registry.transforms.get(bossEntity);
+	TransformComponent& playerTransform = registry.transforms.get(registry.players.entities[0]);
+	vec2 distance = bossTransform.position - playerTransform.position;
+	if ((abs(distance.x) < bossVisual.sightRadius && abs(distance.y) < bossVisual.sightRadius) || bossVisual.hasAggro) {
+		// ACTIONTICK is an indicator of HOW MANY ACTIONS are LEFT in the state
+		// ACTIONTIMER is an indicator of how long SINCE LAST ACTION was taken
+		// ACTIONCOOLDOWN is an indicator of how long there must be BETWEEN ACTIONS
+
+		// TODO, make him stop moving while buffering?
+
+		// IN A STATE, SET BUFFERS
+		if (bossComponent.actionTick > 0 && bossComponent.isBuffering == false) {
+			if (bossComponent.actionTimer > bossComponent.actionCooldown) {
+				bossComponent.actionTick -= 1;
+				bossComponent.actionTimer = 0;
+				bossComponent.isBuffering = true;
+				// TODO add audio!
+				// TODO change the projectile sprite!
+				// TODO make player red when they get hit by boss!!!
+				if (bossComponent.rageState) {
+					// ?
+				}
+				else if (bossComponent.meleeState) {
+					bossComponent.actionBuffer = 75.f * 20; // MELEE ATTACK ANIMATION LENGTH.
+					bossComponent.firstAttack  = true;
+					bossComponent.secondAttack = true;
+				}
+				else if (bossComponent.rangedState) {
+					bossComponent.actionBuffer = 50.f * 10; // RANGED ATTACK ANIMATION LENGTH
+				}
+				else if (bossComponent.summonState) {
+					bossComponent.actionBuffer = 50.f * 10; // SUMMON ANIMATION LENGTH (if any, O.W. STAND STILL AND SUMMON)
+				}
+			}
+			else {
+				bossComponent.actionTimer += elapsedTime;
+			}
+		} else if (bossComponent.isBuffering == false) {
+			// determine state
+			float rangedDistance = 75;
+			if (abs(distance.x) > rangedDistance) {
+				int cent = rand() % 100;
+				if (cent > 20) {
+					bossComponent.rangedState = true;
+					bossComponent.summonState = false;
+					bossComponent.actionTick = 3;
+					bossComponent.actionCooldown = 900;
+				}
+				else {
+					bossComponent.summonState = true;
+					bossComponent.rangedState = false;
+					bossComponent.actionTick  = 2;
+					bossComponent.actionCooldown = 500;
+				}
+				bossComponent.meleeState = false;
+				rangedTransformation(bossEntity, bossComponent, bossTransform);
+			}
+			else {
+				bossComponent.meleeState  = true;
+				bossComponent.rangedState = false;
+				bossComponent.summonState = false;
+				bossComponent.actionTick = 2;
+				bossComponent.actionCooldown = 1250;
+				meleeTransformation(bossEntity, bossComponent, bossTransform);
+			}
+		}
+		else {
+			// is buffering
+			if (bossComponent.actionBuffer < 0) {
+				// done buffering
+				if (bossComponent.rageState) {
+					// ?
+				}
+				else if (bossComponent.meleeState) {
+				}
+				else if (bossComponent.rangedState) {
+					bossProjectileAttack(bossEntity, bossComponent, bossTransform, playerTransform);
+				}
+				else if (bossComponent.summonState) {
+					CreateBatEnemy(bossTransform.position);
+				}
+				bossComponent.isBuffering = false;
+			} 
+			else {
+				// not done buffering
+				registry.pathingBehaviors.get(bossEntity).pathSpeed = 0;
+				registry.motions.get(bossEntity).velocity.x = 0;
+				if (playerTransform.position.x > bossTransform.position.x) {
+					bossComponent.facingRight = true;
+					registry.motions.get(bossEntity).facingRight = true;
+				}
+				else {
+					bossComponent.facingRight = false;
+					registry.motions.get(bossEntity).facingRight = false;
+				}
+				if (bossComponent.meleeState) {
+					if (bossComponent.facingRight) {
+						bossTransform.center = { 108 - 72, 34 };
+					}
+					else {
+						bossTransform.center = { 72, 34 };
+					}
+					if (20 * 75.f - 3 * 75.f > bossComponent.actionBuffer && bossComponent.firstAttack == true) {
+						bossMeleeAttack(bossEntity, bossComponent, bossTransform, playerTransform);
+						bossComponent.firstAttack = false;
+					}
+					else if (20 * 75.f - 15 * 75.f > bossComponent.actionBuffer && bossComponent.secondAttack == true) {
+						bossMeleeAttack(bossEntity, bossComponent, bossTransform, playerTransform);
+						bossComponent.secondAttack = false;
+					}
+				}
+				else if (bossComponent.rangedState) {
+					if (bossComponent.facingRight) {
+						bossTransform.center = { 45 - 28, 22 };
+					}
+					else {
+						bossTransform.center = { 28, 22 };
+					}
+				}
+				bossComponent.actionBuffer -= elapsedTime;
+			}
+		}
+	}
+	// TODO initiate rage state, add transformation to rage sprite!
+}
+
+/*
+void AISystem::BossStep(float elapsedTime) {
 	// melee attacks should be on a delay, with a notice to player
 	// ADD RAGE MODE SECOND PHASE, WHERE HE EXPLODES WITH PROJECTILES!
 			// then he attacks faster
@@ -905,6 +1088,7 @@ void AISystem::BossStep(float elapsedTime) {
 	TransformComponent& playerTransform = registry.transforms.get(registry.players.entities[0]);
 	vec2 distance = bossTransform.position - playerTransform.position;
 	if ((distance.x < bossVisual.sightRadius && distance.y < bossVisual.sightRadius) || bossVisual.hasAggro) {
+		// "Second Phase" stuff
 		if (registry.healthBar.get(bossEntity).health < registry.healthBar.get(bossEntity).maxHealth / 5 && bossComponent.hasRaged == false) {
 			// add sound cue!
 			bossComponent.actionCooldown = 750;
@@ -930,26 +1114,25 @@ void AISystem::BossStep(float elapsedTime) {
 			createEnemyLobbingProjectile(bossTransform.position, neg_velocity, acceleration, bossEntity);
 		}
 		bossVisual.hasAggro = true;
+		// Normal boss stuff
 		if (bossComponent.actionCooldown < bossComponent.actionTimer) {
-
-			float bossMeleeRange = 30;  // ???
-			float bossHeight = 32;		// ???
+			float bossMeleeRange = 30;  // TODO change
+			float bossHeight = 32;		// TODO change
 			bossComponent.actionTimer = 0;
 			if (bossComponent.summonState) {
 				int perdec = rand() % 10;
-				if (perdec < 8) {
+				if (perdec < 6) {
 					bossComponent.summonState = false;
 				}
 				CreateBatEnemy(bossTransform.position);
 			}
 			else {
 				// add sound cues to boss attacks
-				// TODO add timer and notification for melee attack
 				int perdec = rand() % 10;
-				if (perdec < 3) {
+				if (perdec < 2) { // switch to summon state next action
 					bossComponent.summonState = true;
 				}
-				if (perdec < 5) {
+				if (perdec < 5) { // do a ranged attack "ranged state"
 					if (abs(distance.x) > bossMeleeRange + 8 || distance.y > bossHeight) {
 						vec2 velocity = vec2(0.2f * 90, -2.0f * 90);
 						vec2 acceleration = vec2(0.f, 250.f);
@@ -974,7 +1157,7 @@ void AISystem::BossStep(float elapsedTime) {
 						createEnemyProjectile(bossTransform.position, velocity, bossEntity);
 					}
 				}
-				else {
+				else { // do a melee attack "melee state"
 					Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_BOSSMELEEATTACK);
 					auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
 					attack.attackPower = bossComponent.meleeAttackPower;
@@ -1024,4 +1207,185 @@ void AISystem::BossStep(float elapsedTime) {
 			bossComponent.actionTimer += elapsedTime;
 		}
 	}
+}
+*/
+
+void AISystem::bossProjectileAttack(Entity bossEntity, Boss bossComponent, TransformComponent bossTransform, TransformComponent playerTransform) {
+	vec2 distance = bossTransform.position - playerTransform.position;
+	float bossHeight = 30; // TODO make this sprite height
+	if (distance.y > bossHeight) {
+			vec2 velocity = vec2(0.2f * 90, -2.0f * 90);
+			vec2 acceleration = vec2(0.f, 250.f);
+
+			float random_change = 15.f;
+			float percent_diff = (float)rand() / RAND_MAX;
+			int direction = rand() % 2;
+			if (direction) {
+				random_change *= -1.f;
+			}
+			velocity.x += random_change * percent_diff;
+
+			vec2 neg_velocity = { -velocity.x, velocity.y };
+
+			// TODO CHANGE TO USE DIFF SPRITE
+
+			createEnemyLobbingProjectile(bossTransform.position, velocity, acceleration, bossEntity);
+			createEnemyLobbingProjectile(bossTransform.position, neg_velocity, acceleration, bossEntity);
+	}
+	else {
+			vec2 diff_distance = playerTransform.position - bossTransform.position;
+			float angle = atan2(diff_distance.y, diff_distance.x);
+			vec2 velocity = vec2(cos(angle) * 90, sin(angle) * 90);
+			createEnemyProjectile(bossTransform.position, velocity, bossEntity);
+	}
+}
+void AISystem::bossMeleeAttack(Entity bossEntity, Boss bossComponent, TransformComponent bossTransform, TransformComponent playerTransform) {
+	vec2 distance = bossTransform.position - playerTransform.position;
+	Entity enemyMeleeAttackEntity = Entity::CreateEntity(TAG_BOSSMELEEATTACK);
+	auto& attack = registry.enemyMeleeAttacks.emplace(enemyMeleeAttackEntity);
+	attack.attackPower = bossComponent.meleeAttackPower;
+	attack.existenceTime = 150;
+	auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
+	auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
+
+	// TODO CHECK IF THE PLAYER IS OBVIOUSLY OUT OF RANGE (SOMEWHERE THAT ISNT HERE)
+
+	transform.position.y = bossTransform.position.y;// +bossTransform.center.x;
+	transform.position.x = bossTransform.position.x;
+
+	vec2 collisionDimension = { 80, 50 };
+	collider.collision_pos = collisionDimension / 2.f;
+	collider.collision_neg = collisionDimension / 2.f;
+	collider.collider_position = transform.position;
+}
+
+void AISystem::rangedTransformation(Entity& bossEntity, Boss& bossComponent, TransformComponent& bossTransform) {
+	registry.sprites.remove(bossEntity);
+	vec2 dimensions = { 45, 42 };
+	vec2 collisionDimension = { 30, 40 };
+	auto& collider = registry.colliders.get(bossEntity);
+	collider.collision_pos = collisionDimension / 2.f;
+	collider.collision_neg = collisionDimension / 2.f;
+	registry.pathingBehaviors.get(bossEntity).pathSpeed = 0;
+	if (bossComponent.facingRight) {
+		bossTransform.center = { 45 - 28, 22 };
+	}
+	else {
+		bossTransform.center = { 28, 22 };
+	}
+	auto& sprite = registry.sprites.insert(
+		bossEntity,
+		{
+				dimensions,
+				4,
+				EFFECT_ASSET_ID::SPRITE,
+				TEXTURE_ASSET_ID::BOSS_RANGED,
+				true,
+				false,
+				false,
+				225,
+				504,
+				0,
+				0,
+				0.f,
+				{
+
+			// idle
+			{
+					6,
+					0,
+					75.f * 6.f
+			},
+
+		// run
+		{
+				8,
+				6,
+				75.f * 8.f
+		},
+
+		// death 
+		{
+				12,
+				36,
+				75.f * 12.f
+		},
+
+		{
+				10,
+				14,
+				50.f * 10.f
+		},
+
+},
+		}
+	);
+	sprite.reverse = bossComponent.facingRight;
+	sprite.selected_animation = 1;
+}
+
+void AISystem::meleeTransformation(Entity& bossEntity, Boss& bossComponent, TransformComponent& bossTransform) {
+	registry.sprites.remove(bossEntity);
+	vec2 dimensions = { 108, 59 };
+	vec2 collisionDimension = { 30, 45 };
+	auto& collider = registry.colliders.get(bossEntity);
+	collider.collision_pos = collisionDimension / 2.f;
+	collider.collision_neg = collisionDimension / 2.f;
+	registry.pathingBehaviors.get(bossEntity).pathSpeed = 45;
+	if (bossComponent.facingRight) {
+		bossTransform.center = { 108 - 72, 34 };
+	}
+	else {
+		bossTransform.center = { 72, 34 };
+	}
+	auto& sprite = registry.sprites.insert(
+		bossEntity,
+		{
+				dimensions,
+				4,
+				EFFECT_ASSET_ID::SPRITE,
+				TEXTURE_ASSET_ID::BOSS_MELEE,
+				true,
+				false,
+				false,
+				540,
+				708,
+				0,
+				0,
+				0.f,
+				{
+
+		// idle
+		{
+				8,
+				0,
+				75.f * 8.f
+		},
+
+		// run
+		{
+				8,
+				8,
+				75.f * 8.f
+		},
+
+		// death 
+		{
+				12,
+				39,
+				75.f * 12.f
+		},
+		
+		// attack
+		{
+				20,
+				16,
+				75.f * 20
+		},
+
+},
+		}
+	);
+	sprite.reverse = bossComponent.facingRight;
+	sprite.selected_animation = 1;
 }

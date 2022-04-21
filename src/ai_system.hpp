@@ -25,5 +25,8 @@ public:
 	float Heuristic(vec2 pos1, vec2 pos2);
 	void BossStep(float deltaTime);
 private:
+	void bossProjectileAttack(Entity, Boss, TransformComponent, TransformComponent);
+	void bossMeleeAttack(Entity, Boss, TransformComponent, TransformComponent);
+	void rangedTransformation(Entity&, Boss&, TransformComponent&);
+	void meleeTransformation(Entity&, Boss&, TransformComponent&);
 };
-

@@ -37,6 +37,9 @@ enum class TEXTURE_ASSET_ID : u16
     ASCENT_LEVELTILES_SHEET,
     ASCENT_MUTATIONS_SHEET,
     MONSTER,
+    BOSS_MELEE,
+    BOSS_RAGE,
+    BOSS_RANGED,
     BG1,
     BOX,
     SHOPBG,
@@ -109,6 +112,9 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("ascent_leveltiles_spritesheet.png"),
         textures_path("mutations_spritesheet.png"),
         textures_path("monster.png"),
+        textures_path("boss_melee.png"),
+        textures_path("boss_rage.png"),
+        textures_path("boss_ranged.png"),
         textures_path("bg.png"),
         textures_path("box.png"),
         textures_path("shopbg.png"),
@@ -241,13 +247,24 @@ struct Enemy
 
 struct Boss
 {
-    i32 meleeAttackPower = 10;
-    i32 rangedAttackPower = 7;
-    bool summonState = false;
-    float actionTimer = 0;
-    float actionCooldown = 950;
-    bool hasRaged = false;
-    int rageTick = 20;
+    i32 meleeAttackPower  = 10;
+    i32 rangedAttackPower =  7;
+
+    bool summonState  = false;
+    bool meleeState   = false;
+    bool rangedState  = false;
+    bool rageState    = false;
+    bool isBuffering  = false;
+    bool firstAttack  = false;
+    bool secondAttack = false;
+
+    float actionTimer    = 0;
+    float actionCooldown = 0;
+    float actionBuffer   = 0;
+    int actionTick       = 0;
+
+    int rageTick = 25;
+    bool facingRight = false;
 };
 
 struct Behavior {
