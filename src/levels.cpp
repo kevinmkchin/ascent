@@ -466,25 +466,25 @@ INTERNAL void ParseRoomData(const ns::RoomRawData r, int roomXIndex, int roomYIn
                 case '3': {
                     CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                     roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
-                                    "Did you pick up both weapons with C?");
+                                    "Did you pick up all 3 weapons with C?");
                 }break;
 
                 case '4': {
                     CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                     roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
-                                    "Spike hurt... a lot");
+                                    "Spikes hurt... a lot");
                 }break;
 
                 case '5': {
                     CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                     roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
-                                    "You were supposed to platform over here...");
+                                    "You were supposed to platform across...");
                 }break;
 
                 case '6': {
                     CreateHelpSign({ roomXIndex * r.width * TILE_SIZE + j * TILE_SIZE + (TILE_SIZE / 2.f),
                                     roomYIndex * r.height * TILE_SIZE + i * TILE_SIZE + (TILE_SIZE / 2.f) }, 16.f, vec2(0.f, -8.f), 8, 
-                                    "Your first encouter with a monster!");
+                                    "Your first encounter with a monster!");
                 }break;
 
                 case '7': {
