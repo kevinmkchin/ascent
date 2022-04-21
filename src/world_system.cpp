@@ -311,7 +311,7 @@ void WorldSystem::StartNewStage(GAMELEVELENUM stage) {
     if (stage == END_THE_GAME) {
         printf("Ending run.\n");
         currentGameStage = GAME_NOT_STARTED;
-        SetCurrentMode(MODE_MAINMENU);
+        SetCurrentMode(MODE_CREDITS);
         return;
     }
 
@@ -598,6 +598,11 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
                 { TEXTURE_ASSET_ID::HELP_MENU, 1.f }
             };
         }break;
+        case MODE_CREDITS: {
+            renderer->bgTexId = {
+                { TEXTURE_ASSET_ID::CREDITS, 1.f }
+            };
+        }break;
     }
 }
 
@@ -618,6 +623,15 @@ void WorldSystem::UpdateMode() {
             StartNewRun();
         }
         else if (Input::HasKeyBeenPressed(SDL_SCANCODE_M)) {
+            SetCurrentMode(MODE_MAINMENU);
+        }
+    }
+
+    else if (GetCurrentMode() == MODE_CREDITS) {
+        if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+            SetCurrentMode(MODE_MAINMENU);
+        }
+        else if (Input::HasKeyBeenPressed(SDL_SCANCODE_ESCAPE)) {
             SetCurrentMode(MODE_MAINMENU);
         }
     }
