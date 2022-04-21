@@ -395,7 +395,7 @@ void WorldSystem::SpawnLevelEntities() {
 
     switch (currentGameStage) {
         case CHAPTER_TUTORIAL: {
-            CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "You must stop the Evil Sorcerer Izual at the peak of the mountain...");
+            CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "You must stop the Evil Sorcerer Izual at the peak!");
         }break;
         case CHAPTER_ONE_STAGE_ONE: {
             CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
@@ -405,6 +405,10 @@ void WorldSystem::SpawnLevelEntities() {
         }break;
         case CHAPTER_THREE_STAGE_ONE: {
             CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
+        }break;
+        case CHAPTER_BOSS: {
+            CreateHelpSign(currentLevelData.playerStart + vec2(32.f, 0.f), 16.f, vec2(0.f, -16.f), 8, "Evil Sorcerer Izual waits ahead...");
+            CreateHelpSign(currentLevelData.playerStart + vec2(32.f, 0.f), 16.f, vec2(0.f, -8.f), 8, "This is the final fight!");
         }break;
     }
     
