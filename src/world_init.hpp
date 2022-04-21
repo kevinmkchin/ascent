@@ -14,10 +14,6 @@ Entity CreateKnightEnemy(vec2 position);
 
 Entity CreateBoss(vec2 position);
 
-Entity CreateBossMelee();
-
-Entity CreateBossRage();
-
 Entity CreateBossRanged(vec2 position, bool start);
 
 Entity CreateStationaryEnemy(vec2 position);
