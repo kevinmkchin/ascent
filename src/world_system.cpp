@@ -929,6 +929,11 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameInteractButtonHasBeenPressed()) {
+                if (currentGameStage == CHAPTER_BOSS) {
+                    if (registry.boss.entities.size() > 0) {
+                        continue;
+                    }
+                }
                 bGoToNextStage = true;
                 continue;
             }

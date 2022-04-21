@@ -40,6 +40,8 @@ enum class TEXTURE_ASSET_ID : u16
     BOSS_MELEE,
     BOSS_RAGE,
     BOSS_RANGED,
+    BOSS_PROJECTILE,
+    BOSS_PROJECTILE_REVERSE,
     BG1,
     BOX,
     SHOPBG,
@@ -115,6 +117,8 @@ const std::array<std::string, texture_count> texture_paths = {
         textures_path("boss_melee.png"),
         textures_path("boss_rage.png"),
         textures_path("boss_ranged.png"),
+        textures_path("boss_projectile.png"),
+        textures_path("boss_projectile_reverse.png"),
         textures_path("bg.png"),
         textures_path("box.png"),
         textures_path("shopbg.png"),
@@ -231,7 +235,7 @@ struct Player
     i32 attackVariance = 10;
     i16 meleeAttackRange = 16;
     i16 meleeAttackArc = 12;
-    float meleeAttackCooldown = 0.8f;   // TODO: maybe make this a percentage decrease than a flat number?
+    float meleeAttackCooldown = 0.8f;  
     float damageCooldown = 0.0f;
 
     i32 maxJumps = 1;

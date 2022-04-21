@@ -333,12 +333,9 @@ void AISystem::EnemyAttack(Entity enemy_entity, float elapsedTime) {
 			}
 		}
 	}
-	// TODO implement actual melee attacks from enemies, not just contact damage (MeleeBehavior component) but thats not for me to do yet
 }
 
-// TODO
-	// make work when there's multiple spots the enemy would be ok with going
-		// probably do this by finding list of desirable spots then going to closest one
+// TODO merge changes from multiple destination branch
 void AISystem::Pathfind(Entity enemy_entity, float elapsedTime) {
 	bool isPlayerInAwarenessBubble = PlayerInAwarenessBubble(enemy_entity);
 	if (!isPlayerInAwarenessBubble) {
@@ -427,7 +424,6 @@ void AISystem::PatrolBehavior(Entity enemy_entity, float elapsedTime) {
 	}
 }
 void AISystem::PathBehavior(Entity enemy_entity) {
-	// TODO abstract this for easier extension (probably focus on the expanding squares option!)
 	if (registry.pathingBehaviors.has(enemy_entity)) {
 		PathingBehavior& enemyPathingBehavior = registry.pathingBehaviors.get(enemy_entity);
 		Entity player_entity = registry.players.entities.front();
@@ -458,7 +454,6 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 			ListEntry startPos = { enemyPos, NULL, 0 };
 			openList.push_back(startPos);
 
-			// TODO update this to use binary search/insert for speed if its a problem speed wise
 			uint8 maxIter = 50;
 			uint8 currIter = 0;
 			std::vector<ListEntry> entriesSoFar;
@@ -639,7 +634,6 @@ void AISystem::PathBehavior(Entity enemy_entity) {
 				ListEntry startPos = { enemyPos, NULL, 0 };
 				openList.push_back(startPos);
 
-				// TODO update this to use binary search/insert for speed if its a problem speed wise
 				uint8 maxIter = 25;
 				uint8 currIter = 0;
 				std::vector<ListEntry> entriesSoFar;
@@ -953,9 +947,6 @@ void AISystem::BossStep(float elapsedTime) {
 		// ACTIONTICK is an indicator of HOW MANY ACTIONS are LEFT in the state
 		// ACTIONTIMER is an indicator of how long SINCE LAST ACTION was taken
 		// ACTIONCOOLDOWN is an indicator of how long there must be BETWEEN ACTIONS
-
-		// TODO, make him stop moving while buffering?
-
 		// IN A STATE, SET BUFFERS
 		if (bossComponent.actionTick > 0 && bossComponent.isBuffering == false) {
 			if (bossComponent.actionTimer > bossComponent.actionCooldown) {
@@ -964,7 +955,6 @@ void AISystem::BossStep(float elapsedTime) {
 				bossComponent.isBuffering = true;
 				// TODO add audio!
 				// TODO change the projectile sprite!
-				// TODO make player red when they get hit by boss!!!
 				if (bossComponent.rageState) {
 					// ?
 				}
@@ -1212,7 +1202,7 @@ void AISystem::BossStep(float elapsedTime) {
 
 void AISystem::bossProjectileAttack(Entity bossEntity, Boss bossComponent, TransformComponent bossTransform, TransformComponent playerTransform) {
 	vec2 distance = bossTransform.position - playerTransform.position;
-	float bossHeight = 30; // TODO make this sprite height
+	float bossHeight = 30;
 	if (distance.y > bossHeight) {
 			vec2 velocity = vec2(0.2f * 90, -2.0f * 90);
 			vec2 acceleration = vec2(0.f, 250.f);
@@ -1226,8 +1216,6 @@ void AISystem::bossProjectileAttack(Entity bossEntity, Boss bossComponent, Trans
 			velocity.x += random_change * percent_diff;
 
 			vec2 neg_velocity = { -velocity.x, velocity.y };
-
-			// TODO CHANGE TO USE DIFF SPRITE
 
 			createEnemyLobbingProjectile(bossTransform.position, velocity, acceleration, bossEntity);
 			createEnemyLobbingProjectile(bossTransform.position, neg_velocity, acceleration, bossEntity);
@@ -1247,8 +1235,6 @@ void AISystem::bossMeleeAttack(Entity bossEntity, Boss bossComponent, TransformC
 	attack.existenceTime = 150;
 	auto& transform = registry.transforms.emplace(enemyMeleeAttackEntity);
 	auto& collider = registry.colliders.emplace(enemyMeleeAttackEntity);
-
-	// TODO CHECK IF THE PLAYER IS OBVIOUSLY OUT OF RANGE (SOMEWHERE THAT ISNT HERE)
 
 	transform.position.y = bossTransform.position.y;// +bossTransform.center.x;
 	transform.position.x = bossTransform.position.x;
