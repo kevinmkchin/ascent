@@ -271,7 +271,12 @@ void WorldSystem::HelpMode() {
 
     SetCurrentMode(MODE_HELP);
 
-    if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+    if (Input::HasKeyBeenReleased(SDL_SCANCODE_RETURN)) {
+        keyReleased = true;
+    }
+
+    if (keyReleased && Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
+        keyReleased = false;
         SetCurrentMode(MODE_INGAME);
     }
 
@@ -599,7 +604,7 @@ void WorldSystem::SetCurrentMode(GAMEMODE mode) {
 void WorldSystem::UpdateMode() {
     if (GetCurrentMode() == MODE_MAINMENU ) {
         if (Input::HasKeyBeenPressed(SDL_SCANCODE_RETURN)) {
-            StartNewRun();
+            HelpMode();
         }
 
         else if (Input::HasKeyBeenPressed(SDL_SCANCODE_H)) {
@@ -784,22 +789,7 @@ void WorldSystem::handle_collisions() {
 
                 if (enemyHealth.health <= 0.f && !registry.deathTimers.has(entity))
                 {
-                    if (registry.boss.has(entity)) {
-                        auto& boss = registry.boss.get(entity);
-                        auto& timer = registry.deathTimers.emplace(entity);
-                        if (boss.meleeState) {
-                            timer.elapsed_ms = 75.f * 11.f;
-                        }
-                        else if (boss.rangedState) {
-                            timer.elapsed_ms = 75.f * 11.f;
-                        }
-                        else if (boss.rageState) {
-                            timer.elapsed_ms = 75.f * 11.f;// TODO
-                        }
-                    }
-                    else {
-                        registry.deathTimers.emplace(entity);
-                    }
+                    registry.deathTimers.emplace(entity);
                     registry.colliders.remove(entity);
                     registry.collisionEvents.remove(entity);
                     MotionComponent &motion = registry.motions.get(entity);
@@ -853,8 +843,8 @@ void WorldSystem::handle_collisions() {
             if (entity_other.GetTag() == TAG_SPIKE) {
                 if (playerMotion.velocity.y > 0.f && playerComponent.damageCooldown <= 0.f) // only hurt when falling on spikes
                 {
-                    playerHealth.health += -10.f;
-                    playerComponent.damageCooldown = 0.5f;
+                    playerHealth.TakeDamage(10.f);
+                    playerComponent.damageCooldown = 0.75f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -862,10 +852,12 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_BOSSMELEEATTACK) {
-                playerHealth.TakeDamage(registry.boss.components[0].meleeAttackPower);
-                // TODO add iframes (how?)
-                registry.remove_all_components_of(entity_other);
-                continue;
+                if (playerComponent.damageCooldown <= 0.f) {
+                    playerHealth.TakeDamage(registry.boss.components[0].meleeAttackPower);
+                    playerComponent.damageCooldown = 0.75f;
+                    registry.remove_all_components_of(entity_other);
+                    continue;
+                }
             }
 
             if (registry.enemy.has(entity_other)) {
@@ -874,7 +866,7 @@ void WorldSystem::handle_collisions() {
                 if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f) && registry.meleeBehaviors.has(entity_other) && playerComponent.damageCooldown <= 0.f) {
                     const MeleeBehavior enemyMeleeBehavior = registry.meleeBehaviors.get(entity_other);
                     enemy.playerHurtCooldown = 2.f;
-                    playerComponent.damageCooldown = 0.5f;
+                    playerComponent.damageCooldown = 0.75f;
                     playerHealth.TakeDamage((float) enemyMeleeBehavior.attackPower, 5.f);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
@@ -925,7 +917,7 @@ void WorldSystem::handle_collisions() {
                 if (playerHealth.health > 0 && playerComponent.damageCooldown <= 0.f) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
                     playerHealth.TakeDamage((float) enemyProjectile.attackPower, 2.f);
-                    playerComponent.damageCooldown = 0.5f;
+                    playerComponent.damageCooldown = 0.75f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -937,9 +929,7 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_LEVELENDPOINT && Input::GameInteractButtonHasBeenPressed()) {
-                if (currentGameStage != CHAPTER_BOSS || registry.boss.entities.size() == 0) {
-                    bGoToNextStage = true;
-                }
+                bGoToNextStage = true;
                 continue;
             }
 
