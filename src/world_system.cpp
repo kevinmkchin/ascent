@@ -395,6 +395,7 @@ void WorldSystem::SpawnLevelEntities() {
 
     switch (currentGameStage) {
         case CHAPTER_TUTORIAL: {
+            CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "You must stop the Evil Sorcerer Izual at the peak of the mountain...");
         }break;
         case CHAPTER_ONE_STAGE_ONE: {
             CreateHelpSign(currentLevelData.playerStart, 16.f, vec2(0.f, -8.f), 8, "Make your Ascent to the top!");
