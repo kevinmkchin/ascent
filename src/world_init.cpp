@@ -1390,7 +1390,7 @@ Entity CreateHelpSign(vec2 pos, float triggerRadius, vec2 textOffsetFromPos, u32
     newText.textSize = textSize;
     newText.text = std::string(text);
     newText.bTyped = true;
-    newText.secondsBetweenTypedCharacters = 0.04f;
+    newText.secondsBetweenTypedCharacters = 0.02f;
 
     return entity;
 }
