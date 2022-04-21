@@ -32,3 +32,9 @@ Artwork by:
 - Pixfinity
 - kayillustrations
 - davidaf3
+- Clembod
+
+Music by:
+- Chiphead64
+- Sara Garrard
+- YouFulca
