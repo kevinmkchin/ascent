@@ -843,8 +843,8 @@ void WorldSystem::handle_collisions() {
             if (entity_other.GetTag() == TAG_SPIKE) {
                 if (playerMotion.velocity.y > 0.f && playerComponent.damageCooldown <= 0.f) // only hurt when falling on spikes
                 {
-                    playerHealth.health += -10.f;
-                    playerComponent.damageCooldown = 0.5f;
+                    playerHealth.TakeDamage(10.f);
+                    playerComponent.damageCooldown = 0.75f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
@@ -852,9 +852,12 @@ void WorldSystem::handle_collisions() {
             }
 
             if (entity_other.GetTag() == TAG_BOSSMELEEATTACK) {
-                playerHealth.health -= registry.boss.components[0].meleeAttackPower;
-                registry.remove_all_components_of(entity_other);
-                continue;
+                if (playerComponent.damageCooldown <= 0.f) {
+                    playerHealth.TakeDamage(registry.boss.components[0].meleeAttackPower);
+                    playerComponent.damageCooldown = 0.75f;
+                    registry.remove_all_components_of(entity_other);
+                    continue;
+                }
             }
 
             if (registry.enemy.has(entity_other)) {
@@ -863,7 +866,7 @@ void WorldSystem::handle_collisions() {
                 if (enemy.playerHurtCooldown <= 0.f && playerHealth.health > 0.f && !(playerMotion.velocity.y > 0.f) && registry.meleeBehaviors.has(entity_other) && playerComponent.damageCooldown <= 0.f) {
                     const MeleeBehavior enemyMeleeBehavior = registry.meleeBehaviors.get(entity_other);
                     enemy.playerHurtCooldown = 2.f;
-                    playerComponent.damageCooldown = 0.5f;
+                    playerComponent.damageCooldown = 0.75f;
                     playerHealth.TakeDamage((float) enemyMeleeBehavior.attackPower, 5.f);
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
@@ -914,7 +917,7 @@ void WorldSystem::handle_collisions() {
                 if (playerHealth.health > 0 && playerComponent.damageCooldown <= 0.f) {
                     const EnemyProjectile enemyProjectile = registry.enemyProjectiles.get(entity_other);
                     playerHealth.TakeDamage((float) enemyProjectile.attackPower, 2.f);
-                    playerComponent.damageCooldown = 0.5f;
+                    playerComponent.damageCooldown = 0.75f;
                     if (Mix_PlayChannel(-1, player_hurt_sound, 0) == -1) {
                         printf("Mix_PlayChannel: %s\n", Mix_GetError());
                     }
